@@ -11,8 +11,8 @@ spec =
   Gem::Specification.new do |s|
     s.name              = "discount"
     s.version           = VERS
-    s.summary           = "Discount Markdown Implementation"
-    s.files             = FileList['README','COPYING','Rakefile','test.rb','{lib,ext}/**.rb','ext/*.{c,h}']
+    s.summary           = "Discount Implementation of Gruber's Markdown"
+    s.files             = FileList['README','COPYING','Rakefile','test/*','{lib,ext}/**.rb','ext/*.{c,h}']
     s.bindir            = 'bin'
     s.require_path      = 'lib'
     s.has_rdoc          = true
@@ -66,6 +66,7 @@ task :gather => 'submodule:exist' do |t|
     :verbose => true
 end
 
+
 file 'ext/Makefile' => FileList['ext/{*.c,*.h,*.rb}'] do
   chdir('ext') { ruby 'extconf.rb' }
 end
@@ -88,12 +89,22 @@ task 'test:unit' => [:build] do |t|
   ruby 'test.rb'
 end
 
-desc 'Run conformance tests'
-task 'test:conformance' => %w[submodule:exist build] do |t|
+desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
+task 'test:conformance' => [:build] do |t|
   script = "#{pwd}/bin/rdiscount"
-  chdir('MarkdownTest_1.0.3') do
+  test_version = ENV['MARKDOWN_TEST_VER'] || '1.0'
+  chdir("test/MarkdownTest_#{test_version}") do
     sh "./MarkdownTest.pl --script='#{script}' --tidy"
   end
+end
+
+desc 'Run version 1.0 conformance suite'
+task 'test:conformance:1.0' => 'test:conformance'
+
+desc 'Run 1.0.3 conformance suite'
+task 'test:conformance:1.0.3' => [:build] do |t|
+  ENV['MARKDOWN_TEST_VER'] = '1.0.3'
+  Rake::Task['test:conformance'].invoke
 end
 
 desc 'Run unit and conformance tests'
