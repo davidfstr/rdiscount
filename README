@@ -1,0 +1,17 @@
+Discount (For Ruby)
+===================
+
+Discount is a implementation of John Gruber's Markdown markup
+language in C. It implements all of the language as described in
+<http://daringfireball.net/projects/markdown/syntax>
+and passes the Markdown test suite at
+<http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip>
+
+Discount was developed by
+David Loren Parsons <http://www.pell.portland.or.us/~orc>. The Ruby
+extension was developed by Ryan Tomayko <http://tomayko.com/>.
+
+Discount is free software;  it is released under a BSD-style license
+that allows you to do as you wish with it as long as you don't attempt
+to claim it as your own work. The Ruby Discount extension adopts
+Discount's license verbatim. See the file COPYING for more information.
