@@ -5,16 +5,22 @@ class Discount
   # Original Markdown formatted text.
   attr_reader :text
 
-  # Whether smarty-like quote translation should be performed.
+  # Set true to have smarty-like quote translation performed.
   attr_accessor :smart
 
-  # Whether footnotes should be 
-  attr_accessor :notes
+  # BlueCloth compatible output filtering.
+  attr_accessor :filter_styles, :filter_html
+
+  # RedCloth compatible line folding -- not used for Markdown but
+  # included for compatibility.
+  attr_accessor :fold_lines
 
   def initialize(text, *extensions)
-    @smart = false
-    @notes = false
     @text  = text
+    @smart = nil
+    @filter_styles = nil
+    @filter_html = nil
+    @fold_lines = nil
     extensions.each { |e| send("#{e}=", true) }
   end
 

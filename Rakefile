@@ -2,7 +2,7 @@ require 'rake/clean'
 require 'rake/packagetask'
 require 'rake/gempackagetask'
 
-task :default => :test
+task :default => 'test:unit'
 
 DLEXT = Config::CONFIG['DLEXT']
 VERS = '1.2.6'

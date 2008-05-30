@@ -11,7 +11,7 @@ static ID id_notes;
 
 
 static VALUE
-rb_discount_to_html(VALUE self)
+rb_discount_to_html(int argc, VALUE *argv, VALUE self)
 {
     /* grab char pointer to markdown input text */
     VALUE text = rb_funcall(self, id_text, 0);
@@ -42,7 +42,7 @@ void Init_discount()
     id_notes = rb_intern("notes");
 
     rb_cDiscount = rb_define_class("Discount", rb_cObject);
-    rb_define_method(rb_cDiscount, "to_html", rb_discount_to_html, 0);
+    rb_define_method(rb_cDiscount, "to_html", rb_discount_to_html, -1);
 }
 
 // vim: ts=4 sw=4
