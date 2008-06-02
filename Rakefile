@@ -9,9 +9,9 @@ VERS = '1.2.6.1'
 
 spec =
   Gem::Specification.new do |s|
-    s.name              = "discount"
+    s.name              = "rdiscount"
     s.version           = VERS
-    s.summary           = "Discount Implementation of Gruber's Markdown"
+    s.summary           = "Fast Implementation of Gruber's Markdown in C"
     s.files             = FileList['README','COPYING','Rakefile','test/**/*','{lib,ext}/**.rb','ext/*.{c,h}']
     s.bindir            = 'bin'
     s.require_path      = 'lib'
@@ -70,19 +70,19 @@ end
 file 'ext/Makefile' => FileList['ext/{*.c,*.h,*.rb}'] do
   chdir('ext') { ruby 'extconf.rb' }
 end
-CLEAN.include 'ext/Makefile'
+CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
 
-file "ext/discount.#{DLEXT}" => FileList['ext/Makefile', 'ext/*.{c,h,rb}'] do |f|
+file "ext/rdiscount.#{DLEXT}" => FileList['ext/Makefile', 'ext/*.{c,h,rb}'] do |f|
   sh 'cd ext && make'
 end
 CLEAN.include 'ext/*.{o,bundle,so,dll}'
 
-file "lib/discount.#{DLEXT}" => "ext/discount.#{DLEXT}" do |f|
+file "lib/rdiscount.#{DLEXT}" => "ext/rdiscount.#{DLEXT}" do |f|
   cp f.prerequisites, "lib/", :preserve => true
 end
 
-desc 'Build the discount extension'
-task :build => "lib/discount.#{DLEXT}"
+desc 'Build the rdiscount extension'
+task :build => "lib/rdiscount.#{DLEXT}"
 
 desc 'Run unit tests'
 task 'test:unit' => [:build] do |t|
@@ -115,12 +115,12 @@ task :test => %w[test:unit test:conformance]
 # Rubyforge
 # ==========================================================
 
-PKGNAME = "pkg/discount-#{VERS}"
+PKGNAME = "pkg/rdiscount-#{VERS}"
 
 desc 'Publish new release to rubyforge'
 task :release => [ "#{PKGNAME}.gem", "#{PKGNAME}.tar.gz" ] do |t|
   sh <<-end
-    rubyforge add_release wink discount #{VERS} #{PKGNAME}.gem &&
-    rubyforge add_file    wink discount #{VERS} #{PKGNAME}.tar.gz
+    rubyforge add_release wink rdiscount #{VERS} #{PKGNAME}.gem &&
+    rubyforge add_file    wink rdiscount #{VERS} #{PKGNAME}.tar.gz
   end
 end

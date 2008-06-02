@@ -1,6 +1,6 @@
-require 'discount.so'
+require 'rdiscount.so'
 
-class Discount
+class RDiscount
 
   # Original Markdown formatted text.
   attr_reader :text

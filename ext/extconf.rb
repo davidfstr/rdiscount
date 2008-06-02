@@ -1,4 +1,3 @@
 require 'mkmf'
-
-dir_config('discount')
-create_makefile('discount')
+dir_config('rdiscount')
+create_makefile('rdiscount')

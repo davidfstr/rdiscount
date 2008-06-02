@@ -1,4 +1,4 @@
-ext/discount.o
+ext/rdiscount.o
 ext/docheader.o
 ext/dumptree.o
 ext/generate.o
@@ -6,6 +6,11 @@ ext/markdown.o
 ext/mkdio.o
 ext/rbstrio.o
 ext/resource.o
-ext/discount.bundle
-lib/discount.bundle
+ext/rdiscount.bundle
+ext/rdiscount.so
+ext/rdiscount.dll
+lib/rdiscount.bundle
+lib/rdiscount.so
+lib/rdiscount.dll
 ext/Makefile
+pkg

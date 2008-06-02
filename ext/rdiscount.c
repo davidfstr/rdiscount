@@ -3,7 +3,7 @@
 #include "mkdio.h"
 #include "rbstrio.h"
 
-static VALUE rb_cDiscount;
+static VALUE rb_cRDiscount;
 
 static ID id_text;
 static ID id_smart;
@@ -11,7 +11,7 @@ static ID id_notes;
 
 
 static VALUE
-rb_discount_to_html(int argc, VALUE *argv, VALUE self)
+rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 {
     /* grab char pointer to markdown input text */
     VALUE text = rb_funcall(self, id_text, 0);
@@ -34,15 +34,15 @@ rb_discount_to_html(int argc, VALUE *argv, VALUE self)
     return buf;
 }
 
-void Init_discount()
+void Init_rdiscount()
 {
     /* Initialize frequently used Symbols */
     id_text  = rb_intern("text");
     id_smart = rb_intern("smart");
     id_notes = rb_intern("notes");
 
-    rb_cDiscount = rb_define_class("Discount", rb_cObject);
-    rb_define_method(rb_cDiscount, "to_html", rb_discount_to_html, -1);
+    rb_cRDiscount = rb_define_class("RDiscount", rb_cObject);
+    rb_define_method(rb_cRDiscount, "to_html", rb_rdiscount_to_html, -1);
 }
 
-// vim: ts=4 sw=4
+/* vim: set ts=4 sw=4: */
