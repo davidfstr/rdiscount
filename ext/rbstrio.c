@@ -1,4 +1,6 @@
-#define _GNU_SOURCE
+#if defined(HAVE_FOPENCOOKIE)
+#    define _GNU_SOURCE
+#endif
 
 #include <stdlib.h>
 #include "rbstrio.h"
@@ -19,7 +21,7 @@ static int rb_str_io_close(void *cookie) {
     return 0;
 }
 
-#ifdef __GLIBC__
+#if defined(HAVE_FOPENCOOKIE)
 cookie_io_functions_t rb_str_io_functions =
 {
     (cookie_read_function_t*)NULL,
@@ -33,7 +35,7 @@ cookie_io_functions_t rb_str_io_functions =
 FILE *rb_str_io_new(VALUE buf) {
     FILE *rv;
     Check_Type(buf, T_STRING);
-#ifdef __GLIBC__
+#if defined(HAVE_FOPENCOOKIE)
     rv = fopencookie((void*)buf, "w", rb_str_io_functions);
 #else
     rv = funopen((void*)buf, NULL, rb_str_io_write, NULL, rb_str_io_close);
@@ -43,4 +45,4 @@ FILE *rb_str_io_new(VALUE buf) {
     return rv;
 }
 
-// vim: ts=4 sw=4
+/* vim: set ts=4 sw=4: */
