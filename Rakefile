@@ -33,6 +33,102 @@ spec =
     p.need_zip = false
   end
 
+
+# ==========================================================
+# Ruby Extension
+# ==========================================================
+
+file 'ext/Makefile' => FileList['ext/{*.c,*.h,*.rb}'] do
+  chdir('ext') { ruby 'extconf.rb' }
+end
+CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
+
+file "ext/rdiscount.#{DLEXT}" => FileList['ext/Makefile', 'ext/*.{c,h,rb}'] do |f|
+  sh 'cd ext && make'
+end
+CLEAN.include 'ext/*.{o,bundle,so,dll}'
+
+file "lib/rdiscount.#{DLEXT}" => "ext/rdiscount.#{DLEXT}" do |f|
+  cp f.prerequisites, "lib/", :preserve => true
+end
+
+desc 'Build the rdiscount extension'
+task :build => "lib/rdiscount.#{DLEXT}"
+
+
+# ==========================================================
+# Testing
+# ==========================================================
+
+desc 'Run unit tests'
+task 'test:unit' => [:build] do |t|
+  ruby 'test.rb'
+end
+
+desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
+task 'test:conformance' => [:build] do |t|
+  script = "#{pwd}/bin/rdiscount"
+  test_version = ENV['MARKDOWN_TEST_VER'] || '1.0'
+  chdir("test/MarkdownTest_#{test_version}") do
+    sh "./MarkdownTest.pl --script='#{script}' --tidy"
+  end
+end
+
+desc 'Run version 1.0 conformance suite'
+task 'test:conformance:1.0' => 'test:conformance'
+
+desc 'Run 1.0.3 conformance suite'
+task 'test:conformance:1.0.3' => [:build] do |t|
+  ENV['MARKDOWN_TEST_VER'] = '1.0.3'
+  Rake::Task['test:conformance'].invoke
+end
+
+desc 'Run unit and conformance tests'
+task :test => %w[test:unit test:conformance]
+
+
+# ==========================================================
+# Documentation
+# ==========================================================
+
+desc 'Generate API documentation'
+task :doc => 'doc/index.html'
+
+file 'doc/index.html' => FileList['lib/rdiscount.rb','README'] do |f|
+  sh((<<-end).gsub(/\s+/, ' '))
+    hanna --charset utf8 \
+          --fmt html \
+          --inline-source \
+          --line-numbers \
+          --main RDiscount \
+          --op doc \
+          --title 'RDiscount API Documentation' \
+          #{f.prerequisites.join(' ')}
+  end
+end
+
+CLEAN.include 'doc'
+
+
+# ==========================================================
+# Rubyforge
+# ==========================================================
+
+PKGNAME = "pkg/rdiscount-#{VERS}"
+
+desc 'Publish new release to rubyforge'
+task :release => [ "#{PKGNAME}.gem", "#{PKGNAME}.tar.gz" ] do |t|
+  sh <<-end
+    rubyforge add_release wink rdiscount #{VERS} #{PKGNAME}.gem &&
+    rubyforge add_file    wink rdiscount #{VERS} #{PKGNAME}.tar.gz
+  end
+end
+
+
+# ==========================================================
+# Discount Submodule
+# ==========================================================
+
 namespace :submodule do
   desc 'Init the upstream submodule'
   task :init do |t|
@@ -66,61 +162,3 @@ task :gather => 'submodule:exist' do |t|
     :verbose => true
 end
 
-
-file 'ext/Makefile' => FileList['ext/{*.c,*.h,*.rb}'] do
-  chdir('ext') { ruby 'extconf.rb' }
-end
-CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
-
-file "ext/rdiscount.#{DLEXT}" => FileList['ext/Makefile', 'ext/*.{c,h,rb}'] do |f|
-  sh 'cd ext && make'
-end
-CLEAN.include 'ext/*.{o,bundle,so,dll}'
-
-file "lib/rdiscount.#{DLEXT}" => "ext/rdiscount.#{DLEXT}" do |f|
-  cp f.prerequisites, "lib/", :preserve => true
-end
-
-desc 'Build the rdiscount extension'
-task :build => "lib/rdiscount.#{DLEXT}"
-
-desc 'Run unit tests'
-task 'test:unit' => [:build] do |t|
-  ruby 'test.rb'
-end
-
-desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
-task 'test:conformance' => [:build] do |t|
-  script = "#{pwd}/bin/rdiscount"
-  test_version = ENV['MARKDOWN_TEST_VER'] || '1.0'
-  chdir("test/MarkdownTest_#{test_version}") do
-    sh "./MarkdownTest.pl --script='#{script}' --tidy"
-  end
-end
-
-desc 'Run version 1.0 conformance suite'
-task 'test:conformance:1.0' => 'test:conformance'
-
-desc 'Run 1.0.3 conformance suite'
-task 'test:conformance:1.0.3' => [:build] do |t|
-  ENV['MARKDOWN_TEST_VER'] = '1.0.3'
-  Rake::Task['test:conformance'].invoke
-end
-
-desc 'Run unit and conformance tests'
-task :test => %w[test:unit test:conformance]
-
-
-# ==========================================================
-# Rubyforge
-# ==========================================================
-
-PKGNAME = "pkg/rdiscount-#{VERS}"
-
-desc 'Publish new release to rubyforge'
-task :release => [ "#{PKGNAME}.gem", "#{PKGNAME}.tar.gz" ] do |t|
-  sh <<-end
-    rubyforge add_release wink rdiscount #{VERS} #{PKGNAME}.gem &&
-    rubyforge add_file    wink rdiscount #{VERS} #{PKGNAME}.tar.gz
-  end
-end
