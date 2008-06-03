@@ -1,7 +1,9 @@
-$: << File.join(File.dirname(__FILE__), "lib")
+$: << File.join(File.dirname(__FILE__), "../lib")
 
 require 'test/unit'
 require 'rdiscount'
+
+MARKDOWN_TEST_DIR = "#{File.dirname(__FILE__)}/MarkdownTest_1.0.3"
 
 class RDiscountTest < Test::Unit::TestCase
 
@@ -53,7 +55,7 @@ class RDiscountTest < Test::Unit::TestCase
 
   # Build tests for each file in the MarkdownTest test suite
 
-  Dir["#{File.dirname(__FILE__)}/test/MarkdownTest_1.0.3/Tests/*.text"].each do |text_file|
+  Dir["#{MARKDOWN_TEST_DIR}/Tests/*.text"].each do |text_file|
 
     basename = File.basename(text_file).sub(/\.text$/, '')
     html_file = text_file.sub(/text$/, 'html')

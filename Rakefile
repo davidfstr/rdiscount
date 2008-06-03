@@ -12,12 +12,12 @@ spec =
     s.name              = "rdiscount"
     s.version           = VERS
     s.summary           = "Fast Implementation of Gruber's Markdown in C"
-    s.files             = FileList['README','COPYING','Rakefile','test/**/*','{lib,ext}/**.rb','ext/*.{c,h}']
+    s.files             = FileList['README','COPYING','Rakefile','test/**','{lib,ext}/**.rb','ext/*.{c,h}']
     s.bindir            = 'bin'
     s.require_path      = 'lib'
     s.has_rdoc          = true
     s.extra_rdoc_files  = ['README', 'COPYING']
-    s.test_files        = Dir['test.rb']
+    s.test_files        = FileList['test/*_test.rb']
     s.extensions        = ['ext/extconf.rb']
 
     s.author            = 'Ryan Tomayko'
@@ -62,7 +62,7 @@ task :build => "lib/rdiscount.#{DLEXT}"
 
 desc 'Run unit tests'
 task 'test:unit' => [:build] do |t|
-  ruby 'test.rb'
+  ruby 'test/rdiscount_test.rb'
 end
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
