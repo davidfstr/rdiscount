@@ -129,6 +129,10 @@ task :release => [ "#{PKGNAME}.gem", "#{PKGNAME}.tar.gz" ] do |t|
   end
 end
 
+desc 'Publish API docs to rubyforge'
+task :publish => :doc do |t|
+  sh 'scp -rp doc/. rubyforge.org:/var/www/gforge-projects/wink/rdiscount'
+end
 
 # ==========================================================
 # Discount Submodule
