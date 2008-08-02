@@ -62,7 +62,7 @@ task :build => "lib/rdiscount.#{DLEXT}"
 
 desc 'Run unit tests'
 task 'test:unit' => [:build] do |t|
-  ruby 'test/rdiscount_test.rb'
+  ruby 'test/markdown_test.rb'
 end
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
@@ -99,7 +99,7 @@ end
 desc 'Generate API documentation'
 task :doc => 'doc/index.html'
 
-file 'doc/index.html' => FileList['lib/rdiscount.rb','README'] do |f|
+file 'doc/index.html' => FileList['lib/*.rb'] do |f|
   sh((<<-end).gsub(/\s+/, ' '))
     hanna --charset utf8 \
           --fmt html \

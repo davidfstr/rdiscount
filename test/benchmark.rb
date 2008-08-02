@@ -2,16 +2,23 @@ require 'rubygems'
 
 iterations = 100
 test_file = "#{File.dirname(__FILE__)}/benchmark.txt"
-implementations = %w[BlueCloth RDiscount Maruku Markdown]
+implementations = %w[BlueCloth RDiscount Maruku PEGMarkdown]
 
 # Attempt to require each implementation and remove any that are not
 # installed.
 implementations.reject! do |class_name|
   begin
-    require class_name.downcase
+    module_path =
+      if class_name == 'PEGMarkdown'
+        'peg_markdown'
+      else
+        class_name.downcase
+      end
+    require module_path
     false
   rescue LoadError => boom
-    puts "#{class_name} excluded from benchmark. (Try: gem install #{class_name.downcase})"
+    module_path.tr! '_', '-'
+    puts "#{class_name} excluded. Try: gem install #{module_path}"
     true
   end
 end

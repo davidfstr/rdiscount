@@ -59,15 +59,8 @@ class RDiscount
     extensions.each { |e| send("#{e}=", true) }
   end
 
-  # Convert the Markdown #text to HTML.
-  #--
-  # This is method is replaced when the C extension is loaded.
-  def to_html
-    raise NotImplemented
-  end
-
 end
 
-# Load the extension library. This replaces RDiscount#to_html with a real
-# implementation.
+Markdown = RDiscount unless defined? Markdown
+
 require 'rdiscount.so'
