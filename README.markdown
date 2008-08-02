@@ -1,16 +1,20 @@
-= RDiscount - Discount Markdown For Ruby
+Discount Markdown Processor for Ruby
+====================================
 
-Discount is an implementation of John Gruber's Markdown markup
-language in C. It implements all of the language as described in
-<http://daringfireball.net/projects/markdown/syntax>
-and passes the Markdown test suite at
-<http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip>
+Discount is an implementation of John Gruber's Markdown markup language in C. It
+implements all of the language described in [the markdown syntax document][1] and
+passes the [Markdown 1.0 test suite][2].
 
-Discount was developed by
-{David Loren Parsons}[http://www.pell.portland.or.us/~orc]. The
-RDiscount extension was developed by {Ryan Tomayko}[http://tomayko.com/].
+Discount was developed by [David Loren Parsons][3]. The Ruby extension was
+developed by [Ryan Tomayko][4].
 
-== Installation, Hacking
+[1]: http://daringfireball.net/projects/markdown/syntax
+[2]: http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip
+[3]: http://www.pell.portland.or.us/~orc
+[4]: http://tomayko.com/
+
+Installation, Hacking
+---------------------
 
 RDiscount Gem releases are published to RubyForge and can be installed as
 follows:
@@ -23,11 +27,10 @@ The RDiscount sources are available via Git:
   $ cd rdiscount
   $ rake --tasks
 
-For more information, see:
+For more information, see [the project page](http://github.com/rtomayko/rdiscount).
 
-http://github.com/rtomayko/rdiscount
-
-== Usage
+Usage
+-----
 
 RDiscount implements the basic protocol popularized by RedCloth and adopted
 by BlueCloth:
@@ -46,7 +49,8 @@ require statements with the following:
     require 'bluecloth'
   end
 
-== License
+COPYING
+-------
 
 Discount is free software;  it is released under a BSD-style license
 that allows you to do as you wish with it as long as you don't attempt

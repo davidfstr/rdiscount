@@ -12,11 +12,11 @@ spec =
     s.name              = "rdiscount"
     s.version           = VERS
     s.summary           = "Fast Implementation of Gruber's Markdown in C"
-    s.files             = FileList['README','COPYING','Rakefile','test/**','{lib,ext}/**.rb','ext/*.{c,h}']
+    s.files             = FileList['README.markdown','COPYING','Rakefile','test/**','{lib,ext}/**.rb','ext/*.{c,h}']
     s.bindir            = 'bin'
     s.require_path      = 'lib'
     s.has_rdoc          = true
-    s.extra_rdoc_files  = ['README', 'COPYING']
+    s.extra_rdoc_files  = ['COPYING']
     s.test_files        = FileList['test/*_test.rb']
     s.extensions        = ['ext/extconf.rb']
 
