@@ -701,7 +701,7 @@ maybe_tag_or_link(MMIOT *f)
 
     if ( maybetag  || (size >= 3 && strncmp(cursor(f), "!--", 3) == 0) ) {
 	Qstring(forbidden_tag(f) ? "&lt;" : "<", f);
-	while ( ((c = peek(f, size+1)) != EOF) && (c != '>') )
+	while ( ((c = peek(f, 1)) != EOF) && (c != '>') )
 	    cputc(pull(f), f);
 	return 1;
     }
@@ -925,6 +925,22 @@ text(MMIOT *f)
 	case '[':   if ( tag_text(f) || !linkylinky(0, f) )
 			Qchar(c, f);
 		    break;
+#if SUPERSCRIPT
+	case '^':   if ( isthisspace(f,-1) || isthisspace(f,1) )
+			Qchar(c,f);
+		    else {
+			char *sup = cursor(f);
+			int len = 0;
+			Qstring("<sup>",f);
+			while ( !isthisspace(f,1+len) ) {
+			    ++len;
+			}
+			shift(f,len);
+			reparse(sup, len, 0, f);
+			Qstring("</sup>", f);
+		    }
+		    break;
+#endif
 	case '*':
 	case '_':   if ( tag_text(f) )
 			Qchar(c, f);
