@@ -942,7 +942,7 @@ text(MMIOT *f)
 		    break;
 #endif
 	case '*':
-	case '_':   if ( tag_text(f) )
+	case '_':   if ( tag_text(f) || (isthisspace(f,-1) && isthisspace(f,1)) || (isalnum(peek(f,-1)) && isalnum(peek(f,1))) )
 			Qchar(c, f);
 #if RELAXED_EMPHASIS
 		    else if ( peek(f,1) == c ) {
