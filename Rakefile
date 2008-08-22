@@ -135,32 +135,11 @@ task :publish => :doc do |t|
 end
 
 # ==========================================================
-# Discount Submodule
+# Update package's Discount sources
 # ==========================================================
 
-namespace :submodule do
-  desc 'Init the upstream submodule'
-  task :init do |t|
-    unless File.exist? 'discount/markdown.c'
-      rm_rf 'discount'
-      sh 'git submodule init discount'
-      sh 'git submodule update discount'
-    end
-  end
-
-  desc 'Update the discount submodule'
-  task :update => :init do
-    sh 'git submodule update discount' unless File.symlink?('discount')
-  end
-
-  file 'discount/markdown.c' do
-    Rake::Task['submodule:init'].invoke
-  end
-  task :exist => 'discount/markdown.c'
-end
-
 desc 'Gather required discount sources into extension directory'
-task :gather => 'submodule:exist' do |t|
+task :gather => 'discount' do |t|
   files =
     FileList[
       'discount/{markdown,mkdio,amalloc,cstring}.h',
@@ -171,3 +150,20 @@ task :gather => 'submodule:exist' do |t|
     :verbose => true
 end
 
+# best. task. ever.
+file 'discount' do |f|
+  STDERR.puts((<<-TEXT).gsub(/^ +/, ''))
+    Sorry, this operation requires a human. Tell your human to:
+
+    Grab a discount tarball from:
+    http://www.pell.portland.or.us/~orc/Code/discount/
+
+    Extract here with something like:
+    tar xvzf discount-1.2.9.tar.gz
+
+    Create a discount symlink pointing at the version directory:
+    ln -hsf discount-1.2.9 discount
+
+  TEXT
+  fail "discount sources required."
+end
