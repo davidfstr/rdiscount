@@ -5,16 +5,11 @@
 
 static VALUE rb_cRDiscount;
 
-static ID id_text;
-static ID id_smart;
-static ID id_notes;
-
-
 static VALUE
 rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 {
     /* grab char pointer to markdown input text */
-    VALUE text = rb_funcall(self, id_text, 0);
+    VALUE text = rb_funcall(self, rb_intern("text"), 0);
     Check_Type(text, T_STRING);
 
     /* allocate a ruby string buffer and wrap it in a stream */
@@ -23,8 +18,14 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 
     /* compile flags */
     int flags = MKD_TABSTOP | MKD_NOHEADER;
-    if (rb_funcall(self, id_smart, 0) != Qtrue )
+
+    /* smart */
+    if ( rb_funcall(self, rb_intern("smart"), 0) != Qtrue )
         flags = flags | MKD_NOPANTS;
+
+    /* filter_html */
+    if ( rb_funcall(self, rb_intern("filter_html"), 0) == Qtrue )
+        flags = flags | MKD_NOHTML;
 
     MMIOT *doc = mkd_string(RSTRING(text)->ptr, RSTRING(text)->len, flags);
     markdown(doc, stream, flags);
@@ -36,11 +37,6 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 
 void Init_rdiscount()
 {
-    /* Initialize frequently used Symbols */
-    id_text  = rb_intern("text");
-    id_smart = rb_intern("smart");
-    id_notes = rb_intern("notes");
-
     rb_cRDiscount = rb_define_class("RDiscount", rb_cObject);
     rb_define_method(rb_cRDiscount, "to_html", rb_rdiscount_to_html, -1);
 }

@@ -30,6 +30,11 @@ class MarkdownTest < Test::Unit::TestCase
     assert_equal "<p><em>start _ foo_bar bar_baz _ end</em> <em>italic</em> <strong>bold</strong> <a><em>blah</em></a></p>", markdown.to_html.strip
   end
 
+  def test_that_filter_html_works
+    markdown = Markdown.new('Through <em>NO</em> <script>DOUBLE NO</script>', :filter_html)
+    assert_equal "<p>Through &lt;em>NO&lt;/em> &lt;script>DOUBLE NO&lt;/script></p>", markdown.to_html.strip
+  end
+
   def test_that_bluecloth_restrictions_are_supported
     markdown = Markdown.new('Hello World.')
     [:filter_html, :filter_styles].each do |restriction|

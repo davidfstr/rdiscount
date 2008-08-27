@@ -31,8 +31,11 @@ class RDiscount
   # Set true to have smarty-like quote translation performed.
   attr_accessor :smart
 
-  # BlueCloth compatible output filtering.
-  attr_accessor :filter_styles, :filter_html
+  # Do not output <style> tags included in the source text.
+  attr_accessor :filter_styles
+
+  # Do not output any raw HTML included in the source text.
+  attr_accessor :filter_html
 
   # RedCloth compatible line folding -- not used for Markdown but
   # included for compatibility.
@@ -48,8 +51,7 @@ class RDiscount
   #   the source text.
   # * <tt>:fold_lines</tt> - RedCloth compatible line folding (not used).
   #
-  # NOTE: The <tt>:filter_styles</tt> and <tt>:filter_html</tt> extensions
-  # are not yet implemented.
+  # NOTE: The <tt>:filter_styles</tt> extension is not yet implemented.
   def initialize(text, *extensions)
     @text  = text
     @smart = nil
