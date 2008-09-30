@@ -62,7 +62,7 @@ task :build => "lib/rdiscount.#{DLEXT}"
 
 desc 'Run unit tests'
 task 'test:unit' => [:build] do |t|
-  ruby 'test/markdown_test.rb'
+  sh 'testrb test/markdown_test.rb test/rdiscount_test.rb'
 end
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
