@@ -5,7 +5,7 @@ require 'rake/gempackagetask'
 task :default => 'test:unit'
 
 DLEXT = Config::CONFIG['DLEXT']
-VERS = '1.2.10'
+VERS = '1.2.11'
 
 spec =
   Gem::Specification.new do |s|
