@@ -64,6 +64,15 @@ class MarkdownTest < Test::Unit::TestCase
     assert_nothing_raised(ArgumentError) { markdown.to_html(true) }
   end
 
+  def test_that_smart_converts_single_quotes_in_words_that_end_in_re
+    markdown = Markdown.new("They're not for sale.", :smart)
+    assert_equal "<p>They&rsquo;re not for sale.</p>\n", markdown.to_html
+  end
+
+  def test_that_smart_converts_single_quotes_in_words_that_end_in_ll
+    markdown = Markdown.new("Well that'll be the day", :smart)
+    assert_equal "<p>Well that&rsquo;ll be the day</p>\n", markdown.to_html
+  end
 
   # Build tests for each file in the MarkdownTest test suite
 
