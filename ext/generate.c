@@ -830,6 +830,8 @@ static struct smarties {
 } smarties[] = {
     { '\'', "'s>",      "rsquo",  0 },
     { '\'', "'t>",      "rsquo",  0 },
+    { '\'', "'re>",     "rsquo",  0 },
+    { '\'', "'ll>",     "rsquo",  0 },
     { '-',  "--",       "mdash",  1 },
     { '-',  "<->",      "ndash",  0 },
     { '.',  "...",      "hellip", 2 },
