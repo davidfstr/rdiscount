@@ -74,6 +74,11 @@ class MarkdownTest < Test::Unit::TestCase
     assert_equal "<p>Well that&rsquo;ll be the day</p>\n", markdown.to_html
   end
 
+  def test_that_urls_are_not_doubly_escaped
+    markdown = Markdown.new('[Page 2](/search?query=Markdown+Test&page=2)')
+    assert_equal "<p><a href=\"/search?query=Markdown+Test&amp;page=2\">Page 2</a></p>\n", markdown.to_html
+  end
+
   # Build tests for each file in the MarkdownTest test suite
 
   Dir["#{MARKDOWN_TEST_DIR}/Tests/*.text"].each do |text_file|
