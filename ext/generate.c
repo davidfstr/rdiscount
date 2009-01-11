@@ -26,6 +26,7 @@ typedef int (*stfu)(const void*,const void*);
 
 
 /* forward declarations */
+static int iscodeblock(MMIOT*);
 static void code(int, MMIOT*);
 static void text(MMIOT *f);
 static Paragraph *display(Paragraph*, MMIOT*);
@@ -71,6 +72,31 @@ static char*
 cursor(MMIOT *f)
 {
     return T(f->in) + f->isp;
+}
+
+
+static int
+isthisspace(MMIOT *f, int i)
+{
+    int c = peek(f, i);
+
+    return isspace(c) || (c == EOF);
+}
+
+
+static int
+isthisalnum(MMIOT *f, int i)
+{
+    int c = peek(f, i);
+
+    return (c != EOF) && isalnum(c);
+}
+
+
+static int
+isthisnonword(MMIOT *f, int i)
+{
+    return isthisspace(f, i) || ispunct(peek(f,i));
 }
 
 
@@ -313,8 +339,7 @@ puturl(char *s, int size, MMIOT *f)
 	    Qstring("&amp;", f);
 	else if ( c == '<' )
 	    Qstring("&lt;", f);
-	else if ( isalnum(c) || c == '.' || c == '-' || c == '_' || c == '/'
-			     || c == '=' || c == '?' || c == ':' || c == '#' )
+	else if ( isalnum(c) || ispunct(c) )
 	    Qchar(c, f);
 	else
 	    Qprintf(f, "%%%02X", c);
@@ -579,7 +604,7 @@ linkylinky(int image, MMIOT *f)
     Footnote link;
     linkytype *tag;
 
-    if ( !(linkykey(image, &link, f) && S(link.tag)) ) {
+    if ( !linkykey(image, &link, f) ) {
 	mmiotseek(f, start);
 	return 0;
     }
@@ -662,11 +687,11 @@ forbidden_tag(MMIOT *f)
     if ( f->flags & DENY_HTML )
 	return 1;
 
-    if ( c == 'A' && (f->flags & DENY_A) && !isalnum(peek(f,2)) )
+    if ( c == 'A' && (f->flags & DENY_A) && !isthisalnum(f,2) )
 	return 1;
     if ( c == 'I' && (f->flags & DENY_IMG)
 		  && strncasecmp(cursor(f)+1, "MG", 2) == 0
-		  && !isalnum(peek(f,4)) )
+		  && !isthisalnum(f,4) )
 	return 1;
     return 0;
 }
@@ -746,22 +771,6 @@ maybe_tag_or_link(MMIOT *f)
 } /* maybe_tag_or_link */
 
 
-static int
-isthisspace(MMIOT *f, int i)
-{
-    int c = peek(f, i);
-
-    return isspace(c) || (c == EOF);
-}
-
-
-static int
-isthisnonword(MMIOT *f, int i)
-{
-    return isthisspace(f, i) || ispunct(peek(f,i));
-}
-
-
 /* smartyquote code that's common for single and double quotes
  */
 static int
@@ -821,8 +830,6 @@ static struct smarties {
 } smarties[] = {
     { '\'', "'s>",      "rsquo",  0 },
     { '\'', "'t>",      "rsquo",  0 },
-    { '\'', "'re>",     "rsquo",  0 },
-    { '\'', "'ll>",     "rsquo",  0 },
     { '-',  "--",       "mdash",  1 },
     { '-',  "<->",      "ndash",  0 },
     { '.',  "...",      "hellip", 2 },
@@ -931,7 +938,8 @@ text(MMIOT *f)
 			Qchar(c, f);
 		    break;
 #if SUPERSCRIPT
-	case '^':   if ( isthisspace(f,-1) || isthisspace(f,1) )
+	/* A^B -> A<sup>B</sup> */
+	case '^':   if ( (f->flags & (STRICT|INSIDE_TAG)) || isthisspace(f,-1) || isthisspace(f,1) )
 			Qchar(c,f);
 		    else {
 			char *sup = cursor(f);
@@ -948,11 +956,10 @@ text(MMIOT *f)
 #endif
 	case '_':
 #if RELAXED_EMPHASIS
-		    /* If RELAXED_EMPHASIS, underscores don't count when
-		     * they're in the middle of a word.
-		     */
-		    if ( (isthisspace(f,-1) && isthisspace(f,1))
-			    || (isalnum(peek(f,-1)) && isalnum(peek(f,1))) ) {
+	/* Underscores don't count if they're in the middle of a word */
+		    if ( (!(f->flags & STRICT))
+			     && ((isthisspace(f,-1) && isthisspace(f,1))
+			      || (isthisalnum(f,-1) && isthisalnum(f,1))) ){
 			Qchar(c, f);
 			break;
 		    }
@@ -967,7 +974,7 @@ text(MMIOT *f)
 		    }
 		    break;
 	
-	case '`':   if ( tag_text(f) )
+	case '`':   if ( tag_text(f) || !iscodeblock(f) )
 			Qchar(c, f);
 		    else {
 			Qstring("<code>", f);
@@ -1006,7 +1013,7 @@ text(MMIOT *f)
 		    break;
 
 	case '&':   j = (peek(f,1) == '#' ) ? 2 : 1;
-		    while ( isalnum(peek(f,j)) )
+		    while ( isthisalnum(f,j) )
 			++j;
 
 		    if ( peek(f,j) != ';' )
@@ -1019,8 +1026,30 @@ text(MMIOT *f)
 		    break;
 	}
     }
+    /* truncate the input string after we've finished processing it */
+    S(f->in) = f->isp = 0;
 } /* text */
 
+
+static int
+iscodeblock(MMIOT *f)
+{
+    int i=1, single = 1, c;
+    
+    if ( peek(f,i) == '`' ) {
+	single=0;
+	i++;
+    }
+    while ( (c=peek(f,i)) != EOF ) {
+	if ( (c == '`') && (single || peek(f,i+1) == '`') )
+	    return 1;
+	else if ( c == '\\' )
+	    i++;
+	i++;
+    }
+    return 0;
+    
+}
 
 static int
 endofcode(int escape, int offset, MMIOT *f)
@@ -1075,7 +1104,13 @@ code(int escape, MMIOT *f)
 static void
 printheader(Paragraph *pp, MMIOT *f)
 {
-    Qprintf(f, "<h%d>", pp->hnumber);
+    Qprintf(f, "<h%d", pp->hnumber);
+    if ( f->flags & TOC ) {
+	Qprintf(f, " id=\"", pp->hnumber);
+	mkd_string_to_anchor(T(pp->text->text), S(pp->text->text), Qchar, f);
+	Qchar('"', f);
+    }
+    Qchar('>', f);
     push(T(pp->text->text), S(pp->text->text), f);
     text(f);
     Qprintf(f, "</h%d>", pp->hnumber);
@@ -1152,10 +1187,11 @@ printhtml(Line *t, MMIOT *f)
 
 
 static void
-htmlify(Paragraph *p, char *block, MMIOT *f)
+htmlify(Paragraph *p, char *block, char *arguments, MMIOT *f)
 {
     emblock(f);
-    if ( block ) Qprintf(f, "<%s>", block);
+    if ( block )
+	Qprintf(f, arguments ? "<%s %s>" : "<%s>", block, arguments);
     emblock(f);
 
     while (( p = display(p, f) )) {
@@ -1163,7 +1199,8 @@ htmlify(Paragraph *p, char *block, MMIOT *f)
 	Qstring("\n\n", f);
     }
 
-    if ( block ) Qprintf(f, "</%s>", block);
+    if ( block )
+	 Qprintf(f, "</%s>", block);
     emblock(f);
 }
 
@@ -1184,7 +1221,7 @@ definitionlist(Paragraph *p, MMIOT *f)
 		Qstring("</dt>\n", f);
 	    }
 
-	    htmlify(p->down, "dd", f);
+	    htmlify(p->down, "dd", p->ident, f);
 	}
 
 	Qstring("</dl>", f);
@@ -1197,10 +1234,13 @@ static void
 listdisplay(int typ, Paragraph *p, MMIOT* f)
 {
     if ( p ) {
-	Qprintf(f, "<%cl>\n", (typ==UL)?'u':'o');
+	Qprintf(f, "<%cl", (typ==UL)?'u':'o');
+	if ( typ == AL )
+	    Qprintf(f, " type=a");
+	Qprintf(f, ">\n");
 
 	for ( ; p ; p = p->next ) {
-	    htmlify(p->down, "li", f);
+	    htmlify(p->down, "li", p->ident, f);
 	    Qchar('\n', f);
 	}
 
@@ -1230,11 +1270,12 @@ display(Paragraph *p, MMIOT *f)
 	break;
 	
     case QUOTE:
-	htmlify(p->down, "blockquote", f);
+	htmlify(p->down, p->ident ? "div" : "blockquote", p->ident, f);
 	break;
 	
     case UL:
     case OL:
+    case AL:
 	listdisplay(p->typ, p->down, f);
 	break;
 
@@ -1291,7 +1332,7 @@ mkd_document(Document *p, char **res)
 {
     if ( p && p->compiled ) {
 	if ( ! p->html ) {
-	    htmlify(p->code, 0, p->ctx);
+	    htmlify(p->code, 0, 0, p->ctx);
 	    p->html = 1;
 	}
 

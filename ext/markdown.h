@@ -33,8 +33,9 @@ typedef struct paragraph {
     struct paragraph *next;	/* next paragraph */
     struct paragraph *down;	/* recompiled contents of this paragraph */
     struct line *text;		/* all the text in this paragraph */
+    char *ident;		/* %id% tag for QUOTE */
     enum { WHITESPACE=0, CODE, QUOTE, MARKUP,
-	   HTML, STYLE, DL, UL, OL, LISTITEM,
+	   HTML, STYLE, DL, UL, OL, AL, LISTITEM,
 	   HDR, HR } typ;
     enum { IMPLICIT=0, PARA, CENTER} align;
     int hnumber;		/* <Hn> for typ == HDR */
@@ -68,10 +69,12 @@ typedef struct mmiot {
 #define DENY_IMG	0x0002
 #define DENY_SMARTY	0x0004
 #define DENY_HTML	0x0008
+#define STRICT		0x0010
 #define INSIDE_TAG	0x0020
 #define NO_PSEUDO_PROTO	0x0040
 #define CDATA_OUTPUT	0x0080
-#define USER_FLAGS	0x00FF
+#define TOC		0x1000
+#define USER_FLAGS	0xF0FF
 #define EMBEDDED	DENY_A|DENY_IMG|NO_PSEUDO_PROTO|CDATA_OUTPUT
     char *base;
 } MMIOT;
@@ -100,9 +103,11 @@ extern int  mkd_firstnonblank(Line *);
 extern int  mkd_compile(Document *, int);
 extern int  mkd_document(Document *, char **);
 extern int  mkd_generatehtml(Document *, FILE *);
+extern int  mkd_style(Document *, FILE *);
 extern void mkd_cleanup(Document *);
 extern int  mkd_text(char *, int, FILE*, int);
 extern void mkd_basename(Document*, char *);
+extern void mkd_string_to_anchor(char*,int, void(*)(int,void*), void*);
 
 extern Document *mkd_in(FILE *, int);
 extern Document *mkd_string(char*,int, int);

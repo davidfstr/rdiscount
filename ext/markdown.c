@@ -286,7 +286,7 @@ ishr(Line *t)
 static int
 ishdr(Line *t, int *htyp)
 {
-    int i, j;
+    int i;
 
 
     /* first check for etx-style ###HEADER###
@@ -297,21 +297,11 @@ ishdr(Line *t, int *htyp)
     for ( i=0; T(t->text)[i] == '#'; ++i)
 	;
 
+    /* ANY leading `#`'s make this into an ETX header
+     */
     if ( i ) {
-	i = nextnonblank(t, i);
-
-	j = S(t->text)-1;
-
-	while ( (j > i) && (T(t->text)[j] == '#') )
-	    --j;
-	
-	while ( (j > 1) && isspace(T(t->text)[j]) )
-	    --j;
-
-	if ( i < j ) {
-	    *htyp = ETX;
-	    return 1;
-	}
+	*htyp = ETX;
+	return 1;
     }
 
     /* then check for setext-style HEADER
@@ -362,7 +352,7 @@ islist(Line *t, int *trim)
 	*trim = 4;
 	return DL;
     }
-    
+
     if ( strchr("*-+", T(t->text)[t->dle]) && isspace(T(t->text)[t->dle+1]) ) {
 	i = nextnonblank(t, t->dle+1);
 	*trim = (i > 4) ? 4 : i;
@@ -371,6 +361,13 @@ islist(Line *t, int *trim)
 
     if ( (j = nextblank(t,t->dle)) > t->dle ) {
 	if ( T(t->text)[j-1] == '.' ) {
+#if ALPHA_LIST
+	if ( (j == t->dle + 2) && isalpha(T(t->text)[t->dle]) ) {
+	    j = nextnonblank(t,j);
+	    *trim = j;
+	    return AL;
+	}
+#endif
 	    strtoul(T(t->text)+t->dle, &q, 10);
 	    if ( (q > T(t->text)+t->dle) && (q == T(t->text) + (j-1)) ) {
 		j = nextnonblank(t,j);
@@ -406,7 +403,7 @@ headerblock(Paragraph *pp, int htyp)
 	     * the leading and trailing `#`'s
 	     */
 
-	    for (i=0; T(p->text)[i] == T(p->text)[0]; i++)
+	    for (i=0; (T(p->text)[i] == T(p->text)[0]) && (i < S(p->text)-1); i++)
 		;
 
 	    pp->hnumber = i;
@@ -416,8 +413,11 @@ headerblock(Paragraph *pp, int htyp)
 
 	    CLIP(p->text, 0, i);
 
-	    for (j=S(p->text); j && (T(p->text)[j-1] == '#'); --j)
+	    for (j=S(p->text); (j > 1) && (T(p->text)[j-1] == '#'); --j)
 		;
+
+	    while ( j && isspace(T(p->text)[j-1]) )
+		--j;
 
 	    S(p->text) = j;
 
@@ -502,6 +502,47 @@ textblock(Paragraph *p, int toplevel)
 }
 
 
+/* length of the id: or class: kind in a special div-not-quote block
+ */
+static int
+szmarkerclass(char *p)
+{
+    if ( strncasecmp(p, "id:", 3) == 0 )
+	return 3;
+    if ( strncasecmp(p, "class:", 6) == 0 )
+	return 6;
+    return 0;
+}
+
+
+/*
+ * check if the first line of a quoted block is the special div-not-quote
+ * marker %[kind:]name%
+ */
+static int
+isdivmarker(Line *p)
+{
+#if DIV_QUOTE
+    char *s = T(p->text);
+    int len = S(p->text);
+    int i;
+
+    if ( !(len && s[0] == '%' && s[len-1] == '%') ) return 0;
+
+    i = szmarkerclass(s+1);
+    --len;
+
+    while ( ++i < len )
+	if ( !isalnum(s[i]) )
+	    return 0;
+
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+
 /*
  * accumulate a blockquote.
  *
@@ -528,8 +569,26 @@ quoteblock(Paragraph *p)
 
 	if ( !(q = skipempty(t->next)) || ((q != t->next) && !isquote(q)) ) {
 	    ___mkd_freeLineRange(t, q);
-	    return q;
+	    t = q;
+	    break;
 	}
+    }
+    if ( isdivmarker(p->text) ) {
+	char *prefix = "class";
+	int i;
+	
+	q = p->text;
+	p->text = p->text->next;
+
+	if ( (i = szmarkerclass(1+T(q->text))) == 3 )
+	    /* and this would be an "%id:" prefix */
+	    prefix="id";
+	    
+	if ( p->ident = malloc(4+i+S(q->text)) )
+	    sprintf(p->ident, "%s=\"%.*s\"", prefix, S(q->text)-(i+2),
+						     T(q->text)+(i+1) );
+
+	___mkd_freeLine(q);
     }
     return t;
 }
@@ -574,7 +633,7 @@ listitem(Paragraph *p, int indent)
 	    indent = 4;
 	}
 
-	if ( (q->dle < indent) && (ishr(q) || ishdr(q,&z) || islist(q,&z)) ) {
+	if ( (q->dle < indent) && (ishr(q) || islist(q,&z)) && !ishdr(q,&z) ) {
 	    q = t->next;
 	    t->next = 0;
 	    return q;
@@ -617,7 +676,7 @@ listblock(Paragraph *top, int trim, MMIOT *f)
 
 	if ( para && (top->typ != DL) && p->down ) p->down->align = PARA;
 
-	if ( !(q = skipempty(text)) || (islist(q,&trim) != top->typ) )
+	if ( !(q = skipempty(text)) || (islist(q, &trim) == 0) )
 	    break;
 
 	if ( para = (q != text) ) {
