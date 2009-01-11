@@ -1,42 +1,74 @@
 require 'rake/clean'
-require 'rake/packagetask'
-require 'rake/gempackagetask'
 
 task :default => 'test:unit'
 
-DLEXT = Config::CONFIG['DLEXT']
-VERS = '1.2.11'
+# PACKAGING =================================================================
 
-spec =
-  Gem::Specification.new do |s|
-    s.name              = "rdiscount"
-    s.version           = VERS
-    s.summary           = "Fast Implementation of Gruber's Markdown in C"
-    s.files             = FileList['README.markdown','COPYING','Rakefile','test/**','{lib,ext}/**.rb','ext/*.{c,h}']
-    s.bindir            = 'bin'
-    s.require_path      = 'lib'
-    s.has_rdoc          = true
-    s.extra_rdoc_files  = ['COPYING']
-    s.test_files        = FileList['test/*_test.rb']
-    s.extensions        = ['ext/extconf.rb']
-
-    s.author            = 'Ryan Tomayko'
-    s.email             = 'r@tomayko.com'
-    s.homepage          = 'http://github.com/rtomayko/rdiscount'
-    s.rubyforge_project = 'wink'
+# Load the gemspec using the same limitations as github
+$spec =
+  begin
+    require 'rubygems/specification'
+    data = File.read('rdiscount.gemspec')
+    spec = nil
+    Thread.new { spec = eval("$SAFE = 3\n#{data}") }.join
+    spec
   end
 
-  Rake::GemPackageTask.new(spec) do |p|
-    p.gem_spec = spec
-    p.need_tar_gz = true
-    p.need_tar = false
-    p.need_zip = false
-  end
+def package(ext='')
+  "pkg/rdiscount-#{$spec.version}" + ext
+end
 
+desc 'Build packages'
+task :package => %w[.gem .tar.gz].map {|e| package(e)}
+
+desc 'Build and install as local gem'
+task :install => package('.gem') do
+  sh "gem install #{package('.gem')}"
+end
+
+directory 'pkg/'
+
+file package('.gem') => %w[pkg/ rdiscount.gemspec] + $spec.files do |f|
+  sh "gem build rdiscount.gemspec"
+  mv File.basename(f.name), f.name
+end
+
+file package('.tar.gz') => %w[pkg/] + $spec.files do |f|
+  sh "git archive --format=tar HEAD | gzip > #{f.name}"
+end
+
+# GEMSPEC HELPERS ==========================================================
+
+def source_version
+  line = File.read('lib/rdiscount.rb')[/^\s*VERSION = .*/]
+  line.match(/.*VERSION = '(.*)'/)[1]
+end
+
+file 'rdiscount.gemspec' => FileList['Rakefile','lib/rdiscount.rb'] do |f|
+  # read spec file and split out manifest section
+  spec = File.read(f.name)
+  head, manifest, tail = spec.split("  # = MANIFEST =\n")
+  head.sub!(/\.version = '.*'/, ".version = '#{source_version}'")
+  head.sub!(/\.date = '.*'/, ".date = '#{Date.today.to_s}'")
+  # determine file list from git ls-files
+  files = `git ls-files`.
+    split("\n").
+    sort.
+    reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }.
+    map{ |file| "    #{file}" }.
+    join("\n")
+  # piece file back together and write...
+  manifest = "  s.files = %w[\n#{files}\n  ]\n"
+  spec = [head,manifest,tail].join("  # = MANIFEST =\n")
+  File.open(f.name, 'w') { |io| io.write(spec) }
+  puts "updated #{f.name}"
+end
 
 # ==========================================================
 # Ruby Extension
 # ==========================================================
+
+DLEXT = Config::CONFIG['DLEXT']
 
 file 'ext/Makefile' => FileList['ext/{*.c,*.h,*.rb}'] do
   chdir('ext') { ruby 'extconf.rb' }
@@ -54,7 +86,6 @@ end
 
 desc 'Build the rdiscount extension'
 task :build => "lib/rdiscount.#{DLEXT}"
-
 
 # ==========================================================
 # Testing
@@ -119,13 +150,11 @@ CLEAN.include 'doc'
 # Rubyforge
 # ==========================================================
 
-PKGNAME = "pkg/rdiscount-#{VERS}"
-
 desc 'Publish new release to rubyforge'
-task :release => [ "#{PKGNAME}.gem", "#{PKGNAME}.tar.gz" ] do |t|
+task :release => [package('.gem'), package('.tar.gz')] do |t|
   sh <<-end
-    rubyforge add_release wink rdiscount #{VERS} #{PKGNAME}.gem &&
-    rubyforge add_file    wink rdiscount #{VERS} #{PKGNAME}.tar.gz
+    rubyforge add_release wink rdiscount #{$spec.version} #{package('.gem')} &&
+    rubyforge add_file    wink rdiscount #{$spec.version} #{package('.tar.gz')}
   end
 end
 
