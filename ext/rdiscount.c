@@ -26,6 +26,10 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
     /* filter_html */
     if ( rb_funcall(self, rb_intern("filter_html"), 0) == Qtrue )
         flags = flags | MKD_NOHTML;
+        
+    /* generate_toc */
+    if ( rb_funcall(self, rb_intern("generate_toc"), 0) == Qtrue)
+      flags = flags | MKD_TOC;
 
     MMIOT *doc = mkd_string(RSTRING(text)->ptr, RSTRING(text)->len, flags);
     markdown(doc, stream, flags);

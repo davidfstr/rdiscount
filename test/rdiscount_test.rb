@@ -27,4 +27,9 @@ class RDiscountTest < Test::Unit::TestCase
     rd = RDiscount.new(%(# Heading\n\n"Quoted text"), :smart)
     assert_equal %(<h1>Heading</h1>\n\n<p>&ldquo;Quoted text&rdquo;</p>\n), rd.to_html
   end
+  
+  def test_that_generate_toc_sets_toc_ids
+    rd = RDiscount.new("# Level 1\n\n## Level 2", :generate_toc)
+    assert_equal %(<h1 id="Level+1\">Level 1</h1>\n\n<h2 id="Level+2\">Level 2</h2>\n), rd.to_html
+  end
 end
