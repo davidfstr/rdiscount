@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
     ext/rbstrio.h
     ext/rdiscount.c
     ext/resource.c
+    ext/toc.c
     lib/markdown.rb
     lib/rdiscount.rb
     rdiscount.gemspec
