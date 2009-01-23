@@ -20,7 +20,6 @@ class MarkdownTest < Test::Unit::TestCase
 
   def test_that_inline_markdown_goes_to_html
     markdown = Markdown.new('_Hello World_!')
-    assert_respond_to markdown, :to_html
     assert_equal "<p><em>Hello World</em>!</p>", markdown.to_html.strip
   end
 
@@ -28,6 +27,9 @@ class MarkdownTest < Test::Unit::TestCase
     markdown = Markdown.new('_start _ foo_bar bar_baz _ end_ *italic* **bold** <a>_blah_</a>')
     assert_respond_to markdown, :to_html
     assert_equal "<p><em>start _ foo_bar bar_baz _ end</em> <em>italic</em> <strong>bold</strong> <a><em>blah</em></a></p>", markdown.to_html.strip
+
+    markdown = Markdown.new("Run 'rake radiant:extensions:rbac_base:migrate'")
+    assert_equal "<p>Run 'rake radiant:extensions:rbac_base:migrate'</p>", markdown.to_html.strip
   end
 
   def test_that_filter_html_works
