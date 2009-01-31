@@ -18,7 +18,7 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 
     int flags = rb_rdiscount__get_flags(self);
 
-    MMIOT *doc = mkd_string(RSTRING(text)->ptr, RSTRING(text)->len, flags);
+    MMIOT *doc = mkd_string(RSTRING_PTR(text), RSTRING_LEN(text), flags);
     markdown(doc, stream, flags);
 
     fclose(stream);
@@ -39,7 +39,7 @@ rb_rdiscount_toc_content(int argc, VALUE *argv, VALUE self)
     VALUE buf = rb_str_buf_new(4096);
     FILE *stream = rb_str_io_new(buf);
     
-    MMIOT *doc = mkd_string(RSTRING(text)->ptr, RSTRING(text)->len, flags);
+    MMIOT *doc = mkd_string(RSTRING_PTR(text), RSTRING_LEN(text), flags);
     mkd_compile(doc, flags);
     mkd_generatetoc(doc, stream);
     
