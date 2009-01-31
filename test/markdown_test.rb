@@ -1,9 +1,10 @@
-$: << File.join(File.dirname(__FILE__), "../lib")
+rootdir = File.dirname(File.dirname(__FILE__))
+$LOAD_PATH.unshift "#{rootdir}/lib"
 
 require 'test/unit'
 require 'markdown'
 
-MARKDOWN_TEST_DIR = "#{File.dirname(__FILE__)}/MarkdownTest_1.0.3"
+MARKDOWN_TEST_DIR = "#{rootdir}/test/MarkdownTest_1.0.3"
 
 class MarkdownTest < Test::Unit::TestCase
 
