@@ -8,8 +8,8 @@ MARKDOWN_TEST_DIR = "#{File.dirname(__FILE__)}/MarkdownTest_1.0.3"
 class MarkdownTest < Test::Unit::TestCase
 
   def test_that_extension_methods_are_present_on_markdown_class
-    assert Markdown.instance_methods.include?('to_html'),
-      "Markdown class should respond to #to_html"
+      assert Markdown.instance_methods.map{|m| m.to_s }.include?('to_html'),
+        "Markdown class should respond to #to_html"
   end
 
   def test_that_simple_one_liner_goes_to_html

@@ -42,6 +42,9 @@ class RDiscount
   # included for compatibility.
   attr_accessor :fold_lines
 
+  # Enable Table Of Contents generation
+  attr_accessor :generate_toc
+
   # Create a RDiscount Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
   # supplied to set various processing options:
