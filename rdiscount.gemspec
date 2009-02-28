@@ -24,8 +24,6 @@ Gem::Specification.new do |s|
     ext/markdown.h
     ext/mkdio.c
     ext/mkdio.h
-    ext/rbstrio.c
-    ext/rbstrio.h
     ext/rdiscount.c
     ext/resource.c
     ext/toc.c
