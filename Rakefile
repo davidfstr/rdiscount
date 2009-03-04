@@ -99,14 +99,17 @@ end
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
 task 'test:conformance' => [:build] do |t|
   script = "#{pwd}/bin/rdiscount"
-  test_version = ENV['MARKDOWN_TEST_VER'] || '1.0'
+  test_version = ENV['MARKDOWN_TEST_VER'] || '1.0.3'
   chdir("test/MarkdownTest_#{test_version}") do
     sh "./MarkdownTest.pl --script='#{script}' --tidy"
   end
 end
 
 desc 'Run version 1.0 conformance suite'
-task 'test:conformance:1.0' => 'test:conformance'
+task 'test:conformance:1.0' => [:build] do |t|
+  ENV['MARKDOWN_TEST_VER'] = '1.0'
+  Rake::Task['test:conformance'].invoke
+end
 
 desc 'Run 1.0.3 conformance suite'
 task 'test:conformance:1.0.3' => [:build] do |t|
