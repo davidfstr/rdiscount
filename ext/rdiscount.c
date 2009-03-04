@@ -31,10 +31,12 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
     return buf;
 }
 
-#if 0
 static VALUE
 rb_rdiscount_toc_content(int argc, VALUE *argv, VALUE self)
 {
+    char *res;
+    int szres;
+
     int flags = rb_rdiscount__get_flags(self);
 
     /* grab char pointer to markdown input text */
@@ -43,17 +45,21 @@ rb_rdiscount_toc_content(int argc, VALUE *argv, VALUE self)
 
     /* allocate a ruby string buffer and wrap it in a stream */
     VALUE buf = rb_str_buf_new(4096);
-    FILE *stream = rb_str_io_new(buf);
 
     MMIOT *doc = mkd_string(RSTRING_PTR(text), RSTRING_LEN(text), flags);
-    mkd_compile(doc, flags);
-    mkd_generatetoc(doc, stream);
 
-    fclose(stream);
+    if ( mkd_compile(doc, flags) ) {
+        szres = mkd_toc(doc, &res);
+
+        if ( szres != EOF ) {
+            rb_str_cat(buf, res, szres);
+            rb_str_cat(buf, "\n", 1);
+        }
+    }
+    mkd_cleanup(doc);
 
     return buf;
 }
-#endif
 
 int rb_rdiscount__get_flags(VALUE ruby_obj)
 {
@@ -80,9 +86,7 @@ void Init_rdiscount()
 {
     rb_cRDiscount = rb_define_class("RDiscount", rb_cObject);
     rb_define_method(rb_cRDiscount, "to_html", rb_rdiscount_to_html, -1);
-#if 0
     rb_define_method(rb_cRDiscount, "toc_content", rb_rdiscount_toc_content, -1);
-#endif
 }
 
 /* vim: set ts=4 sw=4: */
