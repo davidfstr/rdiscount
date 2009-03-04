@@ -277,10 +277,10 @@ emmatch(MMIOT *f, int go)
 }
 
 
-/* emblock()
+/* ___mkd_emblock()
  */
-static void
-emblock(MMIOT *f)
+void
+___mkd_emblock(MMIOT *f)
 {
     int i;
     block *p;
@@ -301,8 +301,8 @@ emblock(MMIOT *f)
 
 /* generate html from a markup fragment
  */
-static void
-reparse(char *bfr, int size, int flags, MMIOT *f)
+void
+___mkd_reparse(char *bfr, int size, int flags, MMIOT *f)
 {
     MMIOT sub;
 
@@ -316,7 +316,7 @@ reparse(char *bfr, int size, int flags, MMIOT *f)
     S(sub.in)--;
     
     text(&sub);
-    emblock(&sub);
+    ___mkd_emblock(&sub);
     
     Qwrite(T(sub.out), S(sub.out), f);
 
@@ -497,12 +497,14 @@ linkykey(int image, Footnote *val, MMIOT *f)
 {
     Footnote *ret;
     Cstring mylabel;
+    int here;
 
     memset(val, 0, sizeof *val);
 
     if ( (T(val->tag) = linkylabel(f, &S(val->tag))) == 0 )
 	return 0;
 
+    here = mmiottell(f);
     eatspace(f);
     switch ( pull(f) ) {
     case '(':
@@ -517,14 +519,21 @@ linkykey(int image, Footnote *val, MMIOT *f)
 
 	return peek(f,0) == ')';
 
-    case '[':
+    case '[':		/* footnote links /as defined in the standard/ */
+    default:		/* footnote links -- undocumented extension */
 	/* footnote link */
 	mylabel = val->tag;
-	if ( (T(val->tag) = linkylabel(f, &S(val->tag))) == 0 )
-	    return 0;
+	if ( peek(f,0) == '[' ) {
+	    if ( (T(val->tag) = linkylabel(f, &S(val->tag))) == 0 )
+		return 0;
 
-	if ( !S(val->tag) )
-	    val->tag = mylabel;
+	    if ( !S(val->tag) )
+		val->tag = mylabel;
+	}
+	else if ( f->flags & MKD_1_COMPAT )
+	    break;
+	else
+	    mmiotseek(f,here);
 
 	ret = bsearch(val, T(*f->footnotes), S(*f->footnotes),
 	               sizeof *val, (stfu)__mkd_footsort);
@@ -633,12 +642,12 @@ linkylinky(int image, MMIOT *f)
 
 	if ( S(link.title) ) {
 	    Qstring(" title=\"", f);
-	    reparse(T(link.title), S(link.title), INSIDE_TAG, f);
+	    ___mkd_reparse(T(link.title), S(link.title), INSIDE_TAG, f);
 	    Qchar('"', f);
 	}
 
 	Qstring(tag->text_pfx, f);
-	reparse(T(link.tag), S(link.tag), tag->flags, f);
+	___mkd_reparse(T(link.tag), S(link.tag), tag->flags, f);
 	Qstring(tag->text_sfx, f);
     }
     else
@@ -830,8 +839,6 @@ static struct smarties {
 } smarties[] = {
     { '\'', "'s>",      "rsquo",  0 },
     { '\'', "'t>",      "rsquo",  0 },
-    { '\'', "'re>",     "rsquo",  0 },
-    { '\'', "'ll>",     "rsquo",  0 },
     { '-',  "--",       "mdash",  1 },
     { '-',  "<->",      "ndash",  0 },
     { '.',  "...",      "hellip", 2 },
@@ -885,7 +892,7 @@ smartypants(int c, int *flags, MMIOT *f)
 			    break;
 			else if ( c == '\'' && peek(f, j+1) == '\'' ) {
 			    Qstring("&ldquo;", f);
-			    reparse(cursor(f)+1, j-2, 0, f);
+			    ___mkd_reparse(cursor(f)+1, j-2, 0, f);
 			    Qstring("&rdquo;", f);
 			    shift(f,j+1);
 			    return 1;
@@ -951,7 +958,7 @@ text(MMIOT *f)
 			    ++len;
 			}
 			shift(f,len);
-			reparse(sup, len, 0, f);
+			___mkd_reparse(sup, len, 0, f);
 			Qstring("</sup>", f);
 		    }
 		    break;
@@ -1134,6 +1141,7 @@ printblock(Paragraph *pp, MMIOT *f)
 		push("<br/>\n", 6, f);
 	    }
 	    else {
+		___mkd_tidy(t);
 		push(T(t->text), S(t->text), f);
 		if ( t->next )
 		    push("\n", 1, f);
@@ -1191,19 +1199,19 @@ printhtml(Line *t, MMIOT *f)
 static void
 htmlify(Paragraph *p, char *block, char *arguments, MMIOT *f)
 {
-    emblock(f);
+    ___mkd_emblock(f);
     if ( block )
 	Qprintf(f, arguments ? "<%s %s>" : "<%s>", block, arguments);
-    emblock(f);
+    ___mkd_emblock(f);
 
     while (( p = display(p, f) )) {
-	emblock(f);
+	___mkd_emblock(f);
 	Qstring("\n\n", f);
     }
 
     if ( block )
 	 Qprintf(f, "</%s>", block);
-    emblock(f);
+    ___mkd_emblock(f);
 }
 
 
@@ -1219,7 +1227,7 @@ definitionlist(Paragraph *p, MMIOT *f)
 	for ( ; p ; p = p->next) {
 	    for ( tag = p->text; tag; tag = tag->next ) {
 		Qstring("<dt>", f);
-		reparse(T(tag->text), S(tag->text), 0, f);
+		___mkd_reparse(T(tag->text), S(tag->text), 0, f);
 		Qstring("</dt>\n", f);
 	    }
 
@@ -1345,7 +1353,7 @@ mkd_document(Document *p, char **res)
 }
 
 
-/*  public interface for reparse()
+/*  public interface for ___mkd_reparse()
  */
 int
 mkd_text(char *bfr, int size, FILE *output, int flags)
@@ -1355,8 +1363,8 @@ mkd_text(char *bfr, int size, FILE *output, int flags)
     ___mkd_initmmiot(&f, 0);
     f.flags = flags & USER_FLAGS;
     
-    reparse(bfr, size, 0, &f);
-    emblock(&f);
+    ___mkd_reparse(bfr, size, 0, &f);
+    ___mkd_emblock(&f);
     if ( flags & CDATA_OUTPUT )
 	___mkd_xml(T(f.out), S(f.out), output);
     else
