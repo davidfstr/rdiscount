@@ -201,7 +201,7 @@ htmlblock(Paragraph *p, char *tag)
     closesize = sprintf(close, "</%s>", tag);
 
     for ( ; t ; t = t->next) {
-	if ( strncasecmp(T(t->text), close, closesize) == 0 ) {
+	if ( T(t->text)[0] == '<' && strcasestr(T(t->text), close) != NULL ) {
 	    ret = t->next;
 	    t->next = 0;
 	    return ret;
