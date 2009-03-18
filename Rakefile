@@ -1,6 +1,6 @@
 require 'rake/clean'
 
-task :default => 'test:unit'
+task :default => :test
 
 # PACKAGING =================================================================
 
