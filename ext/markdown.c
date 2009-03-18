@@ -189,22 +189,45 @@ static Line *
 htmlblock(Paragraph *p, char *tag)
 {
     Line *t = p->text, *ret;
-    int closesize;
+    int closesize, tagsize;
     char close[MAXTAG+4];
 
-    if ( selfclose(t, tag) || (strlen(tag) >= MAXTAG) ) {
+    char *ps, *pse;
+    int depth;
+
+    tagsize = strlen(tag);
+
+    if ( selfclose(t, tag) || (tagsize >= MAXTAG) ) {
 	ret = t->next;
 	t->next = 0;
 	return ret;
     }
 
     closesize = sprintf(close, "</%s>", tag);
+    depth = 0;
 
     for ( ; t ; t = t->next) {
-	if ( T(t->text)[0] == '<' && strcasestr(T(t->text), close) != NULL ) {
-	    ret = t->next;
-	    t->next = 0;
-	    return ret;
+	ps = T(t->text);
+	pse = ps + (S(t->text) - (tagsize + 1));
+	for ( ; ps < pse; ps++ ) {
+	    if ( *ps == '<' ) {
+	        /* check for close tag */
+	        if ( strncasecmp(ps, close, closesize) == 0 ) {
+	            depth--;
+	            if ( depth == 0 ) {
+	                ret = t->next;
+	                t->next = 0;
+	                return ret;
+	            }
+	            continue;
+	        }
+
+	        /* check for nested open tag */
+	        if ( (strncasecmp(ps + 1, tag, tagsize) == 0) &&
+	             (ps[tagsize + 1] == '>' || ps[tagsize + 1] == ' ') ) {
+	            depth++;
+	        }
+	    }
 	}
     }
     return 0;

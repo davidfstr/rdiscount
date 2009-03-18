@@ -82,6 +82,12 @@ class MarkdownTest < Test::Unit::TestCase
     assert_equal "<p><a href=\"/search?query=Markdown+Test&amp;page=2\">Page 2</a></p>\n", markdown.to_html
   end
 
+  def test_simple_inline_html
+    markdown = Markdown.new("before\n\n<div>\n  foo\n</div>\nafter")
+    assert_equal "<p>before</p>\n\n<div>\n  foo\n</div>\n\n\n<p>after</p>\n",
+      markdown.to_html
+  end
+
   def test_that_html_blocks_do_not_require_their_own_end_tag_line
     markdown = Markdown.new("Para 1\n\n<div><pre>HTML block\n</pre></div>\n\nPara 2 [Link](#anchor)")
     assert_equal "<p>Para 1</p>\n\n<div><pre>HTML block\n</pre></div>\n\n\n<p>Para 2 <a href=\"#anchor\">Link</a></p>\n",
