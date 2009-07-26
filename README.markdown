@@ -19,13 +19,13 @@ Installation, Hacking
 RDiscount Gem releases are published to RubyForge and can be installed as
 follows:
 
-  $ [sudo] gem install rdiscount
+    $ [sudo] gem install rdiscount
 
 The RDiscount sources are available via Git:
 
-  $ git clone git://github.com/rtomayko/rdiscount.git
-  $ cd rdiscount
-  $ rake --tasks
+    $ git clone git://github.com/rtomayko/rdiscount.git
+    $ cd rdiscount
+    $ rake --tasks
 
 For more information, see [the project page](http://github.com/rtomayko/rdiscount).
 
@@ -35,19 +35,19 @@ Usage
 RDiscount implements the basic protocol popularized by RedCloth and adopted
 by BlueCloth:
 
-  require 'rdiscount'
-  markdown = RDiscount.new("Hello World!")
-  puts markdown.to_html
+    require 'rdiscount'
+    markdown = RDiscount.new("Hello World!")
+    puts markdown.to_html
 
 Inject RDiscount into your BlueCloth-using code by replacing your bluecloth
 require statements with the following:
 
-  begin
-    require 'rdiscount'
-    BlueCloth = RDiscount
-  rescue LoadError
-    require 'bluecloth'
-  end
+    begin
+      require 'rdiscount'
+      BlueCloth = RDiscount
+    rescue LoadError
+      require 'bluecloth'
+    end
 
 COPYING
 -------
@@ -55,4 +55,4 @@ COPYING
 Discount is free software;  it is released under a BSD-style license
 that allows you to do as you wish with it as long as you don't attempt
 to claim it as your own work. RDiscount adopts Discount's license
-verbatim. See the file COPYING for more information.
+verbatim. See the file `COPYING` for more information.
