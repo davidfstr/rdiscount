@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'rdiscount'
-  s.version = '1.3.4'
+  s.version = '1.3.5'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2009-03-04'
+  s.date = '2009-07-26'
   s.email = 'r@tomayko.com'
   s.homepage = 'http://github.com/rtomayko/rdiscount'
   s.has_rdoc = true
