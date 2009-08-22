@@ -34,10 +34,47 @@ Usage
 -----
 
 Moredown can be used in any way that RDiscount can be (see below). In addition, Moredown
-implements some extra syntax options via a static formatting method:
+implements some extras:
 
-    require 'nathanhoad-moredown'
-    html = Moredown.text_to_html("Hello World!")
+ * Static method for simple calls
+
+        require 'nathanhoad-moredown'
+        html = Moredown.text_to_html("Hello World!")
+
+ * Remap relative URLs
+ 
+        Moredown.new(text, :base_url => 'http://nathanhoad.net').to_html
+
+ * Remap headings (eg. h1 becomes h3).
+ 
+        Moredown.new(text, :map_headings => 2)
+
+ * Embed Youtube videos (similar to image syntax)
+ 
+        ![Video](youtube:lfAzVe5H-vE)
+
+ * Convert Youtube videos to their preview images (for RSS, etc)
+ 
+        Moredown.new(text, :youtube_as_images => true)
+
+ * Image alignments (extension to image syntax)
+ 
+        ![Image](/images/test.jpg):left
+        ![Image](/images/test.jpg):right
+        ![Image](/images/test.jpg):center
+
+ * Emoticons
+ 
+        :-)
+        :-P
+        :-D
+        :-(
+        :-@
+        ;-)
+
+ * RDiscount extensions are now passed under `:extensions`
+ 
+        Moredown.new(text, :extensions => [:smart])
 
 RDiscount implements the basic protocol popularized by RedCloth and adopted
 by BlueCloth:
