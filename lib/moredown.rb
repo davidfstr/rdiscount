@@ -13,7 +13,7 @@ class Moredown < RDiscount
   # Map any relative URLs in the text to absolute URLs
   attr_accessor :base_url
   
-  # Map headings down a few ranks
+  # Map headings down a few ranks (eg. :map_headings => 2 would convert h1 to h3)
   attr_accessor :map_headings
   
   # Create a Moredown Markdown processor. The +text+ argument
@@ -21,11 +21,11 @@ class Moredown < RDiscount
   # supplied to set various processing options:
   #
   # * <tt>:extensions</tt> - Any of the following RDiscount Extensions:
-  #     * <tt>:smart</tt> - Enable SmartyPants processing.
-  #     * <tt>:filter_styles</tt> - Do not output <tt><style></tt> tags.
-  #     * <tt>:filter_html</tt> - Do not output any raw HTML tags included in
-  #       the source text.
-  #     * <tt>:fold_lines</tt> - RedCloth compatible line folding (not used).
+  #   * <tt>:smart</tt> - Enable SmartyPants processing.
+  #   * <tt>:filter_styles</tt> - Do not output <tt><style></tt> tags.
+  #   * <tt>:filter_html</tt> - Do not output any raw HTML tags included in
+  #     the source text.
+  #   * <tt>:fold_lines</tt> - RedCloth compatible line folding (not used).
   # * <tt>:youtube_as_images</tt> - Convert youtube videos to preview images (handy for valid RSS).
   # * <tt>:has_stylesheet</tt> - Don't use inline CSS for styling.
   # * <tt>:emotes</tt> - Process emoticons.
