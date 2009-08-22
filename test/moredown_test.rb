@@ -122,6 +122,14 @@ TEXT
   
   def test_remap_headings
     text = "<h1>Heading</h1>\n<h2>Sub-heading</h2>"
+    html = "<h1>Heading</h1>\n\n\n<h2>Sub-heading</h2>\n\n"
+    assert_equal html, Moredown.text_to_html(text, :map_headings => 0)
+    
+    text = "<h1>Heading</h1>\n<h2>Sub-heading</h2>"
+    html = "<h2>Heading</h2>\n\n\n<h3>Sub-heading</h3>\n\n"
+    assert_equal html, Moredown.text_to_html(text, :map_headings => 1)
+    
+    text = "<h1>Heading</h1>\n<h2>Sub-heading</h2>"
     html = "<h3>Heading</h3>\n\n\n<h4>Sub-heading</h4>\n\n"
     assert_equal html, Moredown.text_to_html(text, :map_headings => 2)
   end
