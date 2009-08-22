@@ -8,14 +8,14 @@ task :default => :test
 $spec =
   begin
     require 'rubygems/specification'
-    data = File.read('rdiscount.gemspec')
+    data = File.read('moredown.gemspec')
     spec = nil
     Thread.new { spec = eval("$SAFE = 3\n#{data}") }.join
     spec
   end
 
 def package(ext='')
-  "pkg/rdiscount-#{$spec.version}" + ext
+  "pkg/moredown-#{$spec.version}" + ext
 end
 
 desc 'Build packages'
@@ -28,8 +28,8 @@ end
 
 directory 'pkg/'
 
-file package('.gem') => %w[pkg/ rdiscount.gemspec] + $spec.files do |f|
-  sh "gem build rdiscount.gemspec"
+file package('.gem') => %w[pkg/ moredown.gemspec] + $spec.files do |f|
+  sh "gem build moredown.gemspec"
   mv File.basename(f.name), f.name
 end
 
@@ -40,11 +40,11 @@ end
 # GEMSPEC HELPERS ==========================================================
 
 def source_version
-  line = File.read('lib/rdiscount.rb')[/^\s*VERSION = .*/]
+  line = File.read('lib/moredown.rb')[/^\s*VERSION = .*/]
   line.match(/.*VERSION = '(.*)'/)[1]
 end
 
-file 'rdiscount.gemspec' => FileList['Rakefile','lib/rdiscount.rb'] do |f|
+file 'moredown.gemspec' => FileList['Rakefile','lib/moredown.rb'] do |f|
   # read spec file and split out manifest section
   spec = File.read(f.name)
   head, manifest, tail = spec.split("  # = MANIFEST =\n")
@@ -93,7 +93,7 @@ task :build => "lib/rdiscount.#{DLEXT}"
 
 desc 'Run unit tests'
 task 'test:unit' => [:build] do |t|
-  sh 'testrb test/markdown_test.rb test/rdiscount_test.rb'
+  sh 'testrb test/moredown_test.rb test/markdown_test.rb test/rdiscount_test.rb'
 end
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
@@ -139,32 +139,14 @@ file 'doc/index.html' => FileList['lib/*.rb'] do |f|
           --fmt html \
           --inline-source \
           --line-numbers \
-          --main RDiscount \
+          --main Moredown \
           --op doc \
-          --title 'RDiscount API Documentation' \
+          --title 'Moredown API Documentation' \
           #{f.prerequisites.join(' ')}
   end
 end
 
 CLEAN.include 'doc'
-
-
-# ==========================================================
-# Rubyforge
-# ==========================================================
-
-desc 'Publish new release to rubyforge'
-task :release => [package('.gem'), package('.tar.gz')] do |t|
-  sh <<-end
-    rubyforge add_release wink rdiscount #{$spec.version} #{package('.gem')} &&
-    rubyforge add_file    wink rdiscount #{$spec.version} #{package('.tar.gz')}
-  end
-end
-
-desc 'Publish API docs to rubyforge'
-task :publish => :doc do |t|
-  sh 'scp -rp doc/. rubyforge.org:/var/www/gforge-projects/wink/rdiscount'
-end
 
 # ==========================================================
 # Update package's Discount sources

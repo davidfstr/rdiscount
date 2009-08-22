@@ -1,53 +1,61 @@
-Discount Markdown Processor for Ruby
-====================================
+Discount Markdown Processor for Ruby (with some extras)
+=======================================================
 
 Discount is an implementation of John Gruber's Markdown markup language in C. It
 implements all of the language described in [the markdown syntax document][1] and
 passes the [Markdown 1.0 test suite][2].
 
 Discount was developed by [David Loren Parsons][3]. The Ruby extension was
-developed by [Ryan Tomayko][4].
+developed by [Ryan Tomayko][4] and extended by [Nathan Hoad][5].
 
 [1]: http://daringfireball.net/projects/markdown/syntax
 [2]: http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip
 [3]: http://www.pell.portland.or.us/~orc
 [4]: http://tomayko.com/
+[5]: http://nathanhoad.net/
 
 Installation, Hacking
 ---------------------
 
-RDiscount Gem releases are published to RubyForge and can be installed as
-follows:
+The Moredown gem can be installed from Github:
 
-    $ [sudo] gem install rdiscount
+    $ gem sources -a http://gems.github.com
+    $ [sudo] gem install nathanhoad-moredown
 
-The RDiscount sources are available via Git:
+The Moredown sources are available via Git:
 
-    $ git clone git://github.com/rtomayko/rdiscount.git
-    $ cd rdiscount
+    $ git clone git://github.com/nathanhoad/moredown.git
+    $ cd moredown
     $ rake --tasks
 
-For more information, see [the project page](http://github.com/rtomayko/rdiscount).
+For more information, see [the project page](http://github.com/nathanhoad/moredown).
 
 Usage
 -----
 
+Moredown can be used in any way that RDiscount can be (see below). In addition, Moredown
+implements some extra syntax options via a static formatting method:
+
+    require 'nathanhoad-moredown'
+    html = Moredown.text_to_html("Hello World!")
+
 RDiscount implements the basic protocol popularized by RedCloth and adopted
 by BlueCloth:
 
-    require 'rdiscount'
-    markdown = RDiscount.new("Hello World!")
+    require 'nathanhoad-moredown'
+    markdown = Moredown.new("Hello World!")
     puts markdown.to_html
 
-Inject RDiscount into your BlueCloth-using code by replacing your bluecloth
+Inject Moredown into your BlueCloth-using code by replacing your bluecloth
 require statements with the following:
 
     begin
-      require 'rdiscount'
-      BlueCloth = RDiscount
+      require 'nathanhoad-moredown'
+      BlueCloth = Moredown
     rescue LoadError
       require 'bluecloth'
     end
+    
 
 COPYING
 -------
