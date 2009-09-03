@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'moredown'
-  s.version = '1.0.0'
+  s.version = '1.0.1'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2009-08-22'
+  s.date = '2009-09-03'
   s.email = 'nathan@nathanhoad.net'
   s.homepage = 'http://github.com/nathanhoad/moredown'
   s.has_rdoc = true

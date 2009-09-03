@@ -56,6 +56,14 @@ implements some extras:
  * Convert Youtube videos to their preview images (for RSS, etc)
  
         Moredown.new(text, :youtube_as_images => true)
+ 
+ * Use Flash movies
+ 
+        ![Flash](flash:movieclip.swf)
+
+ * Replace Flash with text (eg. Flash is not available for RSS)
+ 
+        Moredown.new(text, :replace_flash_with => 'Flash is not available')
 
  * Image alignments (extension to image syntax)
  

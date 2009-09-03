@@ -16,6 +16,9 @@ class Moredown < RDiscount
   # Map headings down a few ranks (eg. :map_headings => 2 would convert h1 to h3)
   attr_accessor :map_headings
   
+  # Replace Flash with text (eg. Flash is unavailable in RSS)
+  attr_accessor :replace_flash_with
+  
   # Create a Moredown Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
   # supplied to set various processing options:
@@ -31,6 +34,7 @@ class Moredown < RDiscount
   # * <tt>:emotes</tt> - Process emoticons.
   # * <tt>:base_url</tt> - Map any relative URLs in the text to absolute URLs.
   # * <tt>:map_headings</tt> - Map any headings down a few ranks (eg. h1 => h3).
+  # * <tt>:replace_flash_with</tt> - Replace Flash with text (eg. Flash is unavailable in RSS)
   #
   # NOTE: The <tt>:filter_styles</tt> extension is not yet implemented.
   def initialize text, args = {}    
@@ -39,6 +43,7 @@ class Moredown < RDiscount
     @emotes = args[:emotes]
     @base_url = args[:base_url]
     @map_headings = args[:map_headings] || 0
+    @replace_flash_with = args[:replace_flash_with]
     
     if args[:extensions]
       super(text, args[:extensions])
@@ -55,7 +60,20 @@ class Moredown < RDiscount
       if @youtube_as_images
         "<img src=\"http://img.youtube.com/vi/#{$1}/default.jpg\" alt=\"#{$2}\" />"
       else
-        "<object data=\"http://www.youtube.com/v/#{$1}\" type=\"application/x-shockwave-flash\" width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/#{$1}\" /></object>"
+        flash_tag "http://www.youtube.com/v/#{$1}", :width => 425, :height => 350
+      end
+    end
+    
+    # flash movies
+    html.gsub!(/<img src="flash:(.*?)"\s?(?:title="(.*?)")? alt="(.*)" \/>/) do |match|
+      if @replace_flash_with
+        @replace_flash_with
+      else      
+        if $2
+          sizes = $2.split(' ')
+          sizes = { :width => sizes[0], :height => sizes[1] }
+        end
+        flash_tag $1, (sizes || {})
       end
     end
     
@@ -99,4 +117,11 @@ class Moredown < RDiscount
   def self.text_to_html text, args = {}    
     Moredown.new(text, args).to_html
   end
+  
+  
+  protected
+    def flash_tag url, args = {}
+      args = {:width => 400, :height => 300}.merge args
+      "<object data=\"#{url}\" type=\"application/x-shockwave-flash\" width=\"#{args[:width]}\" height=\"#{args[:height]}\"><param name=\"movie\" value=\"#{url}\" /></object>"
+    end
 end

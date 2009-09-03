@@ -132,5 +132,31 @@ TEXT
     text = "<h1>Heading</h1>\n<h2>Sub-heading</h2>"
     html = "<h3>Heading</h3>\n\n\n<h4>Sub-heading</h4>\n\n"
     assert_equal html, Moredown.text_to_html(text, :map_headings => 2)
+    
+    text = <<TEXT
+Heading
+=======
+
+Sub-heading
+-----------
+TEXT
+    html = "<h3>Heading</h3>\n\n<h4>Sub-heading</h4>\n"
+    assert_equal html, Moredown.text_to_html(text, :map_headings => 2)
+  end
+  
+  def test_flash_movies
+    text = '![Flash](flash:movieclip.swf)'
+    html = "<p><object data=\"movieclip.swf\" type=\"application/x-shockwave-flash\" width=\"400\" height=\"300\"><param name=\"movie\" value=\"movieclip.swf\" /></object></p>\n"
+    assert_equal html, Moredown.text_to_html(text)
+    
+    text = '![Flash](flash:movieclip.swf "800 600")'
+    html = "<p><object data=\"movieclip.swf\" type=\"application/x-shockwave-flash\" width=\"800\" height=\"600\"><param name=\"movie\" value=\"movieclip.swf\" /></object></p>\n"
+    assert_equal html, Moredown.text_to_html(text)
+  end
+  
+  def test_replace_flash_with
+    text = '![Flash](flash:movieclip.swf)'
+    html = "<p>Flash cannot be displayed</p>\n"
+    assert_equal html, Moredown.text_to_html(text, :replace_flash_with => 'Flash cannot be displayed');
   end
 end
