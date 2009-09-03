@@ -50,10 +50,13 @@ class Moredown < RDiscount
   def to_html    
     html = super
     
-    if @youtube_as_images
-      html.gsub!(/<img src="youtube:(.*)?" alt="(.*)?" \/>/) { |match| "<img src=\"http://img.youtube.com/vi/#{$1}/default.jpg\" alt=\"#{$2}\" />" }
-    else
-      html.gsub!(/<img src="youtube:(.*)?" alt="(.*)?" \/>/) { |match| "<object data=\"http://www.youtube.com/v/#{$1}\" type=\"application/x-shockwave-flash\" width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/#{$1}\" /></object>" }
+    # youtube
+    html.gsub!(/<img src="youtube:(.*)?" alt="(.*)?" \/>/) do |match|
+      if @youtube_as_images
+        "<img src=\"http://img.youtube.com/vi/#{$1}/default.jpg\" alt=\"#{$2}\" />"
+      else
+        "<object data=\"http://www.youtube.com/v/#{$1}\" type=\"application/x-shockwave-flash\" width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/#{$1}\" /></object>"
+      end
     end
     
     # image alignments
