@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'moredown'
-  s.version = '1.0.1'
+  s.version = '1.0.3'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2009-09-03'
+  s.date = '2009-09-08'
   s.email = 'nathan@nathanhoad.net'
   s.homepage = 'http://github.com/nathanhoad/moredown'
   s.has_rdoc = true
@@ -28,14 +28,15 @@ Gem::Specification.new do |s|
     ext/rdiscount.c
     ext/resource.c
     ext/toc.c
-    lib/moredown.rb
     lib/markdown.rb
+    lib/moredown.rb
     lib/rdiscount.rb
+    moredown.gemspec
     rdiscount.gemspec
     test/benchmark.rb
     test/benchmark.txt
-    test/moredown_test.rb
     test/markdown_test.rb
+    test/moredown_test.rb
     test/rdiscount_test.rb
   ]
   # = MANIFEST =

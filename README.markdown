@@ -52,18 +52,14 @@ implements some extras:
  * Embed Youtube videos (similar to image syntax)
  
         ![Video](youtube:lfAzVe5H-vE)
-
- * Convert Youtube videos to their preview images (for RSS, etc)
- 
-        Moredown.new(text, :youtube_as_images => true)
  
  * Use Flash movies
  
         ![Flash](flash:movieclip.swf)
 
- * Replace Flash with text (eg. Flash is not available for RSS)
+ * Use SwfObject (javascript not included) for graceful Flash degradation
  
-        Moredown.new(text, :replace_flash_with => 'Flash is not available')
+        Moredown.new(text, :swfobject => { :src => 'swfobject.js', :version => '10', :fallback => 'No Flash' })
 
  * Image alignments (extension to image syntax)
  

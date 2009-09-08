@@ -1,8 +1,7 @@
 require 'rdiscount'
 
 class Moredown < RDiscount
-  # Convert youtube videos to preview images (handy for valid RSS)
-  attr_accessor :youtube_as_images
+  VERSION = '1.0.3'
   
   # Don't use inline CSS for styling
   attr_accessor :has_stylesheet
@@ -16,8 +15,8 @@ class Moredown < RDiscount
   # Map headings down a few ranks (eg. :map_headings => 2 would convert h1 to h3)
   attr_accessor :map_headings
   
-  # Replace Flash with text (eg. Flash is unavailable in RSS)
-  attr_accessor :replace_flash_with
+  # Use SwfObject2 if available (eg. :swfobject => { :src => 'swfobject.js', :version => '10', :fallback => 'No Flash' })
+  attr_accessor :swfobject
   
   # Create a Moredown Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
@@ -29,21 +28,22 @@ class Moredown < RDiscount
   #   * <tt>:filter_html</tt> - Do not output any raw HTML tags included in
   #     the source text.
   #   * <tt>:fold_lines</tt> - RedCloth compatible line folding (not used).
-  # * <tt>:youtube_as_images</tt> - Convert youtube videos to preview images (handy for valid RSS).
   # * <tt>:has_stylesheet</tt> - Don't use inline CSS for styling.
   # * <tt>:emotes</tt> - Process emoticons.
   # * <tt>:base_url</tt> - Map any relative URLs in the text to absolute URLs.
   # * <tt>:map_headings</tt> - Map any headings down a few ranks (eg. h1 => h3).
-  # * <tt>:replace_flash_with</tt> - Replace Flash with text (eg. Flash is unavailable in RSS)
+  # * <tt>:swfobject</tt> - Use SwfObject2 if available (eg. :swfobject => { :src => 'swfobject.js', :version => '10', :fallback => 'No Flash' })
   #
   # NOTE: The <tt>:filter_styles</tt> extension is not yet implemented.
   def initialize text, args = {}    
-    @youtube_as_images = args[:youtube_as_images]
     @has_stylesheet = args[:has_stylesheet]
     @emotes = args[:emotes]
     @base_url = args[:base_url]
     @map_headings = args[:map_headings] || 0
-    @replace_flash_with = args[:replace_flash_with]
+    @swfobject = args[:swfobject]
+    
+    # each swfobject needs a unique id
+    @next_flash_id = 0
     
     if args[:extensions]
       super(text, args[:extensions])
@@ -57,24 +57,16 @@ class Moredown < RDiscount
     
     # youtube
     html.gsub!(/<img src="youtube:(.*)?" alt="(.*)?" \/>/) do |match|
-      if @youtube_as_images
-        "<img src=\"http://img.youtube.com/vi/#{$1}/default.jpg\" alt=\"#{$2}\" />"
-      else
-        flash_tag "http://www.youtube.com/v/#{$1}", :width => 425, :height => 350
-      end
+      flash_tag "http://www.youtube.com/v/#{$1}", :width => 425, :height => 350
     end
     
     # flash movies
     html.gsub!(/<img src="flash:(.*?)"\s?(?:title="(.*?)")? alt="(.*)" \/>/) do |match|
-      if @replace_flash_with
-        @replace_flash_with
-      else      
-        if $2
-          sizes = $2.split(' ')
-          sizes = { :width => sizes[0], :height => sizes[1] }
-        end
-        flash_tag $1, (sizes || {})
+      if $2
+        sizes = $2.split(' ')
+        sizes = { :width => sizes[0], :height => sizes[1] }
       end
+      flash_tag $1, (sizes || {})
     end
     
     # image alignments
@@ -110,6 +102,17 @@ class Moredown < RDiscount
       html.gsub!(/<(\/)?h(\d)>/) { |match| "<#{$1}h#{$2.to_i + @map_headings}>" }
     end
     
+    # add the js for swfobject
+    if @swfobject
+      swfobjects = []
+      1.upto(@next_flash_id).each do |n|
+        swfobjects << "swfobject.registerObject(\"swf-#{n}\", \"#{@swfobject[:version]}\");\n"
+      end
+      
+      # html seems to need to go after the swfobject javascript
+      html = "<script type=\"text/javascript\" src=\"#{@swfobject[:src]}\"></script><script type=\"text/javascript\">\n//<![CDATA[\n#{swfobjects}//]]>\n</script>\n#{html}"
+    end
+    
     html
   end
   
@@ -121,7 +124,23 @@ class Moredown < RDiscount
   
   protected
     def flash_tag url, args = {}
-      args = {:width => 400, :height => 300}.merge args
-      "<object data=\"#{url}\" type=\"application/x-shockwave-flash\" width=\"#{args[:width]}\" height=\"#{args[:height]}\"><param name=\"movie\" value=\"#{url}\" /></object>"
+      args = {:width => 400, :height => 300, :fallback => 'Flash is not available.'}.merge args
+      
+      if url.include? 'youtube.com'
+        fallback = "<a href=\"#{url}\"><img src=\"http://img.youtube.com/vi/#{url.split('/').last}/default.jpg\" alt=\"\" /></a>"
+      elsif @swfobject
+        fallback = @swfobject[:fallback]
+      else
+        fallback = args[:fallback]
+      end        
+      
+      return "<object id=\"swf-#{@next_flash_id += 1}\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" width=\"#{args[:width]}\" height=\"#{args[:height]}\">" \
+        +"<param name=\"movie\" value=\"#{url}\" />" \
+        +"<!--[if !IE]>-->" \
+        +"<object type=\"application/x-shockwave-flash\" data=\"#{url}\" width=\"#{args[:width]}\" height=\"#{args[:height]}\">" \
+          +"<!--<![endif]-->#{fallback}<!--[if !IE]>-->" \
+        +"</object>" \
+        +"<!--<![endif]-->" \
+      +"</object>"
     end
 end
