@@ -32,7 +32,6 @@ Gem::Specification.new do |s|
     lib/moredown.rb
     lib/rdiscount.rb
     moredown.gemspec
-    rdiscount.gemspec
     test/benchmark.rb
     test/benchmark.txt
     test/markdown_test.rb
