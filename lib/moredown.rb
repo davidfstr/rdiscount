@@ -1,7 +1,7 @@
 require 'rdiscount'
 
 class Moredown < RDiscount
-  VERSION = '1.0.3'
+  VERSION = '1.0.4'
   
   # Don't use inline CSS for styling
   attr_accessor :has_stylesheet
@@ -55,18 +55,25 @@ class Moredown < RDiscount
   def to_html    
     html = super
     
-    # youtube
-    html.gsub!(/<img src="youtube:(.*)?" alt="(.*)?" \/>/) do |match|
-      flash_tag "http://www.youtube.com/v/#{$1}", :width => 425, :height => 350
-    end
-    
-    # flash movies
-    html.gsub!(/<img src="flash:(.*?)"\s?(?:title="(.*?)")? alt="(.*)" \/>/) do |match|
-      if $2
-        sizes = $2.split(' ')
+    # flash movies (including youtube)
+    html.gsub!(/<img src="(flash|youtube):(.*?)"\s?(?:title="(.*?)")? alt="(.*)" \/>/) do |match|
+      # grab width and height
+      if $3
+        sizes = $3.split(' ')
         sizes = { :width => sizes[0], :height => sizes[1] }
+      else
+        sizes = {}
       end
-      flash_tag $1, (sizes || {})
+      
+      # check the source
+      if $1.downcase == "youtube"
+        url = "http://www.youtube.com/v/#{$2}"
+        sizes = { :width => 425, :height => 350 }.merge sizes
+      else
+        url = $2
+      end
+      
+      flash_tag url, sizes
     end
     
     # image alignments
@@ -110,7 +117,7 @@ class Moredown < RDiscount
       end
       
       # html seems to need to go after the swfobject javascript
-      html = "<script type=\"text/javascript\" src=\"#{@swfobject[:src]}\"></script><script type=\"text/javascript\">\n//<![CDATA[\n#{swfobjects}//]]>\n</script>\n#{html}"
+      html = "<script type=\"text/javascript\" src=\"#{@swfobject[:src]}\"></script><script type=\"text/javascript\">\n/*<![CDATA[*/\n#{swfobjects}/*]]>*/\n</script>\n#{html}"
     end
     
     html

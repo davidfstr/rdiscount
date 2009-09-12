@@ -23,6 +23,10 @@ class MoredownTest < Test::Unit::TestCase
     html = "<p><object id=\"swf-1\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/12345678\" /><!--[if !IE]>--><object type=\"application/x-shockwave-flash\" data=\"http://www.youtube.com/v/12345678\" width=\"425\" height=\"350\"><!--<![endif]--><a href=\"http://www.youtube.com/v/12345678\"><img src=\"http://img.youtube.com/vi/12345678/default.jpg\" alt=\"\" /></a><!--[if !IE]>--></object><!--<![endif]--></object></p>\n"
     assert_equal html, Moredown.text_to_html(text)
     
+    text = "![Video](youtube:12345678 \"200 100\")"
+    html = 'width="200" height="100"'
+    assert Moredown.text_to_html(text).include?(html), "Width should be 200 and height should be 100"
+    
     text = <<TEXT
 Here is a video:
     
@@ -138,8 +142,8 @@ TEXT
     assert_equal html, Moredown.text_to_html(text)
     
     text = '![Flash](flash:movieclip.swf "800 600")'
-    html = "<p><object id=\"swf-1\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" width=\"800\" height=\"600\"><param name=\"movie\" value=\"movieclip.swf\" /><!--[if !IE]>--><object type=\"application/x-shockwave-flash\" data=\"movieclip.swf\" width=\"800\" height=\"600\"><!--<![endif]-->Flash is not available.<!--[if !IE]>--></object><!--<![endif]--></object></p>\n"
-    assert_equal html, Moredown.text_to_html(text)
+    html = 'width="800" height="600"'
+    assert Moredown.text_to_html(text).include?(html), "Width should be 800 and height should be 600"
   end
   
   def test_swfobject
@@ -151,10 +155,10 @@ TEXT
 
 And that's all."
     html = "<script type=\"text/javascript\" src=\"./swfobject.js\"></script><script type=\"text/javascript\">
-//<![CDATA[
+/*<![CDATA[*/
 swfobject.registerObject(\"swf-1\", \"10\");
 swfobject.registerObject(\"swf-2\", \"10\");
-//]]>
+/*]]>*/
 </script>
 <p>Here is some flash:</p>
 
@@ -163,6 +167,6 @@ swfobject.registerObject(\"swf-2\", \"10\");
 <p><object id=\"swf-2\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" width=\"400\" height=\"300\"><param name=\"movie\" value=\"movieclip.swf\" /><!--[if !IE]>--><object type=\"application/x-shockwave-flash\" data=\"movieclip.swf\" width=\"400\" height=\"300\"><!--<![endif]-->No Flash<!--[if !IE]>--></object><!--<![endif]--></object></p>
 
 <p>And that's all.</p>\n"
-    assert_equal html, Moredown.text_to_html(text, :swfobject => { :js_src => './swfobject.js', :version => '10', :fallback => 'No Flash' })  
+    assert_equal html, Moredown.text_to_html(text, :swfobject => { :src => './swfobject.js', :version => '10', :fallback => 'No Flash' })  
   end
 end
