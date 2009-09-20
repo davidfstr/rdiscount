@@ -49,13 +49,15 @@ implements some extras:
  
         Moredown.new(text, :map_headings => 2)
 
- * Embed Youtube videos (similar to image syntax)
+ * Embed Youtube videos (similar to image syntax except the title text is used for width and height)
  
         ![Video](youtube:lfAzVe5H-vE)
+        ![Blah](youtube:lfAzVe5H-vE "400 300")
  
- * Use Flash movies
+ * Use Flash movies (include the width and height if you want)
  
         ![Flash](flash:movieclip.swf)
+        ![Something](flash:something.swf "200 100")
 
  * Use SwfObject (javascript not included) for graceful Flash degradation
  
