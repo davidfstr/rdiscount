@@ -2,67 +2,27 @@ require 'rake/clean'
 
 task :default => :test
 
-# PACKAGING =================================================================
 
-# Load the gemspec using the same limitations as github
-$spec =
-  begin
-    require 'rubygems/specification'
-    data = File.read('moredown.gemspec')
-    spec = nil
-    Thread.new { spec = eval("$SAFE = 3\n#{data}") }.join
-    spec
+# ==========================================================
+# Packaging
+# ==========================================================
+
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "moredown"
+    gemspec.summary = "Markdown plus more!"
+    gemspec.description = "An extension to the RDiscount Markdown formatter"
+    gemspec.email = "nathan@nathanhoad.net"
+    gemspec.homepage = "http://nathanhoad.net/projects/moredown"
+    gemspec.authors = ["Nathan Hoad", "Ryan Tomayko", "David Loren Parsons"]
+    gemspec.files = `git ls-files`.split("\n").sort.reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }
   end
-
-def package(ext='')
-  "pkg/moredown-#{$spec.version}" + ext
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
 
-desc 'Build packages'
-task :package => %w[.gem .tar.gz].map {|e| package(e)}
 
-desc 'Build and install as local gem'
-task :install => package('.gem') do
-  sh "gem install #{package('.gem')}"
-end
-
-directory 'pkg/'
-
-file package('.gem') => %w[pkg/ moredown.gemspec] + $spec.files do |f|
-  sh "gem build moredown.gemspec"
-  mv File.basename(f.name), f.name
-end
-
-file package('.tar.gz') => %w[pkg/] + $spec.files do |f|
-  sh "git archive --format=tar HEAD | gzip > #{f.name}"
-end
-
-# GEMSPEC HELPERS ==========================================================
-
-def source_version
-  line = File.read('lib/moredown.rb')[/^\s*VERSION = .*/]
-  line.match(/.*VERSION = '(.*)'/)[1]
-end
-
-file 'moredown.gemspec' => FileList['Rakefile','lib/moredown.rb'] do |f|
-  # read spec file and split out manifest section
-  spec = File.read(f.name)
-  head, manifest, tail = spec.split("  # = MANIFEST =\n")
-  head.sub!(/\.version = '.*'/, ".version = '#{source_version}'")
-  head.sub!(/\.date = '.*'/, ".date = '#{Date.today.to_s}'")
-  # determine file list from git ls-files
-  files = `git ls-files`.
-    split("\n").
-    sort.
-    reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }.
-    map{ |file| "    #{file}" }.
-    join("\n")
-  # piece file back together and write...
-  manifest = "  s.files = %w[\n#{files}\n  ]\n"
-  spec = [head,manifest,tail].join("  # = MANIFEST =\n")
-  File.open(f.name, 'w') { |io| io.write(spec) }
-  puts "updated #{f.name}"
-end
 
 # ==========================================================
 # Ruby Extension
@@ -85,19 +45,19 @@ file "lib/rdiscount.#{DLEXT}" => "ext/rdiscount.#{DLEXT}" do |f|
 end
 
 desc 'Build the rdiscount extension'
-task :build => "lib/rdiscount.#{DLEXT}"
+task :build_ext => "lib/rdiscount.#{DLEXT}"
 
 # ==========================================================
 # Testing
 # ==========================================================
 
 desc 'Run unit tests'
-task 'test:unit' => [:build] do |t|
+task 'test:unit' => [:build_ext] do |t|
   sh 'testrb test/moredown_test.rb test/markdown_test.rb test/rdiscount_test.rb'
 end
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
-task 'test:conformance' => [:build] do |t|
+task 'test:conformance' => [:build_ext] do |t|
   script = "#{pwd}/bin/rdiscount"
   test_version = ENV['MARKDOWN_TEST_VER'] || '1.0.3'
   chdir("test/MarkdownTest_#{test_version}") do
@@ -106,13 +66,13 @@ task 'test:conformance' => [:build] do |t|
 end
 
 desc 'Run version 1.0 conformance suite'
-task 'test:conformance:1.0' => [:build] do |t|
+task 'test:conformance:1.0' => [:build_ext] do |t|
   ENV['MARKDOWN_TEST_VER'] = '1.0'
   Rake::Task['test:conformance'].invoke
 end
 
 desc 'Run 1.0.3 conformance suite'
-task 'test:conformance:1.0.3' => [:build] do |t|
+task 'test:conformance:1.0.3' => [:build_ext] do |t|
   ENV['MARKDOWN_TEST_VER'] = '1.0.3'
   Rake::Task['test:conformance'].invoke
 end
@@ -121,32 +81,10 @@ desc 'Run unit and conformance tests'
 task :test => %w[test:unit test:conformance]
 
 desc 'Run benchmarks'
-task :benchmark => :build do |t|
+task :benchmark => :build_ext do |t|
   $:.unshift 'lib'
   load 'test/benchmark.rb'
 end
-
-# ==========================================================
-# Documentation
-# ==========================================================
-
-desc 'Generate API documentation'
-task :doc => 'doc/index.html'
-
-file 'doc/index.html' => FileList['lib/*.rb'] do |f|
-  sh((<<-end).gsub(/\s+/, ' '))
-    hanna --charset utf8 \
-          --fmt html \
-          --inline-source \
-          --line-numbers \
-          --main Moredown \
-          --op doc \
-          --title 'Moredown API Documentation' \
-          #{f.prerequisites.join(' ')}
-  end
-end
-
-CLEAN.include 'doc'
 
 # ==========================================================
 # Update package's Discount sources
