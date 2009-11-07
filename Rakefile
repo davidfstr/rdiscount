@@ -17,6 +17,8 @@ begin
     gemspec.homepage = "http://nathanhoad.net/projects/moredown"
     gemspec.authors = ["Nathan Hoad", "Ryan Tomayko", "David Loren Parsons"]
     gemspec.files = `git ls-files`.split("\n").sort.reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }
+    gemspec.executables = 'rdiscount'
+    gemspec.extensions << 'ext/extconf.rb'
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
