@@ -22,8 +22,8 @@
 			    : (T(x) = T(x) ? realloc(T(x), sizeof T(x)[0] * ((x).alloc += 100)) \
 					   : malloc(sizeof T(x)[0] * ((x).alloc += 100)) )]
 
-#define DELETE(x)	(x).alloc ? (free(T(x)), S(x) = (x).alloc = 0) \
-				  : ( S(x) = 0 )
+#define DELETE(x)	ALLOCATED(x) ? (free(T(x)), S(x) = (x).alloc = 0) \
+				     : ( S(x) = 0 )
 #define CLIP(t,i,sz)	\
 	    ( ((i) >= 0) && ((sz) > 0) && (((i)+(sz)) <= S(t)) ) ? \
 	    (memmove(&T(t)[i], &T(t)[i+sz], (S(t)-(i+sz)+1)*sizeof(T(t)[0])), \
@@ -50,7 +50,7 @@
  */
 #define T(x)		(x).text
 #define S(x)		(x).size
-#define ALL(x)		(x).alloc
+#define ALLOCATED(x)	(x).alloc
 
 /* abstract anchor type that defines a list base
  * with a function that attaches an element to
@@ -60,14 +60,16 @@
  * macro will work with it.
  */
 #define ANCHOR(t)	struct { t *text, *end; }
+#define E(t)		((t).end)
 
-#define ATTACH(t, p)	( (t).text ?( ((t).end->next = (p)), ((t).end = (p)) ) \
-				   :( ((t).text = (t).end = (p)) ) )
+#define ATTACH(t, p)	( T(t) ? ( (E(t)->next = (p)), (E(t) = (p)) ) \
+			       : ( (T(t) = E(t) = (p)) ) )
 
 typedef STRING(char) Cstring;
 
 extern void Csputc(int, Cstring *);
 extern int Csprintf(Cstring *, char *, ...);
+extern int Cswrite(Cstring *, char *, int);
 extern void Csreparse(Cstring *, char *, int, int);
 
 #endif/*_CSTRING_D*/

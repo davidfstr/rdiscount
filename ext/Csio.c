@@ -26,12 +26,24 @@ Csprintf(Cstring *iot, char *fmt, ...)
     do {
 	RESERVE(*iot, siz);
 	va_start(ptr, fmt);
-	siz = vsnprintf(T(*iot)+S(*iot), ALL(*iot)-S(*iot), fmt, ptr);
+	siz = vsnprintf(T(*iot)+S(*iot), ALLOCATED(*iot)-S(*iot), fmt, ptr);
 	va_end(ptr);
-    } while ( siz > (ALL(*iot)-S(*iot)) );
+    } while ( siz > (ALLOCATED(*iot)-S(*iot)) );
 
     S(*iot) += siz;
     return siz;
+}
+
+
+/* write() into a cstring
+ */
+int
+Cswrite(Cstring *iot, char *bfr, int size)
+{
+    RESERVE(*iot, size);
+    memcpy(T(*iot)+S(*iot), bfr, size);
+    S(*iot) += size;
+    return size;
 }
 
 
