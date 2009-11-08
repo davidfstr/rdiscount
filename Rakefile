@@ -4,15 +4,8 @@ task :default => :test
 
 # PACKAGING =================================================================
 
-# Load the gemspec using the same limitations as github
-$spec =
-  begin
-    require 'rubygems/specification'
-    data = File.read('rdiscount.gemspec')
-    spec = nil
-    Thread.new { spec = eval("$SAFE = 3\n#{data}") }.join
-    spec
-  end
+require 'rubygems/specification'
+$spec = eval(File.read('rdiscount.gemspec'))
 
 def package(ext='')
   "pkg/rdiscount-#{$spec.version}" + ext
