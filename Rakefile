@@ -176,7 +176,7 @@ task :gather => 'discount' do |t|
   files =
     FileList[
       'discount/{markdown,mkdio,amalloc,cstring}.h',
-      'discount/{markdown,docheader,dumptree,generate,mkdio,resource,toc,Csio}.c'
+      'discount/{markdown,docheader,dumptree,generate,mkdio,resource,toc,Csio,xml,css}.c'
     ]
   cp files, 'ext/',
     :preserve => true,
