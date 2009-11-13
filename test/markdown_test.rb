@@ -94,6 +94,12 @@ class MarkdownTest < Test::Unit::TestCase
       markdown.to_html
   end
 
+  def test_filter_html_doesnt_break_two_space_hard_break
+    markdown = Markdown.new("Lorem,  \nipsum\n", :filter_html)
+    assert_equal "<p>Lorem,<br/>\nipsum</p>\n",
+      markdown.to_html
+  end
+
   # Build tests for each file in the MarkdownTest test suite
 
   Dir["#{MARKDOWN_TEST_DIR}/Tests/*.text"].each do |text_file|
