@@ -84,9 +84,17 @@ task :build => "lib/rdiscount.#{DLEXT}"
 # Testing
 # ==========================================================
 
+def runner
+  if system("type turn 2>/dev/null 1>&2")
+    "turn"
+  else
+    "testrb"
+  end
+end
+
 desc 'Run unit tests'
 task 'test:unit' => [:build] do |t|
-  sh 'testrb test/markdown_test.rb test/rdiscount_test.rb'
+  sh "#{runner} test/markdown_test.rb test/rdiscount_test.rb"
 end
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
