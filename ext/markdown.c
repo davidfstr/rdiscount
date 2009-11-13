@@ -306,7 +306,11 @@ isfootnote(Line *t)
 static int
 isquote(Line *t)
 {
-    return ( T(t->text)[0] == '>' );
+    char *pt = T(t->text);
+    return ( pt[0] == '>' ) ||
+	   ( pt[0] == ' ' && pt[1] == '>' ) ||
+	   ( pt[0] == ' ' && pt[1] == ' ' && pt[2] == '>') ||
+	   ( pt[0] == ' ' && pt[1] == ' ' && pt[2] == ' ' && pt[3] == '>');
 }
 
 
@@ -620,7 +624,9 @@ quoteblock(Paragraph *p)
 
     for ( t = p->text; t ; t = q ) {
 	if ( isquote(t) ) {
-	    qp = (T(t->text)[1] == ' ') ? 2 : 1;
+	    char *p = strchr(T(t->text), '>');
+	    if ( p[1] == ' ' ) p++;
+	    qp = p - T(t->text) + 1;
 	    CLIP(t->text, 0, qp);
 	    t->dle = mkd_firstnonblank(t);
 	}
