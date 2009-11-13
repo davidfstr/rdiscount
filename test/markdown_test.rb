@@ -100,6 +100,17 @@ class MarkdownTest < Test::Unit::TestCase
       markdown.to_html
   end
 
+  # This isn't in the spec but is Markdown.pl behavior.
+  def test_block_quotes_preceded_by_spaces
+    markdown = Markdown.new(
+      "A wise man once said:\n\n" +
+      " > Isn't it wonderful just to be alive.\n"
+    )
+    assert_equal "<p>A wise man once said:</p>\n\n" +
+      "<blockquote><p>Isn't it wonderful just to be alive.</p></blockquote>\n",
+      markdown.to_html
+  end
+
   # Build tests for each file in the MarkdownTest test suite
 
   Dir["#{MARKDOWN_TEST_DIR}/Tests/*.text"].each do |text_file|
