@@ -4,7 +4,7 @@
 # and passes the Markdown 1.0 test suite. The RDiscount extension makes
 # the Discount processor available via a Ruby C Extension library.
 #
-# === Usage
+# == Usage
 #
 # RDiscount implements the basic protocol popularized by RedCloth and adopted
 # by BlueCloth:
@@ -12,7 +12,7 @@
 #   markdown = RDiscount.new("Hello World!")
 #   puts markdown.to_html
 #
-# === Replacing BlueCloth
+# == Replacing BlueCloth
 #
 # Inject RDiscount into your BlueCloth-using code by replacing your bluecloth
 # require statements with the following:
