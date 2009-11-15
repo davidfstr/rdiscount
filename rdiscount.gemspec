@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.email = 'r@tomayko.com'
   s.homepage = 'http://github.com/rtomayko/rdiscount'
   s.has_rdoc = true
-  s.authors = ["Ryan Tomayko", "Andrew White"]
+  s.authors = ["Ryan Tomayko", "David Loren Parsons", "Andrew White"]
   # = MANIFEST =
   s.files = %w[
     COPYING
