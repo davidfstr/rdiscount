@@ -111,6 +111,18 @@ class MarkdownTest < Test::Unit::TestCase
       markdown.to_html
   end
 
+  def test_ul_with_zero_space_indent
+    markdown = Markdown.new("- foo\n\n- bar\n\n  baz\n")
+    assert_equal "<ul><li><p>foo</p></li><li><p>bar</p><p>baz</p></li></ul>",
+      markdown.to_html.gsub("\n", "")
+  end
+
+  def test_ul_with_single_space_indent
+    markdown = Markdown.new(" - foo\n\n - bar\n\n   baz\n")
+    assert_equal "<ul><li><p>foo</p></li><li><p>bar</p><p>baz</p></li></ul>",
+      markdown.to_html.gsub("\n", "")
+  end
+
   # Build tests for each file in the MarkdownTest test suite
 
   Dir["#{MARKDOWN_TEST_DIR}/Tests/*.text"].each do |text_file|
