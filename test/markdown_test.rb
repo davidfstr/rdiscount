@@ -129,7 +129,7 @@ class MarkdownTest < Test::Unit::TestCase
 
     basename = File.basename(text_file).sub(/\.text$/, '')
     html_file = text_file.sub(/text$/, 'html')
-    method_name = basename.gsub(/[-,]/, '').gsub(/\s+/, '_').downcase
+    method_name = basename.gsub(/[-,()]/, '').gsub(/\s+/, '_').downcase
 
     define_method "test_#{method_name}" do
       markdown = Markdown.new(File.read(text_file))
@@ -137,7 +137,7 @@ class MarkdownTest < Test::Unit::TestCase
       assert_not_nil actual_html
     end
 
-    define_method "test_#{method_name}_with_smarty_enabled" do
+    define_method "test_#{method_name}_smart" do
       markdown = Markdown.new(File.read(text_file), :smart)
       actual_html = markdown.to_html
       assert_not_nil actual_html
