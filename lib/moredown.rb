@@ -100,7 +100,14 @@ class Moredown < RDiscount
     
     # remap relative urls
     if @base_url
-      html.gsub!('"/images/', "\"#{@base_url}/images/")
+      html.gsub!(/<img src="(.*?)"/) do |match|
+        if $1.include? '://'
+          url = $1
+        else
+          url = "#{@base_url.chomp('/')}/#{$1}"
+        end
+        "<img src=\"#{url}\""
+      end
       html.gsub!('<a href="/', "<a href=\"#{@base_url}/")
     end
     

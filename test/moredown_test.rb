@@ -107,8 +107,16 @@ TEXT
   end
   
   def test_base_url
-    text = "![Image](/images/test.jpg)"
-    html = "<p><img src=\"http://www.example.com/images/test.jpg\" alt=\"Image\" /></p>\n"
+    text = "![Image](test.jpg)"
+    html = "<p><img src=\"http://www.example.com/test.jpg\" alt=\"Image\" /></p>\n"
+    assert_equal html, Moredown.text_to_html(text, :base_url => 'http://www.example.com')
+    
+    text = "![Image](test.jpg)"
+    html = "<p><img src=\"http://www.example.com/test.jpg\" alt=\"Image\" /></p>\n"
+    assert_equal html, Moredown.text_to_html(text, :base_url => 'http://www.example.com/')
+    
+    text = "![Image](http://icanhascheezburger.files.wordpress.com/2009/11/funny-pictures-cat-wishes-for-cheeseburger.jpg)"
+    html = "<p><img src=\"http://icanhascheezburger.files.wordpress.com/2009/11/funny-pictures-cat-wishes-for-cheeseburger.jpg\" alt=\"Image\" /></p>\n"
     assert_equal html, Moredown.text_to_html(text, :base_url => 'http://www.example.com')
   end
   
