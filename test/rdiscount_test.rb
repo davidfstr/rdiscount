@@ -46,7 +46,6 @@ class RDiscountTest < Test::Unit::TestCase
     def test_should_return_string_in_same_encoding_as_input
       input = "Yogācāra"
       output = RDiscount.new(input).to_html
-      puts output.encoding.name
       assert_equal input.encoding.name, output.encoding.name
     end
   end
