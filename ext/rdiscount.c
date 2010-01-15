@@ -10,6 +10,7 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
     /* grab char pointer to markdown input text */
     char *res;
     int szres;
+    VALUE encoding;
     VALUE text = rb_funcall(self, rb_intern("text"), 0);
     VALUE buf = rb_str_buf_new(1024);
     Check_Type(text, T_STRING);
@@ -27,6 +28,13 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
         }
     }
     mkd_cleanup(doc);
+
+
+    /* force the input encoding */
+    if ( rb_respond_to(text, rb_intern("encoding")) ) {
+      encoding = rb_funcall(text, rb_intern("encoding"), 0);
+      rb_funcall(buf, rb_intern("force_encoding"), 1, encoding);
+    }
 
     return buf;
 }
