@@ -632,9 +632,9 @@ linkyformat(MMIOT *f, Cstring text, int image, Footnote *ref)
 	
 	Qstring(tag->link_sfx, f);
 
-	if ( tag->WxH && ref->height && ref->width ) {
-	    Qprintf(f," height=\"%d\"", ref->height);
-	    Qprintf(f, " width=\"%d\"", ref->width);
+	if ( tag->WxH) {
+	    if ( ref->height) Qprintf(f," height=\"%d\"", ref->height);
+	    if ( ref->width) Qprintf(f, " width=\"%d\"", ref->width);
 	}
 
 	if ( S(ref->title) ) {
@@ -667,7 +667,7 @@ linkylinky(int image, MMIOT *f)
     int status = 0;
 
     CREATE(name);
-    bzero(&key, sizeof key);
+    memset(&key, 0, sizeof key);
 
     if ( linkylabel(f, &name) ) {
 	if ( peek(f,1) == '(' ) {
@@ -869,9 +869,19 @@ maybe_tag_or_link(MMIOT *f)
 
     if ( size ) {
 	if ( maybetag || (size >= 3 && strncmp(cursor(f), "!--", 3) == 0) ) {
+
+	    /* It is not a html tag unless we find the closing '>' in
+	     * the same block.
+	     */
+	    while ( (c = peek(f, size+1)) != '>' )
+		if ( c == EOF )
+		    return 0;
+		else
+		    size++;
+	    
 	    Qstring(forbidden_tag(f) ? "&lt;" : "<", f);
 	    while ( ((c = peek(f, 1)) != EOF) && (c != '>') )
-		cputc(pull(f), f);
+		Qchar(pull(f), f);
 	    return 1;
 	}
 	else if ( !isspace(c) && process_possible_link(f, size) ) {
@@ -1331,7 +1341,7 @@ printtable(Paragraph *pp, MMIOT *f)
     int hcols;
     char *p;
 
-    if ( !(pp->text && pp->text->next && pp->text->next->next) )
+    if ( !(pp->text && pp->text->next) )
 	return 0;
 
     hdr = pp->text;
