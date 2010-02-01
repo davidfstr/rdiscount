@@ -123,6 +123,16 @@ class MarkdownTest < Test::Unit::TestCase
       markdown.to_html.gsub("\n", "")
   end
 
+  # http://github.com/rtomayko/rdiscount/issues/#issue/13
+  def test_headings_with_trailing_space
+    text = "The Ant-Sugar Tales \n"         +
+           "=================== \n\n"        +
+           "By Candice Yellowflower   \n"
+    markdown = Markdown.new(text)
+    assert_equal "<h1>The Ant-Sugar Tales </h1>\n\n<p>By Candice Yellowflower <br/>\n</p>\n",
+      markdown.to_html
+  end
+
   # Build tests for each file in the MarkdownTest test suite
 
   Dir["#{MARKDOWN_TEST_DIR}/Tests/*.text"].each do |text_file|
