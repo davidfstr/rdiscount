@@ -2,61 +2,6 @@ require 'rake/clean'
 
 task :default => :test
 
-# PACKAGING =================================================================
-
-require 'rubygems/specification'
-$spec = eval(File.read('rdiscount.gemspec'))
-
-def package(ext='')
-  "pkg/rdiscount-#{$spec.version}" + ext
-end
-
-desc 'Build packages'
-task :package => %w[.gem .tar.gz].map {|e| package(e)}
-
-desc 'Build and install as local gem'
-task :install => package('.gem') do
-  sh "gem install #{package('.gem')}"
-end
-
-directory 'pkg/'
-
-file package('.gem') => %w[pkg/ rdiscount.gemspec] + $spec.files do |f|
-  sh "gem build rdiscount.gemspec"
-  mv File.basename(f.name), f.name
-end
-
-file package('.tar.gz') => %w[pkg/] + $spec.files do |f|
-  sh "git archive --format=tar HEAD | gzip > #{f.name}"
-end
-
-# GEMSPEC HELPERS ==========================================================
-
-def source_version
-  line = File.read('lib/rdiscount.rb')[/^\s*VERSION = .*/]
-  line.match(/.*VERSION = '(.*)'/)[1]
-end
-
-file 'rdiscount.gemspec' => FileList['Rakefile','lib/rdiscount.rb'] do |f|
-  # read spec file and split out manifest section
-  spec = File.read(f.name)
-  head, manifest, tail = spec.split("  # = MANIFEST =\n")
-  head.sub!(/\.version = '.*'/, ".version = '#{source_version}'")
-  head.sub!(/\.date = '.*'/, ".date = '#{Date.today.to_s}'")
-  # determine file list from git ls-files
-  files = `git ls-files`.
-    split("\n").
-    sort.
-    reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }.
-    map{ |file| "    #{file}" }.
-    join("\n")
-  # piece file back together and write...
-  manifest = "  s.files = %w[\n#{files}\n  ]\n"
-  spec = [head,manifest,tail].join("  # = MANIFEST =\n")
-  File.open(f.name, 'w') { |io| io.write(spec) }
-  puts "updated #{f.name}"
-end
-
 # ==========================================================
 # Ruby Extension
 # ==========================================================
@@ -187,4 +132,58 @@ file 'discount' do |f|
 
   TEXT
   fail "discount sources required."
+end
+
+# PACKAGING =================================================================
+
+$spec = eval(File.read('rdiscount.gemspec'))
+
+def package(ext='')
+  "pkg/rdiscount-#{$spec.version}" + ext
+end
+
+desc 'Build packages'
+task :package => %w[.gem .tar.gz].map {|e| package(e)}
+
+desc 'Build and install as local gem'
+task :install => package('.gem') do
+  sh "gem install #{package('.gem')}"
+end
+
+directory 'pkg/'
+
+file package('.gem') => %w[pkg/ rdiscount.gemspec] + $spec.files do |f|
+  sh "gem build rdiscount.gemspec"
+  mv File.basename(f.name), f.name
+end
+
+file package('.tar.gz') => %w[pkg/] + $spec.files do |f|
+  sh "git archive --format=tar HEAD | gzip > #{f.name}"
+end
+
+# GEMSPEC HELPERS ==========================================================
+
+def source_version
+  line = File.read('lib/rdiscount.rb')[/^\s*VERSION = .*/]
+  line.match(/.*VERSION = '(.*)'/)[1]
+end
+
+file 'rdiscount.gemspec' => FileList['Rakefile','lib/rdiscount.rb'] do |f|
+  # read spec file and split out manifest section
+  spec = File.read(f.name)
+  head, manifest, tail = spec.split("  # = MANIFEST =\n")
+  head.sub!(/\.version = '.*'/, ".version = '#{source_version}'")
+  head.sub!(/\.date = '.*'/, ".date = '#{Date.today.to_s}'")
+  # determine file list from git ls-files
+  files = `git ls-files`.
+    split("\n").
+    sort.
+    reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }.
+    map{ |file| "    #{file}" }.
+    join("\n")
+  # piece file back together and write...
+  manifest = "  s.files = %w[\n#{files}\n  ]\n"
+  spec = [head,manifest,tail].join("  # = MANIFEST =\n")
+  File.open(f.name, 'w') { |io| io.write(spec) }
+  puts "updated #{f.name}"
 end
