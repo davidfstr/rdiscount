@@ -82,24 +82,6 @@ end
 
 CLEAN.include 'doc'
 
-
-# ==========================================================
-# Rubyforge
-# ==========================================================
-
-desc 'Publish new release to rubyforge'
-task :release => [package('.gem'), package('.tar.gz')] do |t|
-  sh <<-end
-    rubyforge add_release wink rdiscount #{$spec.version} #{package('.gem')} &&
-    rubyforge add_file    wink rdiscount #{$spec.version} #{package('.tar.gz')}
-  end
-end
-
-desc 'Publish API docs to rubyforge'
-task :publish => :doc do |t|
-  sh 'scp -rp doc/. rubyforge.org:/var/www/gforge-projects/wink/rdiscount'
-end
-
 # ==========================================================
 # Update package's Discount sources
 # ==========================================================
