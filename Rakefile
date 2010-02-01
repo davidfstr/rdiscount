@@ -129,13 +129,8 @@ task :doc => 'doc/index.html'
 
 file 'doc/index.html' => FileList['lib/*.rb'] do |f|
   sh((<<-end).gsub(/\s+/, ' '))
-    hanna --charset utf8 \
-          --fmt html \
-          --inline-source \
-          --line-numbers \
-          --main RDiscount \
-          --op doc \
-          --title 'RDiscount API Documentation' \
+    hanna --charset utf8 --fmt html --inline-source --line-numbers \
+          --main RDiscount --op doc --title 'RDiscount API Documentation' \
           #{f.prerequisites.join(' ')}
   end
 end
