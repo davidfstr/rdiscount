@@ -84,17 +84,10 @@ task :build => "lib/rdiscount.#{DLEXT}"
 # Testing
 # ==========================================================
 
-def runner
-  if system("type turn 2>/dev/null 1>&2")
-    "turn"
-  else
-    "testrb"
-  end
-end
-
-desc 'Run unit tests'
-task 'test:unit' => [:build] do |t|
-  sh "#{runner} test/markdown_test.rb test/rdiscount_test.rb"
+require 'rake/testtask'
+Rake::TestTask.new('test:unit') do |t|
+  t.test_files = FileList['test/*_test.rb']
+  t.ruby_opts = ['-rubygems -I.'] if defined? Gem
 end
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
