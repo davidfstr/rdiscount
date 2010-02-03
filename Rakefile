@@ -10,7 +10,7 @@ task :default => :test
 DLEXT = Config::CONFIG['DLEXT']
 RUBYDIGEST = Digest::MD5.hexdigest(`#{RUBY} --version`)
 
-file 'ext/Makefile' => FileList['ext/{*.{c,h,rb}'] do
+file 'ext/Makefile' => FileList['ext/*.{c,h,rb}'] do
   chdir('ext') { ruby 'extconf.rb' }
 end
 CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
