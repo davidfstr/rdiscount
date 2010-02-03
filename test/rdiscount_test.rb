@@ -30,6 +30,21 @@ class RDiscountTest < Test::Unit::TestCase
     assert_equal %(<h1>Heading</h1>\n\n<p>&ldquo;Quoted text&rdquo;</p>\n), rd.to_html
   end
 
+  def test_that_smart_gives_ve_suffix_a_rsquo
+    rd = RDiscount.new("I've been meaning to tell you ..", :smart)
+    assert_equal "<p>I&rsquo;ve been meaning to tell you ..</p>\n", rd.to_html
+  end
+
+  def test_that_smart_gives_m_suffix_a_rsquo
+    rd = RDiscount.new("I'm not kidding", :smart)
+    assert_equal "<p>I&rsquo;m not kidding</p>\n", rd.to_html
+  end
+
+  def test_that_smart_gives_d_suffix_a_rsquo
+    rd = RDiscount.new("what'd you say?", :smart)
+    assert_equal "<p>what&rsquo;d you say?</p>\n", rd.to_html
+  end
+
   def test_that_generate_toc_sets_toc_ids
     rd = RDiscount.new("# Level 1\n\n## Level 2", :generate_toc)
     assert rd.generate_toc
