@@ -3,6 +3,7 @@
 /ext/*.so
 /ext/*.dll
 /ext/mkmf.log
+/ext/ruby-*
 /lib/*.bundle
 /lib/*.so
 /lib/*.dll

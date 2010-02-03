@@ -1,4 +1,5 @@
 require 'rake/clean'
+require 'digest/md5'
 
 task :default => :test
 
@@ -7,14 +8,21 @@ task :default => :test
 # ==========================================================
 
 DLEXT = Config::CONFIG['DLEXT']
+RUBYDIGEST = Digest::MD5.hexdigest(`#{RUBY} --version`)
 
-file 'ext/Makefile' => FileList['ext/{*.c,*.h,*.rb}'] do
+file 'ext/Makefile' => FileList['ext/{*.{c,h,rb}'] do
   chdir('ext') { ruby 'extconf.rb' }
 end
 CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
 
-file "ext/rdiscount.#{DLEXT}" => FileList['ext/Makefile', 'ext/*.{c,h,rb}'] do |f|
-  sh 'cd ext && make'
+file "ext/ruby-#{RUBYDIGEST}" do |f|
+  rm_f FileList["ext/ruby-*"]
+  touch f.name
+end
+CLEAN.include "ext/ruby-*"
+
+file "ext/rdiscount.#{DLEXT}" => FileList["ext/Makefile", "ext/ruby-#{RUBYDIGEST}"] do |f|
+  sh 'cd ext && make clean && make'
 end
 CLEAN.include 'ext/*.{o,bundle,so,dll}'
 
@@ -32,8 +40,9 @@ task :build => "lib/rdiscount.#{DLEXT}"
 require 'rake/testtask'
 Rake::TestTask.new('test:unit') do |t|
   t.test_files = FileList['test/*_test.rb']
-  t.ruby_opts = ['-rubygems -I.'] if defined? Gem
+  t.ruby_opts += ['-rubygems'] if defined? Gem
 end
+task 'test:unit' => [:build]
 
 desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
 task 'test:conformance' => [:build] do |t|
