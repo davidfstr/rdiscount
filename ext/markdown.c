@@ -388,7 +388,11 @@ ishdr(Line *t, int *htyp)
 	char *q = T(t->next->text);
 
 	if ( (*q == '=') || (*q == '-') ) {
-	    for (i=1; i < S(t->next->text); i++)
+	    /* find trailing space on === line */
+	    int e = S(t->next->text) - 1;
+	    while (e > 1 && q[e] == ' ') e--;
+
+	    for (i=1; i <= e; i++)
 		if ( q[0] != q[i] )
 		    return 0;
 	    *htyp = SETEXT;
