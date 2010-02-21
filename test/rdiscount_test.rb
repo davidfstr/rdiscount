@@ -64,4 +64,43 @@ class RDiscountTest < Test::Unit::TestCase
       assert_equal input.encoding.name, output.encoding.name
     end
   end
+
+  def test_that_no_image_flag_works
+    rd = RDiscount.new(%(![dust mite](http://dust.mite/image.png) <img src="image.png" />), :no_image)
+    assert rd.to_html !~ /<img/
+  end
+
+  def test_that_no_links_flag_works
+    rd = RDiscount.new(%([This link](http://example.net/) <a href="links.html">links</a>), :no_links)
+    assert rd.to_html !~ /<a /
+  end
+
+  def test_that_no_tables_flag_works
+    rd = RDiscount.new(<<EOS, :no_tables)
+ aaa | bbbb
+-----|------
+hello|sailor
+EOS
+    assert rd.to_html !~ /<table/
+  end
+
+  def test_that_strict_flag_works
+    rd = RDiscount.new("foo_bar_baz", :strict)
+    assert_equal "<p>foo<em>bar</em>baz</p>\n", rd.to_html
+  end
+
+  def test_that_autolink_flag_works
+    rd = RDiscount.new("http://github.com/rtomayko/rdiscount", :autolink)
+    assert_equal "<p><a href=\"http://github.com/rtomayko/rdiscount\">http://github.com/rtomayko/rdiscount</a></p>\n", rd.to_html
+  end
+
+  def test_that_safelink_flag_works
+    rd = RDiscount.new("[IRC](irc://chat.freenode.org/#freenode)", :safelink)
+    assert_equal "<p>[IRC](irc://chat.freenode.org/#freenode)</p>\n", rd.to_html
+  end
+
+  def test_that_no_pseudo_protocols_flag_works
+    rd = RDiscount.new("[foo](id:bar)", :no_pseudo_protocols)
+    assert_equal "<p>[foo](id:bar)</p>\n", rd.to_html
+  end
 end
