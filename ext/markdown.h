@@ -56,6 +56,17 @@ typedef struct block {
 typedef STRING(block) Qblock;
 
 
+typedef char* (*mkd_callback_t)(const char*, const int, void*);
+typedef void  (*mkd_free_t)(char*, void*);
+
+typedef struct callback_data {
+    void *e_data;		/* private data for callbacks */
+    mkd_callback_t e_url;	/* url edit callback */
+    mkd_callback_t e_flags;	/* extra href flags callback */
+    mkd_free_t e_free;		/* edit/flags callback memory deallocator */
+} Callback_data;
+
+
 /* a magic markdown io thing holds all the data structures needed to
  * do the backend processing of a markdown document
  */
@@ -81,7 +92,7 @@ typedef struct mmiot {
 #define SAFELINK	0x8000
 #define USER_FLAGS	0xFCFF
 #define EMBEDDED	DENY_A|DENY_IMG|NO_PSEUDO_PROTO|CDATA_OUTPUT
-    char *base;
+    Callback_data *cb;
 } MMIOT;
 
 
@@ -100,7 +111,7 @@ typedef struct document {
     int html;			/* set after (internal) htmlify() */
     int tabstop;		/* for properly expanding tabs (ick) */
     MMIOT *ctx;			/* backend buffers, flags, and structures */
-    char *base;			/* url basename for url fragments */
+    Callback_data cb;		/* callback functions & private data */
 } Document;
 
 

@@ -217,14 +217,6 @@ markdown(Document *document, FILE *out, int flags)
 }
 
 
-void
-mkd_basename(Document *document, char *base)
-{
-    if ( document )
-	document->base = base;
-}
-
-
 /* write out a Cstring, mangled into a form suitable for `<a href=` or `<a id=`
  */
 void
@@ -300,4 +292,44 @@ mkd_generateline(char *bfr, int size, FILE *output, int flags)
 
     ___mkd_freemmiot(&f, 0);
     return 0;
+}
+
+
+/* set the url display callback
+ */
+void
+mkd_e_url(Document *f, mkd_callback_t edit)
+{
+    if ( f )
+	f->cb.e_url = edit;
+}
+
+
+/* set the url options callback
+ */
+void
+mkd_e_flags(Document *f, mkd_callback_t edit)
+{
+    if ( f )
+	f->cb.e_flags = edit;
+}
+
+
+/* set the url display/options deallocator
+ */
+void
+mkd_e_free(Document *f, mkd_free_t dealloc)
+{
+    if ( f )
+	f->cb.e_free = dealloc;
+}
+
+
+/* set the url display/options context data field
+ */
+void
+mkd_e_data(Document *f, void *data)
+{
+    if ( f )
+	f->cb.e_data = data;
 }

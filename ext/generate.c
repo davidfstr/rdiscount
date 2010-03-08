@@ -21,8 +21,6 @@ typedef int (*stfu)(const void*,const void*);
 
 
 /* forward declarations */
-static int iscodeblock(MMIOT*);
-static void code(int, MMIOT*);
 static void text(MMIOT *f);
 static Paragraph *display(Paragraph*, MMIOT*);
 
@@ -166,6 +164,16 @@ Qprintf(MMIOT *f, char *fmt, ...)
 }
 
 
+/* Qcopy()
+ */
+static void
+Qcopy(int count, MMIOT *f)
+{
+    while ( count-- > 0 )
+	Qchar(pull(f), f);
+}
+
+
 /* Qem()
  */
 static void
@@ -182,118 +190,6 @@ Qem(MMIOT *f, char c, int count)
 }
 
 
-/* empair()
- */
-static int
-empair(MMIOT *f, int go, int level)
-{
-    
-    int i;
-    block *begin, *p;
-
-    begin = &T(f->Q)[go];
-    for (i=go+1; i < S(f->Q); i++) {
-	p = &T(f->Q)[i];
-
-	if ( (p->b_type != bTEXT) && (p->b_count <= 0) )
-	    break;
-	
-	if ( p->b_type == begin->b_type ) {
-	    if ( p->b_count == level )	/* exact match */
-		return i-go;
-
-	    if ( p->b_count > 2 )	/* fuzzy match */
-		return i-go;
-	}
-    }
-    return EOF;
-}
-
-
-
-static struct emtags {
-    char open[10];
-    char close[10];
-    int size;
-} emtags[] = {  { "<em>" , "</em>", 5 }, { "<strong>", "</strong>", 9 } };
-
-
-static void
-emclose(Cstring *s, int level)
-{
-    PREFIX(*s, emtags[level-1].close, emtags[level-1].size);
-}
-
-
-static void
-emopen(Cstring *s, int level)
-{
-    SUFFIX(*s, emtags[level-1].open, emtags[level-1].size-1);
-}
-
-
-/* emmatch()
- */
-static void
-emmatch(MMIOT *f, int go)
-{
-    block *start = &T(f->Q)[go], *end;
-    int e, e2, i, match;
-
-    while ( start->b_count ) {
-	switch (start->b_count) {
-	case 2: e = empair(f,go,match=2);
-		if ( e != EOF ) break;
-	case 1: e = empair(f,go,match=1); break;
-	default:
-	    e = empair(f,go,1);
-	    e2= empair(f,go,2);
-
-	    if ( e == EOF || ((e2 != EOF) && (e2 >= e)) ) {
-		e = e2;
-		match = 2;
-	    } 
-	    else
-		match = 1;
-	}
-	if ( e != EOF ) {
-	    end = &T(f->Q)[go+e];
-	    emclose(&end->b_post, match);
-	    emopen(&start->b_text, match);
-	    end->b_count -= match;
-	}
-	else {
-	    for (i=0; i < match; i++)
-		EXPAND(start->b_text) = start->b_char;
-	}
-	
-	start->b_count -= match;
-    }
-}
-
-
-/* ___mkd_emblock()
- */
-void
-___mkd_emblock(MMIOT *f)
-{
-    int i;
-    block *p;
-
-    for (i=0; i < S(f->Q); i++) {
-	p = &T(f->Q)[i];
-	
-	if ( p->b_type != bTEXT ) emmatch(f, i);
-
-	if ( S(p->b_post) ) { SUFFIX(f->out, T(p->b_post), S(p->b_post));
-			      DELETE(p->b_post); }
-	if ( S(p->b_text) ) { SUFFIX(f->out, T(p->b_text), S(p->b_text));
-			      DELETE(p->b_text); }
-    }
-    S(f->Q) = 0;
-}
-
-
 /* generate html from a markup fragment
  */
 void
@@ -304,7 +200,7 @@ ___mkd_reparse(char *bfr, int size, int flags, MMIOT *f)
     ___mkd_initmmiot(&sub, f->footnotes);
     
     sub.flags = f->flags | flags;
-    sub.base = f->base;
+    sub.cb = f->cb;
 
     push(bfr, size, &sub);
     EXPAND(sub.in) = 0;
@@ -345,6 +241,8 @@ puturl(char *s, int size, MMIOT *f, int display)
 	    Qstring("%22", f);
 	else if ( isalnum(c) || ispunct(c) || (display && isspace(c)) )
 	    Qchar(c, f);
+	else if ( c == 003 )	/* untokenize ^C */
+	    Qstring("  ", f);
 	else
 	    Qprintf(f, "%%%02X", c);
     }
@@ -512,27 +410,28 @@ linkyurl(MMIOT *f, int image, Footnote *p)
 
 /* prefixes for <automatic links>
  */
-static struct {
+static struct _protocol {
     char *name;
     int   nlen;
 } protocol[] = { 
 #define _aprotocol(x)	{ x, (sizeof x)-1 }
-    _aprotocol( "http://" ), 
     _aprotocol( "https://" ), 
-    _aprotocol( "ftp://" ), 
+    _aprotocol( "http://" ), 
     _aprotocol( "news://" ),
+    _aprotocol( "ftp://" ), 
 #undef _aprotocol
 };
 #define NRPROTOCOLS	(sizeof protocol / sizeof protocol[0])
 
 
 static int
-isautoprefix(char *text)
+isautoprefix(char *text, int size)
 {
     int i;
+    struct _protocol *p;
 
-    for (i=0; i < NRPROTOCOLS; i++)
-	if ( strncasecmp(text, protocol[i].name, protocol[i].nlen) == 0 )
+    for (i=0, p=protocol; i < NRPROTOCOLS; i++, p++)
+	if ( (size >= p->nlen) && strncasecmp(text, p->name, p->nlen) == 0 )
 	    return 1;
     return 0;
 }
@@ -584,13 +483,42 @@ pseudo(Cstring t)
     int i;
     linkytype *r;
 
-    for ( i=0; i < NR(specials); i++ ) {
-	r = &specials[i];
+    for ( i=0, r=specials; i < NR(specials); i++,r++ ) {
 	if ( (S(t) > r->szpat) && (strncasecmp(T(t), r->pat, r->szpat) == 0) )
 	    return r;
     }
     return 0;
 }
+
+
+/* print out the start of an `img' or `a' tag, applying callbacks as needed.
+ */
+static void
+printlinkyref(MMIOT *f, linkytype *tag, char *link, int size)
+{
+    char *edit;
+    
+    Qstring(tag->link_pfx, f);
+	
+    if ( tag->kind & IS_URL ) {
+	if ( f->cb->e_url && (edit = (*f->cb->e_url)(link, size, f->cb->e_data)) ) {
+	    puturl(edit, strlen(edit), f, 0);
+	    if ( f->cb->e_free ) (*f->cb->e_free)(edit, f->cb->e_data);
+	}
+	else
+	    puturl(link + tag->szpat, size - tag->szpat, f, 0);
+    }
+    else
+	___mkd_reparse(link + tag->szpat, size - tag->szpat, INSIDE_TAG, f);
+
+    Qstring(tag->link_sfx, f);
+
+    if ( f->cb->e_flags && (edit = (*f->cb->e_flags)(link, size, f->cb->e_data)) ) {
+	Qchar(' ', f);
+	Qstring(edit, f);
+	if ( f->cb->e_free ) (*f->cb->e_free)(edit, f->cb->e_data);
+    }
+} /* printlinkyref */
 
 
 /* print out a linky (or fail if it's Not Allowed)
@@ -608,11 +536,11 @@ linkyformat(MMIOT *f, Cstring text, int image, Footnote *ref)
     }
     else if ( (f->flags & SAFELINK) && T(ref->link)
 				    && (T(ref->link)[0] != '/')
-				    && !isautoprefix(T(ref->link)) )
+				    && !isautoprefix(T(ref->link), S(ref->link)) )
 	/* if SAFELINK, only accept links that are local or
 	 * a well-known protocol
 	 */
-	    return 0;
+	return 0;
     else
 	tag = &linkt;
 
@@ -620,21 +548,11 @@ linkyformat(MMIOT *f, Cstring text, int image, Footnote *ref)
 	return 0;
 
     if ( tag->link_pfx ) {
-	Qstring(tag->link_pfx, f);
-	
-	if ( tag->kind & IS_URL ) {
-	    if ( f->base && T(ref->link) && (T(ref->link)[tag->szpat] == '/') )
-		puturl(f->base, strlen(f->base), f, 0);
-	    puturl(T(ref->link) + tag->szpat, S(ref->link) - tag->szpat, f, 0);
-	}
-	else
-	    ___mkd_reparse(T(ref->link) + tag->szpat, S(ref->link) - tag->szpat, INSIDE_TAG, f);
-	
-	Qstring(tag->link_sfx, f);
+	printlinkyref(f, tag, T(ref->link), S(ref->link));
 
-	if ( tag->WxH) {
-	    if ( ref->height) Qprintf(f," height=\"%d\"", ref->height);
-	    if ( ref->width) Qprintf(f, " width=\"%d\"", ref->width);
+	if ( tag->WxH ) {
+	    if ( ref->height ) Qprintf(f," height=\"%d\"", ref->height);
+	    if ( ref->width ) Qprintf(f, " width=\"%d\"", ref->width);
 	}
 
 	if ( S(ref->title) ) {
@@ -742,6 +660,89 @@ mangle(char *s, int len, MMIOT *f)
 }
 
 
+/* nrticks() -- count up a row of tick marks
+ */
+static int
+nrticks(int offset, MMIOT *f)
+{
+    int  tick = 0;
+
+    while ( peek(f, offset+tick) == '`' ) tick++;
+
+    return tick;
+} /* nrticks */
+
+
+/* matchticks() -- match a certain # of ticks, and if that fails
+ *                 match the largest subset of those ticks.
+ *
+ *                 if a subset was matched, modify the passed in
+ *                 # of ticks so that the caller (text()) can
+ *                 appropriately process the horrible thing.
+ */
+static int
+matchticks(MMIOT *f, int *ticks)
+{
+    int size, tick, c;
+    int subsize=0, subtick=0;
+    
+    for (size = *ticks; (c=peek(f,size)) != EOF; ) {
+	if ( c == '`' )
+	    if ( (tick=nrticks(size,f)) == *ticks )
+		return size;
+	    else {
+		if ( tick > subtick ) {
+		    subsize = size;
+		    subtick = tick;
+		}
+		size += tick;
+	    }
+	else
+	    size++;
+    }
+    if ( subsize ) {
+	*ticks = subtick;
+	return subsize;
+    }
+    return 0;
+    
+} /* matchticks */
+
+
+/* code() -- write a string out as code. The only characters that have
+ *           special meaning in a code block are * `<' and `&' , which
+ *           are /always/ expanded to &lt; and &amp;
+ */
+static void
+code(MMIOT *f, char *s, int length)
+{
+    int i,c;
+
+    for ( i=0; i < length; i++ )
+	if ( (c = s[i]) == 003)  /* ^C: expand back to 2 spaces */
+	    Qstring("  ", f);
+	else
+	    cputc(c, f);
+} /* code */
+
+
+/*  codespan() -- write out a chunk of text as code, trimming one
+ *                space off the front and/or back as appropriate.
+ */
+static void
+codespan(MMIOT *f, int size)
+{
+    int i=0, c;
+
+    if ( size > 1 && peek(f, size-1) == ' ' ) --size;
+    if ( peek(f,i) == ' ' ) ++i, --size;
+    
+    Qstring("<code>", f);
+    code(f, cursor(f)+(i-1), size);
+    Qstring("</code>", f);
+} /* codespan */
+
+
 /* before letting a tag through, validate against
  * DENY_A and DENY_IMG
  */
@@ -826,10 +827,9 @@ process_possible_link(MMIOT *f, int size)
 	Qstring("</a>", f);
 	return 1;
     }
-    else if ( isautoprefix(text) ) {
-	Qstring("<a href=\"", f);
-	puturl(text,size,f, 0);
-	Qstring("\">", f);
+    else if ( isautoprefix(text, size) ) {
+	printlinkyref(f, &linkt, text, size);
+	Qchar('>', f);
 	puturl(text,size,f, 1);
 	Qstring("</a>", f);
 	return 1;
@@ -879,7 +879,10 @@ maybe_tag_or_link(MMIOT *f)
 		else
 		    size++;
 	    
-	    Qstring(forbidden_tag(f) ? "&lt;" : "<", f);
+	    if ( forbidden_tag(f) )
+		return 0;
+
+	    Qchar('<', f);
 	    while ( ((c = peek(f, 1)) != EOF) && (c != '>') )
 		Qchar(pull(f), f);
 	    return 1;
@@ -1065,7 +1068,7 @@ text(MMIOT *f)
     int smartyflags = 0;
 
     while (1) {
-        if ( (f->flags & AUTOLINK) && isalpha(peek(f,1)) )
+        if ( (f->flags & AUTOLINK) && isalpha(peek(f,1)) && !tag_text(f) )
 	    maybe_autolink(f);
 
         c = pull(f);
@@ -1078,7 +1081,7 @@ text(MMIOT *f)
 	switch (c) {
 	case 0:     break;
 
-	case 3:     Qstring("<br/>", f);
+	case 3:     Qstring(tag_text(f) ? "  " : "<br/>", f);
 		    break;
 
 	case '>':   if ( tag_text(f) )
@@ -1131,16 +1134,13 @@ text(MMIOT *f)
 		    }
 #endif
 	case '*':
-#if RELAXED_EMPHASIS
 	/* Underscores & stars don't count if they're out in the middle
 	 * of whitespace */
-		    if ( !(f->flags & STRICT) && isthisspace(f,-1)
-					      && isthisspace(f,1) ) {
+		    if ( isthisspace(f,-1) && isthisspace(f,1) ) {
 			Qchar(c, f);
 			break;
 		    }
 		    /* else fall into the regular old emphasis case */
-#endif
 		    if ( tag_text(f) )
 			Qchar(c, f);
 		    else {
@@ -1150,17 +1150,20 @@ text(MMIOT *f)
 		    }
 		    break;
 	
-	case '`':   if ( tag_text(f) || !iscodeblock(f) )
+	case '`':   if ( tag_text(f) )
 			Qchar(c, f);
 		    else {
-			Qstring("<code>", f);
-			if ( peek(f, 1) == '`' ) {
-			    pull(f);
-			    code(2, f);
+			int size, tick = nrticks(0, f);
+
+			if ( size = matchticks(f, &tick) ) {
+			    shift(f, tick);
+			    codespan(f, size-tick);
+			    shift(f, size-1);
 			}
-			else
-			    code(1, f);
-			Qstring("</code>", f);
+			else {
+			    Qchar(c, f);
+			    Qcopy(tick-1, f);
+			}
 		    }
 		    break;
 
@@ -1169,11 +1172,10 @@ text(MMIOT *f)
 				break;
 		    case '<':   Qstring("&lt;", f);
 				break;
-		    case '\\':
 		    case '>': case '#': case '.': case '-':
 		    case '+': case '{': case '}': case ']':
-		    case '(': case ')': case '"': case '\'':
 		    case '!': case '[': case '*': case '_':
+		    case '\\':case '(': case ')':
 		    case '`':	Qchar(c, f);
 				break;
 		    default:
@@ -1205,74 +1207,6 @@ text(MMIOT *f)
     /* truncate the input string after we've finished processing it */
     S(f->in) = f->isp = 0;
 } /* text */
-
-
-static int
-iscodeblock(MMIOT *f)
-{
-    int i=1, single = 1, c;
-    
-    if ( peek(f,i) == '`' ) {
-	single=0;
-	i++;
-    }
-    while ( (c=peek(f,i)) != EOF ) {
-	if ( (c == '`') && (single || peek(f,i+1) == '`') )
-	    return 1;
-	else if ( c == '\\' )
-	    i++;
-	i++;
-    }
-    return 0;
-    
-}
-
-static int
-endofcode(int escape, int offset, MMIOT *f)
-{
-    switch (escape) {
-    case 2: if ( peek(f, offset+1) == '`' ) {
-		shift(f,1);
-    case 1:     shift(f,offset);
-		return 1;
-	    }
-    default:return 0;
-    }
-}
-
-
-/* the only characters that have special meaning in a code block are
- * `<' and `&' , which are /always/ expanded to &lt; and &amp;
- */
-static void
-code(int escape, MMIOT *f)
-{
-    int c;
-
-    if ( escape && (peek(f,1) == ' ') )
-	shift(f,1);
-
-    while ( (c = pull(f)) != EOF ) {
-	switch (c) {
-	case ' ':   if ( peek(f,1) == '`' && endofcode(escape, 1, f) )
-			return;
-		    Qchar(c, f);
-		    break;
-
-	case '`':   if ( endofcode(escape, 0, f) )
-			return;
-		    Qchar(c, f);
-		    break;
-
-	case '\\':  cputc(c, f);
-		    if ( peek(f,1) == '>' || (c = pull(f)) == EOF )
-			break;
-	
-	default:    cputc(c, f);
-		    break;
-	}
-    }
-} /* code */
 
 
 /* print a header block
@@ -1332,6 +1266,7 @@ splat(Line *p, char *block, Istring align, int force, MMIOT *f)
     Qstring("</tr>\n", f);
     return colno;
 }
+
 
 static int
 printtable(Paragraph *pp, MMIOT *f)
@@ -1402,8 +1337,9 @@ printblock(Paragraph *pp, MMIOT *f)
 
     while (t) {
 	if ( S(t->text) ) {
-	    if ( S(t->text) > 2 && T(t->text)[S(t->text)-2] == ' '
-				&& T(t->text)[S(t->text)-1] == ' ') {
+	    if ( t->next && S(t->text) > 2
+			 && T(t->text)[S(t->text)-2] == ' '
+			 && T(t->text)[S(t->text)-1] == ' ' ) {
 		push(T(t->text), S(t->text)-2, f);
 		push("\003\n", 2, f);
 	    }
@@ -1428,19 +1364,18 @@ printcode(Line *t, MMIOT *f)
 {
     int blanks;
 
-    for ( blanks = 0; t ; t = t->next )
+    Qstring("<pre><code>", f);
+    for ( blanks = 0; t ; t = t->next ) {
 	if ( S(t->text) > t->dle ) {
 	    while ( blanks ) {
-		push("\n", 1, f);
+		Qchar('\n', f);
 		--blanks;
 	    }
-	    push(T(t->text), S(t->text), f);
-	    push("\n", 1, f);
+	    code(f, T(t->text), S(t->text));
+	    Qchar('\n', f);
 	}
 	else blanks++;
-
-    Qstring("<pre><code>", f);
-    code(0, f);
+    }
     Qstring("</code></pre>", f);
 }
 
