@@ -129,7 +129,7 @@ class MarkdownTest < Test::Unit::TestCase
            "=================== \n\n"        +
            "By Candice Yellowflower   \n"
     markdown = Markdown.new(text)
-    assert_equal "<h1>The Ant-Sugar Tales </h1>\n\n<p>By Candice Yellowflower <br/>\n</p>\n",
+    assert_equal "<h1>The Ant-Sugar Tales </h1>\n\n<p>By Candice Yellowflower</p>\n",
       markdown.to_html
   end
 
