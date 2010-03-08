@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'rdiscount'
-  s.version = '1.5.8.1'
+  s.version = '1.6.3'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
   s.date = '2010-03-08'
   s.email = 'r@tomayko.com'
@@ -15,11 +15,13 @@ Gem::Specification.new do |s|
     bin/rdiscount
     ext/Csio.c
     ext/amalloc.h
+    ext/basename.c
     ext/config.h
     ext/css.c
     ext/cstring.h
     ext/docheader.c
     ext/dumptree.c
+    ext/emmatch.c
     ext/extconf.rb
     ext/generate.c
     ext/markdown.c
