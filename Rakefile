@@ -10,18 +10,18 @@ task :default => :test
 DLEXT = Config::CONFIG['DLEXT']
 RUBYDIGEST = Digest::MD5.hexdigest(`#{RUBY} --version`)
 
-file 'ext/Makefile' => FileList['ext/*.{c,h,rb}'] do
-  chdir('ext') { ruby 'extconf.rb' }
-end
-CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
-
 file "ext/ruby-#{RUBYDIGEST}" do |f|
   rm_f FileList["ext/ruby-*"]
   touch f.name
 end
 CLEAN.include "ext/ruby-*"
 
-file "ext/rdiscount.#{DLEXT}" => FileList["ext/Makefile", "ext/ruby-#{RUBYDIGEST}"] do |f|
+file 'ext/Makefile' => FileList['ext/*.{c,h,rb}', "ext/ruby-#{RUBYDIGEST}"] do
+  chdir('ext') { ruby 'extconf.rb' }
+end
+CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
+
+file "ext/rdiscount.#{DLEXT}" => FileList["ext/Makefile"] do |f|
   sh 'cd ext && make clean && make'
 end
 CLEAN.include 'ext/*.{o,bundle,so,dll}'
