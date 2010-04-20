@@ -1,3 +1,4 @@
+require 'date'
 require 'rake/clean'
 require 'digest/md5'
 
@@ -152,31 +153,31 @@ if defined?(Gem)
   file package('.tar.gz') => %w[pkg/] + $spec.files do |f|
     sh "git archive --format=tar HEAD | gzip > #{f.name}"
   end
+end
 
-  # GEMSPEC HELPERS ==========================================================
+# GEMSPEC HELPERS ==========================================================
 
-  def source_version
-    line = File.read('lib/rdiscount.rb')[/^\s*VERSION = .*/]
-    line.match(/.*VERSION = '(.*)'/)[1]
-  end
+def source_version
+  line = File.read('lib/rdiscount.rb')[/^\s*VERSION = .*/]
+  line.match(/.*VERSION = '(.*)'/)[1]
+end
 
-  file 'rdiscount.gemspec' => FileList['Rakefile','lib/rdiscount.rb'] do |f|
-    # read spec file and split out manifest section
-    spec = File.read(f.name)
-    head, manifest, tail = spec.split("  # = MANIFEST =\n")
-    head.sub!(/\.version = '.*'/, ".version = '#{source_version}'")
-    head.sub!(/\.date = '.*'/, ".date = '#{Date.today.to_s}'")
-    # determine file list from git ls-files
-    files = `git ls-files`.
-      split("\n").
-      sort.
-      reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }.
-      map{ |file| "    #{file}" }.
-      join("\n")
-    # piece file back together and write...
-    manifest = "  s.files = %w[\n#{files}\n  ]\n"
-    spec = [head,manifest,tail].join("  # = MANIFEST =\n")
-    File.open(f.name, 'w') { |io| io.write(spec) }
-    puts "updated #{f.name}"
-  end
+file 'rdiscount.gemspec' => FileList['Rakefile','lib/rdiscount.rb'] do |f|
+  # read spec file and split out manifest section
+  spec = File.read(f.name)
+  head, manifest, tail = spec.split("  # = MANIFEST =\n")
+  head.sub!(/\.version = '.*'/, ".version = '#{source_version}'")
+  head.sub!(/\.date = '.*'/, ".date = '#{Date.today.to_s}'")
+  # determine file list from git ls-files
+  files = `git ls-files`.
+    split("\n").
+    sort.
+    reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }.
+    map{ |file| "    #{file}" }.
+    join("\n")
+  # piece file back together and write...
+  manifest = "  s.files = %w[\n#{files}\n  ]\n"
+  spec = [head,manifest,tail].join("  # = MANIFEST =\n")
+  File.open(f.name, 'w') { |io| io.write(spec) }
+  puts "updated #{f.name}"
 end
