@@ -128,31 +128,30 @@ end
 
 # PACKAGING =================================================================
 
-if defined?(Gem)
-  $spec = eval(File.read('rdiscount.gemspec'))
+require 'rubygems'
+$spec = eval(File.read('rdiscount.gemspec'))
 
-  def package(ext='')
-    "pkg/rdiscount-#{$spec.version}" + ext
-  end
+def package(ext='')
+  "pkg/rdiscount-#{$spec.version}" + ext
+end
 
-  desc 'Build packages'
-  task :package => %w[.gem .tar.gz].map {|e| package(e)}
+desc 'Build packages'
+task :package => %w[.gem .tar.gz].map {|e| package(e)}
 
-  desc 'Build and install as local gem'
-  task :install => package('.gem') do
-    sh "gem install #{package('.gem')}"
-  end
+desc 'Build and install as local gem'
+task :install => package('.gem') do
+  sh "gem install #{package('.gem')}"
+end
 
-  directory 'pkg/'
+directory 'pkg/'
 
-  file package('.gem') => %w[pkg/ rdiscount.gemspec] + $spec.files do |f|
-    sh "gem build rdiscount.gemspec"
-    mv File.basename(f.name), f.name
-  end
+file package('.gem') => %w[pkg/ rdiscount.gemspec] + $spec.files do |f|
+  sh "gem build rdiscount.gemspec"
+  mv File.basename(f.name), f.name
+end
 
-  file package('.tar.gz') => %w[pkg/] + $spec.files do |f|
-    sh "git archive --format=tar HEAD | gzip > #{f.name}"
-  end
+file package('.tar.gz') => %w[pkg/] + $spec.files do |f|
+  sh "git archive --format=tar HEAD | gzip > #{f.name}"
 end
 
 # GEMSPEC HELPERS ==========================================================
