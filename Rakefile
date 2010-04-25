@@ -106,6 +106,7 @@ task :gather => 'discount' do |t|
   cp files, 'ext/',
     :preserve => true,
     :verbose => true
+  cp 'discount/markdown.7', 'man/'
 end
 
 # best. task. ever.
