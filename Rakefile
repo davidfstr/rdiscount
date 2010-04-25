@@ -35,6 +35,18 @@ desc 'Build the rdiscount extension'
 task :build => "lib/rdiscount.#{DLEXT}"
 
 # ==========================================================
+# Manual
+# ==========================================================
+
+file 'man/rdiscount.1' => 'man/rdiscount.1.ronn' do
+  sh "ronn --manual=RUBY -b man/rdiscount.1.ronn"
+end
+CLOBBER.include 'man/rdiscount.1'
+
+desc 'Build manpages'
+task :man => 'man/rdiscount.1'
+
+# ==========================================================
 # Testing
 # ==========================================================
 
