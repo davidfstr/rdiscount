@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name = 'rdiscount'
   s.version = '1.6.3.1'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2010-04-20'
+  s.date = '2010-04-24'
   s.email = 'r@tomayko.com'
   s.homepage = 'http://github.com/rtomayko/rdiscount'
   s.has_rdoc = true
@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
     ext/xml.c
     lib/markdown.rb
     lib/rdiscount.rb
+    man/markdown.7
     rdiscount.gemspec
     test/benchmark.rb
     test/benchmark.txt
