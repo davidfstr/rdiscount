@@ -64,20 +64,6 @@ TEXT
     assert_equal html, Moredown.text_to_html(text, :has_stylesheet => true)
   end
   
-  def test_code
-    text = <<TEXT
-Here is some code:
-
-    def test_code
-      puts 'test'
-    end
-
-That is all.
-TEXT
-    html = "<p>Here is some code:</p>\n\n<pre class=\"prettyprint\"><code>def test_code\n  puts 'test'\nend\n</code></pre>\n\n<p>That is all.</p>\n"
-    assert_equal html, Moredown.text_to_html(text)
-  end
-  
   def test_emotes
     assert_equal "<p>:-)</p>\n", Moredown.text_to_html(':-)'), "Emotes are ignored when the switch is off"
     

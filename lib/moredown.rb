@@ -85,9 +85,6 @@ class Moredown < RDiscount
       html.gsub!(/<img (.*?) \/>:center/) { |match| "<img style=\"display: block; margin: auto;\" #{$1} />" }
     end
     
-    # code
-    html.gsub!('<pre>', '<pre class="prettyprint">')
-    
     # emoticons
     if @emotes
       html.gsub!(':-)', '<img src="/images/emote-smile.png" alt=":-)" width="16" height="16" />')
