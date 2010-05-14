@@ -24,7 +24,7 @@
 #   end
 #
 class RDiscount
-  VERSION = '1.6.3.1'
+  VERSION = '1.6.3.2'
 
   # Original Markdown formatted text.
   attr_reader :text
