@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name = 'rdiscount'
-  s.version = '1.6.3.2'
+  s.version = '1.6.5'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2010-05-14'
-  s.email = 'r@tomayko.com'
+  s.date = '2010-06-15'
+  s.email = 'rtomayko@gmail.com'
   s.homepage = 'http://github.com/rtomayko/rdiscount'
   s.has_rdoc = true
   s.authors = ["Ryan Tomayko", "David Loren Parsons", "Andrew White"]
@@ -24,12 +24,15 @@ Gem::Specification.new do |s|
     ext/emmatch.c
     ext/extconf.rb
     ext/generate.c
+    ext/html5.c
     ext/markdown.c
     ext/markdown.h
     ext/mkdio.c
     ext/mkdio.h
     ext/rdiscount.c
     ext/resource.c
+    ext/tags.c
+    ext/tags.h
     ext/toc.c
     ext/xml.c
     lib/markdown.rb
