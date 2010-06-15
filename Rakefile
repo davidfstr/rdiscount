@@ -23,7 +23,7 @@ end
 CLEAN.include 'ext/Makefile', 'ext/mkmf.log'
 
 file "ext/rdiscount.#{DLEXT}" => FileList["ext/Makefile"] do |f|
-  sh 'cd ext && make clean && make'
+  sh 'cd ext && make clean && make && rm -rf conftest.dSYM'
 end
 CLEAN.include 'ext/*.{o,bundle,so,dll}'
 
@@ -112,8 +112,8 @@ desc 'Gather required discount sources into extension directory'
 task :gather => 'discount' do |t|
   files =
     FileList[
-      'discount/{markdown,mkdio,amalloc,cstring}.h',
-      'discount/{markdown,docheader,dumptree,generate,mkdio,resource,toc,Csio,xml,css,basename,emmatch}.c'
+      'discount/{markdown,mkdio,amalloc,cstring,tags}.h',
+      'discount/{markdown,docheader,dumptree,generate,mkdio,resource,toc,Csio,xml,css,basename,emmatch,tags,html5}.c'
     ]
   cp files, 'ext/',
     :preserve => true,
