@@ -103,4 +103,9 @@ EOS
     rd = RDiscount.new("[foo](id:bar)", :no_pseudo_protocols)
     assert_equal "<p>[foo](id:bar)</p>\n", rd.to_html
   end
+
+  def test_that_tags_can_have_dashes_and_underscores
+    rd = RDiscount.new("foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b>")
+    assert_equal "<p>foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b></p>\n", rd.to_html
+  end
 end
