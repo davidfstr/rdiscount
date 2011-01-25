@@ -9,5 +9,4 @@
 /lib/*.dll
 /ext/Makefile
 /pkg
-/discount
 /discount-*
