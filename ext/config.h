@@ -1,10 +1,13 @@
+/*
+ * rdiscount extension discount configuration
+ */
+#ifndef __MARKDOWN_D
+#define __MARKDOWN_D 1
 
-/* rdiscount extension configuration */
-
-#undef USE_AMALLOC
-
+/* tabs are four spaces */
 #define TABSTOP 4
 
+/* these are setup by extconf.rb */
 #if HAVE_RANDOM
 #define COINTOSS() (random()&1)
 #elif HAVE_RAND
@@ -17,5 +20,4 @@
 #define INITRNG(x) srand((unsigned int)x)
 #endif
 
-#define RELAXED_EMPHASIS 1
-#define SUPERSCRIPT 1
+#endif/* __MARKDOWN_D */
