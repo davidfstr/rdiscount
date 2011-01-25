@@ -61,8 +61,9 @@ desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
 task 'test:conformance' => [:build] do |t|
   script = "#{pwd}/bin/rdiscount"
   test_version = ENV['MARKDOWN_TEST_VER'] || '1.0.3'
+  lib_dir = "#{pwd}/lib"
   chdir("test/MarkdownTest_#{test_version}") do
-    sh "./MarkdownTest.pl --script='#{script}' --tidy"
+    sh "RUBYLIB=#{lib_dir} ./MarkdownTest.pl --script='#{script}' --tidy"
   end
 end
 
