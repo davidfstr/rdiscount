@@ -1,0 +1,34 @@
+BUILDING rdiscount
+==================
+
+You'll be needing Ruby, rake, and a basic build environment.
+
+Build the rdiscount extension for tests and local development:
+
+    $ rake build
+
+Use your rdiscount working copy when running ruby programs:
+
+    $ export RUBYLIB=~/rdiscount/lib:$RUBYLIB
+    $ ruby some-program.rb
+
+Gathering changes from an upstream Orc/discount.git clone requires first
+grabbing the discount submodule into the root of the project and then running
+the rake gather task to copy discount source files into the ext/ directory:
+
+    $ git submodule init
+    Submodule 'discount' (git://github.com/rtomayko/discount.git) registered for path 'discount'
+    $ rake gather
+    $ rake build
+
+The rtomayko/discount.git repository's master branch is the default submodule
+head. It exists to merge branches for rdiscount specific patches to the upstream
+discount codebase.
+
+Do work in the submodule and then add a remote for your clone THAT YOU FORKED ON
+GITHUB BECAUSE YOU'RE GOING TO SEND ME A PULL REQUEST. After you've committed
+your great changes somewhere, push them up with:
+
+    $ cd discount
+    $ git remote add you git@github.com:you/discount.git
+    $ git push you HEAD:topic-branch-name

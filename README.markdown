@@ -31,7 +31,10 @@ The RDiscount sources are available via Git:
     $ cd rdiscount
     $ rake --tasks
 
+See the file [BUILDING][] for hacking instructions.
+
 [gemcutter]: http://gemcutter.org/gems/rdiscount
+[BUILDING]: BUILDING
 
 USAGE
 -----
