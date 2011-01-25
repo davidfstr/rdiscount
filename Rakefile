@@ -109,7 +109,7 @@ CLEAN.include 'doc'
 # ==========================================================
 
 desc 'Gather required discount sources into extension directory'
-task :gather => 'discount' do |t|
+task :gather => 'discount/markdown.h' do |t|
   files =
     FileList[
       'discount/{markdown,mkdio,amalloc,cstring,tags}.h',
@@ -121,22 +121,8 @@ task :gather => 'discount' do |t|
   cp 'discount/markdown.7', 'man/'
 end
 
-# best. task. ever.
-file 'discount' do |f|
-  STDERR.puts((<<-TEXT).gsub(/^ +/, ''))
-    Sorry, this operation requires a human. Tell your human to:
-
-    Grab a discount tarball from:
-    http://www.pell.portland.or.us/~orc/Code/discount/
-
-    Extract here with something like:
-    tar xvzf discount-1.2.9.tar.gz
-
-    Create a discount symlink pointing at the version directory:
-    ln -hsf discount-1.2.9 discount
-
-  TEXT
-  fail "discount sources required."
+file 'discount/markdown.h' do |t|
+  abort "The discount submodule is required. See the file BUILDING for getting set up."
 end
 
 # PACKAGING =================================================================
