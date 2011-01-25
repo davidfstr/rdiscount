@@ -1,18 +1,20 @@
 Gem::Specification.new do |s|
   s.name = 'rdiscount'
-  s.version = '1.6.5'
+  s.version = '1.6.8'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2010-06-15'
+  s.date = '2011-01-25'
   s.email = 'rtomayko@gmail.com'
   s.homepage = 'http://github.com/rtomayko/rdiscount'
   s.has_rdoc = true
   s.authors = ["Ryan Tomayko", "David Loren Parsons", "Andrew White"]
   # = MANIFEST =
   s.files = %w[
+    BUILDING
     COPYING
     README.markdown
     Rakefile
     bin/rdiscount
+    discount
     ext/Csio.c
     ext/amalloc.h
     ext/basename.c
