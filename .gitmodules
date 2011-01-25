@@ -1,3 +1,4 @@
 [submodule "discount"]
 	path = discount
 	url = git://github.com/rtomayko/discount.git
+	ignore = untracked
