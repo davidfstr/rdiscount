@@ -4,6 +4,8 @@
 
 static VALUE rb_cRDiscount;
 
+static int rb_rdiscount__get_flags(VALUE ruby_obj);
+
 static VALUE
 rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 {
@@ -69,7 +71,7 @@ rb_rdiscount_toc_content(int argc, VALUE *argv, VALUE self)
     return buf;
 }
 
-int rb_rdiscount__get_flags(VALUE ruby_obj)
+static int rb_rdiscount__get_flags(VALUE ruby_obj)
 {
   /* compile flags */
   int flags = MKD_TABSTOP | MKD_NOHEADER;
