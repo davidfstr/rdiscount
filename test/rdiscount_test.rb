@@ -108,4 +108,14 @@ EOS
     rd = RDiscount.new("foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b>")
     assert_equal "<p>foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b></p>\n", rd.to_html
   end
+
+  def test_that_footnotes_flag_works
+    rd = RDiscount.new(<<EOS, :footnotes)
+Obtuse text.[^1]
+
+[^1]: Clarification
+EOS
+    assert rd.to_html.include?('<a href="#fn:1" rel="footnote">1</a>')
+  end
+
 end

@@ -42,6 +42,9 @@ class RDiscount
   # included for compatibility.
   attr_accessor :fold_lines
 
+  # Enable php markdown extra-style footnotes
+  attr_accessor :footnotes
+
   # Enable Table Of Contents generation
   attr_accessor :generate_toc
 
@@ -75,6 +78,7 @@ class RDiscount
   # * <tt>:filter_html</tt> - Do not output any raw HTML tags included in
   #   the source text.
   # * <tt>:fold_lines</tt> - RedCloth compatible line folding (not used).
+  # * <tt>:footnotes</tt> - PHP markdown extra-style footnotes.
   # * <tt>:generate_toc</tt> - Enable Table Of Contents generation
   # * <tt>:no_image</tt> - Do not output any <tt><img></tt> tags.
   # * <tt>:no_links</tt> - Do not output any <tt><a></tt> tags.
