@@ -82,6 +82,10 @@ int rb_rdiscount__get_flags(VALUE ruby_obj)
   if ( rb_funcall(ruby_obj, rb_intern("filter_html"), 0) == Qtrue )
       flags = flags | MKD_NOHTML;
 
+  /* footnotes */
+  if ( rb_funcall(ruby_obj, rb_intern("footnotes"), 0) == Qtrue )
+      flags = flags | MKD_EXTRA_FOOTNOTE;
+
   /* generate_toc */
   if ( rb_funcall(ruby_obj, rb_intern("generate_toc"), 0) == Qtrue)
     flags = flags | MKD_TOC;
