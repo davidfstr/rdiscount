@@ -16,8 +16,12 @@ Gathering changes from an upstream Orc/discount.git clone requires first
 grabbing the discount submodule into the root of the project and then running
 the rake gather task to copy discount source files into the ext/ directory:
 
-    $ git submodule init
+    $ git submodule update --init
     Submodule 'discount' (git://github.com/rtomayko/discount.git) registered for path 'discount'
+    Cloning into discount...
+    $ cd discount
+    $ ./configure.sh  # to generate mkdio.h from mkdio.h.in
+    $ cd ..
     $ rake gather
     $ rake build
 
