@@ -146,7 +146,7 @@ extern void mkd_basename(Document*, char *);
 extern void mkd_string_to_anchor(char*,int, void(*)(int,void*), void*, int);
 
 extern Document *mkd_in(FILE *, DWORD);
-extern Document *mkd_string(char*,int, DWORD);
+extern Document *mkd_string(const char*,int, DWORD);
 
 extern void mkd_initialize();
 extern void mkd_shlib_destructor();
