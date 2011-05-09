@@ -66,6 +66,10 @@ class RDiscount
   # Do not process pseudo-protocols like <tt>[](id:name)</tt>
   attr_accessor :no_pseudo_protocols
 
+  # Protect text enclosed in dollar signs from being scrambled by smartypants
+  # and/or markdown.
+  attr_accessor :protect_math
+
   # Create a RDiscount Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
   # supplied to set various processing options:
@@ -83,6 +87,7 @@ class RDiscount
   # * <tt>:autolink</tt> - Greedily urlify links.
   # * <tt>:safelink</tt> - Do not make links for unknown URL types.
   # * <tt>:no_pseudo_protocols</tt> - Do not process pseudo-protocols.
+  # * <tt>:protect_math</tt> - Do not modify text enclosed in dollar signs.
   #
   def initialize(text, *extensions)
     @text  = text

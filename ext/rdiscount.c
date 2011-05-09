@@ -114,6 +114,9 @@ int rb_rdiscount__get_flags(VALUE ruby_obj)
   if ( rb_funcall(ruby_obj, rb_intern("no_pseudo_protocols"), 0) == Qtrue)
     flags = flags | MKD_NO_EXT;
 
+  /* protect_math */
+  if ( rb_funcall(ruby_obj, rb_intern("protect_math"), 0) == Qtrue)
+    flags = flags | MKD_PROTECTMATH;
 
   return flags;
 }
