@@ -1072,7 +1072,7 @@ smartypants(int c, int *flags, MMIOT *f)
 {
     int i;
 
-    if ( f->flags & (MKD_NOPANTS|MKD_TAGTEXT|IS_LABEL) )
+    if ( f->flags & (MKD_NOPANTS|MKD_TAGTEXT|IS_LABEL|MKD_MATH) )
 	return 0;
 
     for ( i=0; i < NRSMART; i++)
@@ -1140,13 +1140,53 @@ tickhandler(MMIOT *f, int tickchar, int minticks, spanhandler spanner)
     return 0;
 }
 
-#define tag_text(f)	(f->flags & MKD_TAGTEXT)
+static int
+ismathleft(MMIOT *f, int offset)
+{
+    int i;
+
+    while (peek(f,offset-1) == '$')
+        --offset;
+
+    i = 1;
+    while (peek(f,offset-i) == '\\')
+	++i;
+    if ( (i % 2) == 0 )
+	return 0;
+
+    while (!isthisspace(f,offset-i)) {
+	if (isthisalnum(f,offset-i))
+	    return 0;
+	++i;
+    }
+
+    return !isthisspace(f,offset+1);
+}
+
+static int
+ismathright(MMIOT *f, int offset)
+{
+    int i;
+
+    while (peek(f,offset+1) == '$')
+        ++offset;
+
+    i = 1;
+    while (peek(f,offset-i) == '\\')
+	++i;
+    if ( (i % 2) == 0 )
+	return 0;
+
+    return !isthisalnum(f,offset+1);
+}
+
+#define protected(f)	(f->flags & (MKD_TAGTEXT|MKD_MATH))
 
 
 static void
 text(MMIOT *f)
 {
-    int c, j;
+    int c, j, escape;
     int rep;
     int smartyflags = 0;
 
@@ -1164,16 +1204,16 @@ text(MMIOT *f)
 	switch (c) {
 	case 0:     break;
 
-	case 3:     Qstring(tag_text(f) ? "  " : "<br/>", f);
+	case 3:     Qstring(protected(f) ? "  " : "<br/>", f);
 		    break;
 
-	case '>':   if ( tag_text(f) )
+	case '>':   if ( protected(f) )
 			Qstring("&gt;", f);
 		    else
 			Qchar(c, f);
 		    break;
 
-	case '"':   if ( tag_text(f) )
+	case '"':   if ( protected(f) )
 			Qstring("&quot;", f);
 		    else
 			Qchar(c, f);
@@ -1181,17 +1221,17 @@ text(MMIOT *f)
 			
 	case '!':   if ( peek(f,1) == '[' ) {
 			pull(f);
-			if ( tag_text(f) || !linkylinky(1, f) )
+			if ( protected(f) || !linkylinky(1, f) )
 			    Qstring("![", f);
 		    }
 		    else
 			Qchar(c, f);
 		    break;
-	case '[':   if ( tag_text(f) || !linkylinky(0, f) )
+	case '[':   if ( protected(f) || !linkylinky(0, f) )
 			Qchar(c, f);
 		    break;
 	/* A^B -> A<sup>B</sup> */
-	case '^':   if ( (f->flags & (MKD_NOSUPERSCRIPT|MKD_STRICT|MKD_TAGTEXT))
+	case '^':   if ( (f->flags & (MKD_NOSUPERSCRIPT|MKD_STRICT|MKD_TAGTEXT|MKD_MATH))
 				|| (isthisnonword(f,-1) && peek(f,-1) != ')')
 				|| isthisspace(f,1) )
 			Qchar(c,f);
@@ -1240,7 +1280,7 @@ text(MMIOT *f)
 			break;
 		    }
 		    /* else fall into the regular old emphasis case */
-		    if ( tag_text(f) )
+		    if ( protected(f) )
 			Qchar(c, f);
 		    else {
 			for (rep = 1; peek(f,1) == c; pull(f) )
@@ -1249,11 +1289,37 @@ text(MMIOT *f)
 		    }
 		    break;
 	
-	case '~':   if ( (f->flags & (MKD_NOSTRIKETHROUGH|MKD_TAGTEXT|MKD_STRICT)) || !tickhandler(f,c,2,delspan) )
+	case '$':
+		    if ( (f->flags & MKD_PROTECTMATH) && !(f->flags & MKD_TAGTEXT)) {
+			escape = 1;
+			for (j = 1; peek(f,j) == '$';)
+			    ++j;
+			if ( ismathleft(f,j-1) ) {
+			    for (; (c = peek(f,j)) != EOF; j++) {
+				if ((c == '\n' && peek(f,j+1) == '\n')
+					|| (c == '$' && ismathleft(f,j)))
+				    break;
+				if (c == '$' && ismathright(f,j)) {
+				    escape = 0;
+				    f->flags |= MKD_MATH;
+				    break;
+				}
+			    }
+			} else if ( ismathright(f,j-1) ) {
+			    escape = 0;
+			    f->flags &= ~MKD_MATH;
+			}
+			if (escape)
+			    Qchar('\\', f);
+		    }
+		    Qchar('$', f);
+		    break;
+
+	case '~':   if ( (f->flags & (MKD_NOSTRIKETHROUGH|MKD_TAGTEXT|MKD_STRICT|MKD_MATH)) || !tickhandler(f,c,2,delspan) )
 			Qchar(c, f);
 		    break;
 
-	case '`':   if ( tag_text(f) || !tickhandler(f,c,1,codespan) )
+	case '`':   if ( protected(f) || !tickhandler(f,c,1,codespan) )
 			Qchar(c, f);
 		    break;
 
