@@ -1,22 +1,119 @@
-.\" generated with Ronn/v0.6.8
-.\" http://github.com/rtomayko/ronn/
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "RDISCOUNT" "1" "April 2010" "" "RUBY"
+.TH "RDISCOUNT" "1" "July 2011" "" "RUBY"
 .
 .SH "NAME"
 \fBrdiscount\fR \- humane markup to HTML conversion tool
 .
 .SH "SYNOPSIS"
-\fBrdiscount\fR [\fIfile\fR\.\.\.]
+[\fBenv\fR RDISCOUNT_EXTENSIONS=\'\fIextension\fR,\.\.\.\'] \fBrdiscount\fR [\fIfile\fR\.\.\.]
 .
 .SH "DESCRIPTION"
 The \fBrdiscount\fR utility reads one or more markdown(7)\-formatted text \fIfile\fRs and writes HTML to standard output\. With no \fIfile\fR, or when \fIfile\fR is \'\-\', \fBrdiscount\fR reads source text from standard input\.
+.
+.P
+The \fBRDISCOUNT_EXTENSIONS\fR environment variable can specify a comma\-separated list of Markdown processing \fIextension\fRs to enable (see \fBEXTENSIONS\fR below)\.
+.
+.SH "EXTENSIONS"
+.
+.TP
+\fBfilter_styles\fR
+Do not output \fB<style>\fR tags\.
+.
+.TP
+\fBfold_lines\fR
+RedCloth compatible line folding (not used)\.
+.
+.TP
+\fBMKD_NOLINKS\fR
+Don\'t do link processing, block \fB<a>\fR tags
+.
+.TP
+\fBMKD_NOIMAGE\fR
+Don\'t do image processing, block \fB<img>\fR
+.
+.TP
+\fBMKD_NOPANTS\fR
+Don\'t run smartypants()
+.
+.TP
+\fBMKD_NOHTML\fR
+Don\'t allow raw html through AT ALL
+.
+.TP
+\fBMKD_STRICT\fR
+Disable SUPERSCRIPT, RELAXED_EMPHASIS
+.
+.TP
+\fBMKD_TAGTEXT\fR
+Process text inside an html tag; no \fB<em>\fR, no \fB<bold>\fR, no html or [] expansion
+.
+.TP
+\fBMKD_NO_EXT\fR
+Don\'t allow pseudo\-protocols
+.
+.TP
+\fBMKD_CDATA\fR
+Generate code for xml ![CDATA[\.\.\.]]
+.
+.TP
+\fBMKD_NOSUPERSCRIPT\fR
+No A
+.
+.TP
+\fBMKD_NORELAXED\fR
+Emphasis happens everywhere
+.
+.TP
+\fBMKD_NOTABLES\fR
+Don\'t process PHP Markdown Extra tables\.
+.
+.TP
+\fBMKD_NOSTRIKETHROUGH\fR
+Forbid
+.
+.TP
+\fBMKD_TOC\fR
+Do table\-of\-contents processing
+.
+.TP
+\fBMKD_1_COMPAT\fR
+Compatability with MarkdownTest_1\.0
+.
+.TP
+\fBMKD_AUTOLINK\fR
+Make http://foo\.com a link even without \fB<>\fRs
+.
+.TP
+\fBMKD_SAFELINK\fR
+Paranoid check for link protocol
+.
+.TP
+\fBMKD_NOHEADER\fR
+Don\'t process document headers
+.
+.TP
+\fBMKD_TABSTOP\fR
+Expand tabs to 4 spaces
+.
+.TP
+\fBMKD_NODIVQUOTE\fR
+Forbid >%class% blocks
+.
+.TP
+\fBMKD_NOALPHALIST\fR
+Forbid alphabetic lists
+.
+.TP
+\fBMKD_NODLIST\fR
+Forbid definition lists
 .
 .SH "RETURN VALUES"
 The \fBrdiscount\fR utility exits 0 on success, and > 0 if an error occurs\.
 .
 .SH "SEE ALSO"
-markdown(7)
+markdown(7), env(1)
 .
 .SH "AUTHOR"
 Ryan Tomayko \fIhttp://tomayko\.com/about\fR

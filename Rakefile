@@ -63,7 +63,7 @@ task 'test:conformance' => [:build] do |t|
   test_version = ENV['MARKDOWN_TEST_VER'] || '1.0.3'
   lib_dir = "#{pwd}/lib"
   chdir("test/MarkdownTest_#{test_version}") do
-    result = `RUBYLIB=#{lib_dir} ./MarkdownTest.pl --script='#{script}' --tidy`
+    result = `env RDISCOUNT_EXTENSIONS='MKD_NOPANTS' RUBYLIB=#{lib_dir} ./MarkdownTest.pl --script='#{script}' --tidy`
     print result
     fail unless result.include? "; 0 failed."
   end
