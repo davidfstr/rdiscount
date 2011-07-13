@@ -29,64 +29,55 @@ class RDiscount
   # Original Markdown formatted text.
   attr_reader :text
 
-  # Set true to have smarty-like quote translation performed.
-  attr_accessor :smart
+  # Integer containing bit flags for the underlying Discount library.
+  attr_accessor :flags
 
   # Do not output <tt><style></tt> tags included in the source text.
   attr_accessor :filter_styles
-
-  # Do not output any raw HTML included in the source text.
-  attr_accessor :filter_html
 
   # RedCloth compatible line folding -- not used for Markdown but
   # included for compatibility.
   attr_accessor :fold_lines
 
-  # Enable Table Of Contents generation
-  attr_accessor :generate_toc
-
-  # Do not process <tt>![]</tt> and remove <tt><img></tt> tags from the output.
-  attr_accessor :no_image
-
-  # Do not process <tt>[]</tt> and remove <tt><a></tt> tags from the output.
-  attr_accessor :no_links
-
-  # Do not process tables
-  attr_accessor :no_tables
-
-  # Disable superscript and relaxed emphasis processing.
-  attr_accessor :strict
-
-  # Convert URL in links, even if they aren't encased in <tt><></tt>
-  attr_accessor :autolink
-
-  # Don't make hyperlinks from <tt>[][]</tt> links that have unknown URL types.
-  attr_accessor :safelink
-
-  # Do not process pseudo-protocols like <tt>[](id:name)</tt>
-  attr_accessor :no_pseudo_protocols
-
-  # Create a RDiscount Markdown processor. The +text+ argument
-  # should be a string containing Markdown text. Additional arguments may be
-  # supplied to set various processing options:
+  # Create a RDiscount Markdown processor. The +text+ argument should be a
+  # string containing Markdown text. Additional arguments may be supplied to
+  # set various processing options:
   #
-  # * <tt>:smart</tt> - Enable SmartyPants processing.
-  # * <tt>:filter_styles</tt> - Do not output <tt><style></tt> tags.
-  # * <tt>:filter_html</tt> - Do not output any raw HTML tags included in
-  #   the source text.
-  # * <tt>:fold_lines</tt> - RedCloth compatible line folding (not used).
-  # * <tt>:generate_toc</tt> - Enable Table Of Contents generation
-  # * <tt>:no_image</tt> - Do not output any <tt><img></tt> tags.
-  # * <tt>:no_links</tt> - Do not output any <tt><a></tt> tags.
-  # * <tt>:no_tables</tt> - Do not output any tables.
-  # * <tt>:strict</tt> - Disable superscript and relaxed emphasis processing.
-  # * <tt>:autolink</tt> - Greedily urlify links.
-  # * <tt>:safelink</tt> - Do not make links for unknown URL types.
-  # * <tt>:no_pseudo_protocols</tt> - Do not process pseudo-protocols.
+  # * <tt>:filter_styles</tt>       - Do not output <tt><style></tt> tags.
+  # * <tt>:fold_lines</tt>          - RedCloth compatible line folding (not used).
+  # * <tt>:MKD_NOLINKS</tt>         - Don't do link processing, block <a> tags
+  # * <tt>:MKD_NOIMAGE</tt>         - Don't do image processing, block <img>
+  # * <tt>:MKD_NOPANTS</tt>         - Don't run smartypants()
+  # * <tt>:MKD_NOHTML</tt>          - Don't allow raw html through AT ALL
+  # * <tt>:MKD_STRICT</tt>          - Disable SUPERSCRIPT, RELAXED_EMPHASIS
+  # * <tt>:MKD_TAGTEXT</tt>         - Process text inside an html tag; no <em>, no <bold>, no html or [] expansion
+  # * <tt>:MKD_NO_EXT</tt>          - Don't allow pseudo-protocols
+  # * <tt>:MKD_CDATA</tt>           - Generate code for xml ![CDATA[...]]
+  # * <tt>:MKD_NOSUPERSCRIPT</tt>   - No A^B
+  # * <tt>:MKD_NORELAXED</tt>       - Emphasis happens everywhere
+  # * <tt>:MKD_NOTABLES</tt>        - Don't process PHP Markdown Extra tables.
+  # * <tt>:MKD_NOSTRIKETHROUGH</tt> - Forbid ~~strikethrough~~
+  # * <tt>:MKD_TOC</tt>             - Do table-of-contents processing
+  # * <tt>:MKD_1_COMPAT</tt>        - Compatability with MarkdownTest_1.0
+  # * <tt>:MKD_AUTOLINK</tt>        - Make http://foo.com a link even without <>s
+  # * <tt>:MKD_SAFELINK</tt>        - Paranoid check for link protocol
+  # * <tt>:MKD_NOHEADER</tt>        - Don't process document headers
+  # * <tt>:MKD_TABSTOP</tt>         - Expand tabs to 4 spaces
+  # * <tt>:MKD_NODIVQUOTE</tt>      - Forbid >%class% blocks
+  # * <tt>:MKD_NOALPHALIST</tt>     - Forbid alphabetic lists
+  # * <tt>:MKD_NODLIST</tt>         - Forbid definition lists
   #
   def initialize(text, *extensions)
     @text  = text
-    extensions.each { |e| send("#{e}=", true) }
+    @flags = 0
+    extensions.each do |ext|
+      writer = "#{ext}="
+      if respond_to? writer
+        send writer, true
+      else
+        @flags |= RDiscount.const_get(ext)
+      end
+    end
   end
 
 end
