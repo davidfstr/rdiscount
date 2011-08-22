@@ -1,5 +1,5 @@
-Discount Markdown Processor for Ruby (with some extras)
-=======================================================
+Moredown - Discount Markdown Processor for Ruby (with some extras)
+==================================================================
 
 Discount is an implementation of John Gruber's Markdown markup language in C. It
 implements all of the language described in [the markdown syntax document][1] and
@@ -19,8 +19,7 @@ Installation, Hacking
 
 The Moredown gem can be installed from Github:
 
-    $ gem sources -a http://gems.github.com
-    $ [sudo] gem install nathanhoad-moredown
+    $ gem install moredown
 
 The Moredown sources are available via Git:
 
@@ -38,7 +37,7 @@ implements some extras:
 
  * Static method for simple calls
 
-        require 'nathanhoad-moredown'
+        require 'moredown'
         html = Moredown.text_to_html("Hello World!")
 
  * Remap relative URLs
@@ -85,7 +84,7 @@ implements some extras:
 RDiscount implements the basic protocol popularized by RedCloth and adopted
 by BlueCloth:
 
-    require 'nathanhoad-moredown'
+    require 'moredown'
     markdown = Moredown.new("Hello World!")
     puts markdown.to_html
 
@@ -93,7 +92,7 @@ Inject Moredown into your BlueCloth-using code by replacing your bluecloth
 require statements with the following:
 
     begin
-      require 'nathanhoad-moredown'
+      require 'moredown'
       BlueCloth = Moredown
     rescue LoadError
       require 'bluecloth'
