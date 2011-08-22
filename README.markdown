@@ -17,7 +17,7 @@ developed by [Ryan Tomayko][4] and extended by [Nathan Hoad][5].
 Installation, Hacking
 ---------------------
 
-The Moredown gem can be installed from Github:
+The Moredown gem can be installed from [Rubygems](https://rubygems.org/gems/moredown):
 
     $ gem install moredown
 
