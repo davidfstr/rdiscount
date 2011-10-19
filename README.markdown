@@ -34,7 +34,7 @@ The RDiscount sources are available via Git:
 See the file [BUILDING][] for hacking instructions.
 
 [gemcutter]: http://gemcutter.org/gems/rdiscount
-[BUILDING]: BUILDING
+[BUILDING]: https://github.com/rtomayko/rdiscount/blob/master/BUILDING
 
 USAGE
 -----
