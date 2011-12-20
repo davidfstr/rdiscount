@@ -5,9 +5,9 @@ Discount is an implementation of John Gruber's Markdown markup language in C. It
 implements all of the language described in [the markdown syntax document][1] and
 passes the [Markdown 1.0 test suite][2].
 
-CODE: `git clone git://github.com/rtomayko/rdiscount.git`  
-HOME: <http://github.com/rtomayko/rdiscount>  
-DOCS: <http://rdoc.info/projects/rtomayko/rdiscount>  
+CODE: `git clone git://github.com/rtomayko/rdiscount.git`
+HOME: <http://github.com/rtomayko/rdiscount>
+DOCS: <http://rdoc.info/projects/rtomayko/rdiscount>
 BUGS: <http://github.com/rtomayko/rdiscount/issues>
 
 Discount was developed by [David Loren Parsons][3]. The Ruby extension
@@ -34,7 +34,7 @@ The RDiscount sources are available via Git:
 See the file [BUILDING][] for hacking instructions.
 
 [gemcutter]: http://gemcutter.org/gems/rdiscount
-[BUILDING]: BUILDING
+[BUILDING]: https://github.com/rtomayko/rdiscount/blob/master/BUILDING
 
 USAGE
 -----
