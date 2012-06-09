@@ -3,7 +3,7 @@ rdiscount(1) -- humane markup to HTML conversion tool
 
 ## SYNOPSIS
 
-`rdiscount` [<file>...]
+[`env` RDISCOUNT_EXTENSIONS='<extension>,...'] `rdiscount` [<file>...]
 
 ## DESCRIPTION
 
@@ -11,13 +11,87 @@ The `rdiscount` utility reads one or more markdown(7)-formatted text <file>s and
 writes HTML to standard output. With no <file>, or when <file> is '-',
 `rdiscount` reads source text from standard input.
 
+The `RDISCOUNT_EXTENSIONS` environment variable can specify a comma-separated
+list of Markdown processing <extension>s to enable (see **EXTENSIONS** below).
+
+## EXTENSIONS
+
+* `filter_styles`:
+   Do not output `<style>` tags.
+
+* `fold_lines`:
+   RedCloth compatible line folding (not used).
+
+* `MKD_NOLINKS`:
+   Don't do link processing, block `<a>` tags
+
+* `MKD_NOIMAGE`:
+   Don't do image processing, block `<img>`
+
+* `MKD_NOPANTS`:
+   Don't run smartypants()
+
+* `MKD_NOHTML`:
+   Don't allow raw html through AT ALL
+
+* `MKD_STRICT`:
+   Disable SUPERSCRIPT, RELAXED_EMPHASIS
+
+* `MKD_TAGTEXT`:
+   Process text inside an html tag; no `<em>`, no `<bold>`, no html or [] expansion
+
+* `MKD_NO_EXT`:
+   Don't allow pseudo-protocols
+
+* `MKD_CDATA`:
+   Generate code for xml ![CDATA[...]]
+
+* `MKD_NOSUPERSCRIPT`:
+   No A^B
+
+* `MKD_NORELAXED`:
+   Emphasis happens everywhere
+
+* `MKD_NOTABLES`:
+   Don't process PHP Markdown Extra tables.
+
+* `MKD_NOSTRIKETHROUGH`:
+   Forbid ~~strikethrough~~
+
+* `MKD_TOC`:
+   Do table-of-contents processing
+
+* `MKD_1_COMPAT`:
+   Compatability with MarkdownTest_1.0
+
+* `MKD_AUTOLINK`:
+   Make http://foo.com a link even without `<>`s
+
+* `MKD_SAFELINK`:
+   Paranoid check for link protocol
+
+* `MKD_NOHEADER`:
+   Don't process document headers
+
+* `MKD_TABSTOP`:
+   Expand tabs to 4 spaces
+
+* `MKD_NODIVQUOTE`:
+   Forbid >%class% blocks
+
+* `MKD_NOALPHALIST`:
+   Forbid alphabetic lists
+
+* `MKD_NODLIST`:
+   Forbid definition lists
+
 ## RETURN VALUES
 
 The `rdiscount` utility exits 0 on success, and > 0 if an error occurs.
 
 ## SEE ALSO
 
-markdown(7)
+markdown(7), env(1)
 
 ## AUTHOR
 
