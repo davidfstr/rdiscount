@@ -10,3 +10,5 @@
 /ext/Makefile
 /pkg
 /discount-*
+.DS_Store
+rdiscount-*.gem
