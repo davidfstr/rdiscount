@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
     ext/mkdio.h
     ext/rdiscount.c
     ext/resource.c
+    ext/setup.c
     ext/tags.c
     ext/tags.h
     ext/toc.c
