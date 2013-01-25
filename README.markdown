@@ -1,10 +1,6 @@
 Discount Markdown Processor for Ruby
 ====================================
 
-**NOTE: This project is no longer maintained. Please migrate to [Redcarpet](https://github.com/vmg/redcarpet)** 
-
-----
-
 Discount is an implementation of John Gruber's Markdown markup language in C. It
 implements all of the language described in [the markdown syntax document][1] and
 passes the [Markdown 1.0 test suite][2].
@@ -15,12 +11,12 @@ DOCS: <http://rdoc.info/projects/rtomayko/rdiscount>
 BUGS: <http://github.com/rtomayko/rdiscount/issues>  
 
 Discount was developed by [David Loren Parsons][3]. The Ruby extension
-is maintained by [Ryan Tomayko][4].
+is maintained by [David Foster][4].
 
 [1]: http://daringfireball.net/projects/markdown/syntax
 [2]: http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip
 [3]: http://www.pell.portland.or.us/~orc
-[4]: http://tomayko.com/about
+[4]: https://github.com/davidfstr
 
 INSTALL, HACKING
 ----------------
