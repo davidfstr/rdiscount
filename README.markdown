@@ -21,9 +21,9 @@ is maintained by [David Foster][4].
 INSTALL, HACKING
 ----------------
 
-New releases of RDiscount are published to [gemcutter][]:
+New releases of RDiscount are published to [RubyGems][]:
 
-    $ [sudo] gem install rdiscount -s http://gemcutter.org
+    $ [sudo] gem install rdiscount
 
 The RDiscount sources are available via Git:
 
@@ -33,7 +33,7 @@ The RDiscount sources are available via Git:
 
 See the file [BUILDING][] for hacking instructions.
 
-[gemcutter]: http://gemcutter.org/gems/rdiscount
+[RubyGems]: https://rubygems.org/gems/rdiscount
 [BUILDING]: https://github.com/rtomayko/rdiscount/blob/master/BUILDING
 
 USAGE
