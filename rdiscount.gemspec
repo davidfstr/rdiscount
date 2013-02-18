@@ -15,6 +15,8 @@ Gem::Specification.new do |s|
     bin/rdiscount
     discount
     ext/Csio.c
+    ext/VERSION
+    ext/amalloc.c
     ext/amalloc.h
     ext/basename.c
     ext/config.h
@@ -24,6 +26,7 @@ Gem::Specification.new do |s|
     ext/dumptree.c
     ext/emmatch.c
     ext/extconf.rb
+    ext/flags.c
     ext/generate.c
     ext/html5.c
     ext/markdown.c
@@ -35,8 +38,11 @@ Gem::Specification.new do |s|
     ext/setup.c
     ext/tags.c
     ext/tags.h
+    ext/theme.c
     ext/toc.c
+    ext/version.c
     ext/xml.c
+    ext/xmlpage.c
     lib/markdown.rb
     lib/rdiscount.rb
     man/markdown.7
