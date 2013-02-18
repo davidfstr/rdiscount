@@ -12,7 +12,7 @@ Use your rdiscount working copy when running ruby programs:
     $ export RUBYLIB=~/rdiscount/lib:$RUBYLIB
     $ ruby some-program.rb
 
-Gathering changes from an upstream Orc/discount.git clone requires first
+Gathering changes from an upstream discount clone requires first
 grabbing the discount submodule into the root of the project and then running
 the rake gather task to copy discount source files into the ext/ directory:
 
@@ -25,14 +25,104 @@ the rake gather task to copy discount source files into the ext/ directory:
     $ rake gather
     $ rake build
 
-The rtomayko/discount.git repository's master branch is the default submodule
-head. It exists to merge branches for rdiscount specific patches to the upstream
-discount codebase.
 
-Do work in the submodule and then add a remote for your clone THAT YOU FORKED ON
-GITHUB BECAUSE YOU'RE GOING TO SEND ME A PULL REQUEST. After you've committed
-your great changes somewhere, push them up with:
+UPGRADING Discount
+==================
+
+The most common maintenance task is upgrading the version of Discount that
+RDiscount is using.
+
+Before doing anything, make sure you can build the current (unmodified) version
+of RDiscount. See the section above for details.
+
+Update the Discount submodule to the desired version:
 
     $ cd discount
-    $ git remote add you git@github.com:you/discount.git
-    $ git push you HEAD:topic-branch-name
+    $ git fetch
+    $ git checkout v2.0.7.x  # insert desired version
+    $ cd ..
+
+Copy the new Discount sources to the appropriate directories for RDiscount:
+
+    $ rake gather
+
+Update rdiscount.gemspec to include all *.c, *.h, and *.rb files in
+ext. This must be done manually. Here's a quick way to get the full list:
+
+    $ echo ext/*.c ext/*.h ext/*.rb ext/VERSION | tr ' ' "\n" | sort
+
+Build the RDiscount gem. If you get errors related to missing files
+in ext, make sure you updated the gemspec correctly in the previous step.
+
+    $ gem build rdiscount.gemspec
+
+Install this new gem locally. It is recommended that you use RVM to
+create an isolated installation environment. If you get an error after the line
+"Building native extensions", see the troubleshooting section below.
+
+    $ rvm ruby@rdiscount --create  # recommended; requires RVM
+    $ gem install rdiscount-*.gem
+
+Make sure the gem can be imported:
+
+    $ ruby -e 'require "rdiscount"'
+
+Worked? Swell! The hard part is past.
+
+Check the Discount release notes to determine whether it has gained any new
+features that should be exposed through the RDiscount Ruby interface
+(lib/rdiscount.rb), such as new MKD_* flags. If so, update the
+Ruby interface.
+
+For new Discount extensions, you will need to update:
+
+* lib/rdiscount.rb with new accessors and
+* the rb_rdiscount__get_flags function in ext/rdiscount.c with new
+  accessor-to-flag mappings for each new extension.
+
+You should also look for RDiscount-specific bugs & feature requests in the
+GitHub tracker and fix a few.
+
+Update rdiscount.gemspec with the new version number and date.
+Push that change as the final commit with a message in the format
+"2.0.7 release".
+
+Push the gem file to RubyGems.
+
+    $ gem push rdiscount-NEW_VERSION.gem
+
+Announce the new release! For releases with new features it is recommended to
+write a full blog post.
+
+
+Troubleshooting Native Extension Issues
+---------------------------------------
+
+The most likely place where errors will crop up is when you attempt to build
+the C extension. If this happens, you will have to debug manually. Below are
+a few recommended sanity checks:
+
+Ensure the Makefile is generated correctly:
+
+    $ cd ext
+    $ ruby extconf.rb
+
+Ensure make succeeds:
+
+    $ make
+
+If you get linker errors related to there being duplicate symbols for _main,
+you probably need to update the deploy target of the Rakefile to exclude
+new *.c files from Discount that have a main function.
+
+For issues related to config.h or extconf.rb, there was probably some
+change to Discount's configure.sh that broke them. You will probably need
+to update these files in ext/ manually.
+
+For other errors, you'll have to investigate yourself. Common error classes:
+    * 'ext/configure.sh' fails:
+        - Create a patch to the upstream Discount.
+    * Some files missing from ext/ that are present in discount/:
+        - Update 'rake deploy' target to copy more files.
+    * Some files missing when `gem build` is run:
+        - Update gemspec to enumerate the correct files in ext/.
