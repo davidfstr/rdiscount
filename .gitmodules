@@ -1,4 +1,4 @@
 [submodule "discount"]
 	path = discount
-	url = git://github.com/rtomayko/discount.git
+	url = git://github.com/davidfstr/discount.git
 	ignore = untracked

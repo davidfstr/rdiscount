@@ -111,14 +111,49 @@ CLEAN.include 'doc'
 
 desc 'Gather required discount sources into extension directory'
 task :gather => 'discount/markdown.h' do |t|
-  files =
-    FileList[
-      'discount/{markdown,mkdio,amalloc,cstring,tags}.h',
-      'discount/{markdown,docheader,dumptree,generate,mkdio,resource,toc,Csio,xml,css,basename,emmatch,tags,html5}.c'
-    ]
-  cp files, 'ext/',
-    :preserve => true,
-    :verbose => true
+  rdiscount_ext_files = [
+    "config.h",
+    "extconf.rb",
+    "rdiscount.c",
+  ]
+  
+  discount_c_files_with_main_function = [
+    "main.c",
+    "makepage.c",
+    "mkd2html.c",
+  ]
+  
+  # Ensure configure.sh was run
+  if not File.exists? 'discount/mkdio.h'
+    abort "discount/mkdio.h not found. Did you run ./configure.sh in the discount directory?"
+  end
+  
+  # Delete all *.c and *.h files from ext that are not specific to RDiscount.
+  Dir.chdir("ext") do
+    c_files_to_delete = Dir["*.c"].select { |e| !rdiscount_ext_files.include? e }
+    h_files_to_delete = Dir["*.h"].select { |e| !rdiscount_ext_files.include? e }
+    
+    rm (c_files_to_delete + h_files_to_delete),
+      :verbose => true
+  end
+  
+  # Copy all *.c and *.h files from discount -> ext except those that
+  # RDiscount overrides. Also exclude Discount files with main functions.
+  Dir.chdir("discount") do
+    c_files_to_copy = Dir["*.c"].select { |e|
+      (!rdiscount_ext_files.include? e) &&
+      (!discount_c_files_with_main_function.include? e)
+    }
+    h_files_to_copy = Dir["*.h"].select { |e| !rdiscount_ext_files.include? e }
+  
+    cp (c_files_to_copy + h_files_to_copy), '../ext/',
+      :preserve => true,
+      :verbose => true
+  end
+  
+  cp 'discount/VERSION', 'ext/'
+  
+  # Copy man page
   cp 'discount/markdown.7', 'man/'
 end
 

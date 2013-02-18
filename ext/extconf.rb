@@ -15,9 +15,11 @@ end
 DWORD = sized_int(4, ["unsigned long", "unsigned int"])
 WORD =  sized_int(2, ["unsigned int", "unsigned short"])
 BYTE = "unsigned char"
+VERSION = IO.read('VERSION').strip
 
 $defs.push("-DDWORD='#{DWORD}'")
 $defs.push("-DWORD='#{WORD}'")
 $defs.push("-DBYTE='#{BYTE}'")
+$defs.push("-DVERSION=\\\"#{VERSION}\\\"")
 
 create_makefile('rdiscount')
