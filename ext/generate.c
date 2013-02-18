@@ -963,7 +963,7 @@ maybe_tag_or_link(MMIOT *f)
 	}
 	else if ( isspace(c) )
 	    break;
-	else if ( ! (c == '/' || c == '-' || c == '_' || isalnum(c) ) )
+	else if ( ! (c == '/' || isalnum(c) ) )
 	    maybetag=0;
     }
 
