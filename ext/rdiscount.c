@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <locale.h>
 #include "ruby.h"
 #include "mkdio.h"
 
@@ -16,6 +17,17 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
     Check_Type(text, T_STRING);
 
     int flags = rb_rdiscount__get_flags(self);
+    
+    /* 
+     * Force Discount to use ASCII character encoding for isalnum(), isalpha(),
+     * and similar functions.
+     * 
+     * Ruby tends to use UTF-8 encoding, which is ill-defined for these
+     * functions since they expect 8-bit codepoints (and UTF-8 has codepoints
+     * of at least 21 bits).
+     */
+    char *old_locale = setlocale(LC_CTYPE, NULL);
+    setlocale(LC_CTYPE, "C");   // ASCII (and passthru characters > 127)
 
     MMIOT *doc = mkd_string(RSTRING_PTR(text), RSTRING_LEN(text), flags);
 
@@ -29,6 +41,7 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
     }
     mkd_cleanup(doc);
 
+    setlocale(LC_CTYPE, old_locale);
 
     /* force the input encoding */
     if ( rb_respond_to(text, rb_intern("encoding")) ) {

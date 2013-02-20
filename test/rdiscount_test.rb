@@ -117,5 +117,10 @@ Obtuse text.[^1]
 EOS
     assert rd.to_html.include?('<a href="#fn:1" rel="footnote">1</a>')
   end
+  
+  def test_that_unicode_urls_encoded_correctly
+    rd = RDiscount.new("[Test](http://example.com/ß)")
+    assert_equal "<p><a href=\"http://example.com/%C3%9F\">Test</a></p>\n", rd.to_html
+  end
 
 end
