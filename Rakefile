@@ -121,6 +121,7 @@ task :gather => 'discount/markdown.h' do |t|
     "main.c",
     "makepage.c",
     "mkd2html.c",
+    "theme.c",
   ]
   
   # Ensure configure.sh was run

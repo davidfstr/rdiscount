@@ -38,7 +38,6 @@ Gem::Specification.new do |s|
     ext/setup.c
     ext/tags.c
     ext/tags.h
-    ext/theme.c
     ext/toc.c
     ext/version.c
     ext/xml.c
