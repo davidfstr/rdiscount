@@ -67,6 +67,10 @@ Make sure the gem can be imported:
 
     $ ruby -e 'require "rdiscount"'
 
+Make sure the tests (still) pass:
+
+    $ rake test
+
 Worked? Swell! The hard part is past.
 
 Check the Discount release notes to determine whether it has gained any new
