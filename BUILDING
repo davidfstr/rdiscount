@@ -87,6 +87,11 @@ For new Discount extensions, you will need to update:
 You should also look for RDiscount-specific bugs & feature requests in the
 GitHub tracker and fix a few.
 
+If any bugs were fixed or features added, be sure to rerun the
+release tests mentioned above.
+
+Update the CHANGELOG.
+
 Update rdiscount.gemspec with the new version number and date.
 Push that change as the final commit with a message in the format
 "2.0.7 release".
