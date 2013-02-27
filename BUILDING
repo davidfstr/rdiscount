@@ -96,8 +96,13 @@ Update rdiscount.gemspec with the new version number and date.
 Push that change as the final commit with a message in the format
 "2.0.7 release".
 
-Push the gem file to RubyGems.
+Tag the release commit:
 
+    $ git tag 2.0.7     # insert desired version
+
+Rebuild the gem file and push it to RubyGems.
+
+    $ gem build rdiscount.gemspec
     $ gem push rdiscount-NEW_VERSION.gem
 
 Announce the new release! For releases with new features it is recommended to
