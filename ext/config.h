@@ -20,4 +20,6 @@
 #define INITRNG(x) srand((unsigned int)x)
 #endif
 
+#include "ruby-config.h"
+
 #endif/* __MARKDOWN_D */
