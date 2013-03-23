@@ -19,6 +19,7 @@ VERSION = IO.read('VERSION').strip
 
 open(File.join(File.dirname(__FILE__), "ruby-config.h"), "wb") do |f|
   f.write <<-EOF
+// These data types may be already defined if building on Windows (using MinGW)
 #ifndef DWORD
   #define DWORD #{DWORD}
 #endif
