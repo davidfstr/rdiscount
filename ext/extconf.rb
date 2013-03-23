@@ -17,9 +17,20 @@ WORD =  sized_int(2, ["unsigned int", "unsigned short"])
 BYTE = "unsigned char"
 VERSION = IO.read('VERSION').strip
 
-$defs.push("-DDWORD='#{DWORD}'")
-$defs.push("-DWORD='#{WORD}'")
-$defs.push("-DBYTE='#{BYTE}'")
+open(File.join(File.dirname(__FILE__), "ruby-config.h"), "wb") do |f|
+  f.write <<-EOF
+#ifndef DWORD
+  #define DWORD #{DWORD}
+#endif
+#ifndef WORD
+  #define WORD #{WORD}
+#endif
+#ifndef BYTE
+  #define BYTE #{BYTE}
+#endif
+  EOF
+end
+
 $defs.push("-DVERSION=\\\"#{VERSION}\\\"")
 
 create_makefile('rdiscount')
