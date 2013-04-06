@@ -11,4 +11,5 @@
 /pkg
 /discount-*
 .DS_Store
+doc
 rdiscount-*.gem
