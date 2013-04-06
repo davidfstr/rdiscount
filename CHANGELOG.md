@@ -1,6 +1,14 @@
 # RDiscount Changelog
 
-## Version 2.0.7.1
+## Version 2.0.7.2 <small>(Mar 2013)</small>
+
+### Fixes
+
+* Fix compile error on Windows.
+* Disallow install on Ruby 1.9.2, due to known bugs in Ruby.
+    * Please upgrade to Ruby 1.9.3 or later.
+
+## Version 2.0.7.1 <small>(Feb 2013)</small>
 
 ### Fixes
 
