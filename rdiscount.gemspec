@@ -60,4 +60,6 @@ Gem::Specification.new do |s|
   s.executables = ["rdiscount"]
   s.require_paths = ["lib"]
   s.rubyforge_project = 'wink'
+  # Ruby 1.9.2 has a known bug in mkmf. Ruby 1.9.3 or later is fine.
+  s.required_ruby_version = '!= 1.9.2'
 end
