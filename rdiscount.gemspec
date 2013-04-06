@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'rdiscount'
-  s.version = '2.0.7.1'
+  s.version = '2.0.7.2'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2013-02-26'
+  s.date = '2013-04-06'
   s.email = 'rtomayko@gmail.com'
   s.homepage = 'http://github.com/rtomayko/rdiscount'
   s.authors = ["Ryan Tomayko", "David Loren Parsons", "Andrew White", "David Foster"]
