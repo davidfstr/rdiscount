@@ -11,5 +11,6 @@
 /pkg
 /discount-*
 .DS_Store
+.yardoc
 doc
 rdiscount-*.gem
