@@ -90,8 +90,8 @@ EOS
   end
 
   def test_that_autolink_flag_works
-    rd = RDiscount.new("http://github.com/rtomayko/rdiscount", :autolink)
-    assert_equal "<p><a href=\"http://github.com/rtomayko/rdiscount\">http://github.com/rtomayko/rdiscount</a></p>\n", rd.to_html
+    rd = RDiscount.new("http://github.com/davidfstr/rdiscount", :autolink)
+    assert_equal "<p><a href=\"http://github.com/davidfstr/rdiscount\">http://github.com/davidfstr/rdiscount</a></p>\n", rd.to_html
   end
 
   def test_that_safelink_flag_works

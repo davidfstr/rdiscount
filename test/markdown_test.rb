@@ -123,7 +123,7 @@ class MarkdownTest < Test::Unit::TestCase
       markdown.to_html.gsub("\n", "")
   end
 
-  # http://github.com/rtomayko/rdiscount/issues/#issue/13
+  # http://github.com/davidfstr/rdiscount/issues/#issue/13
   def test_headings_with_trailing_space
     text = "The Ant-Sugar Tales \n"         +
            "=================== \n\n"        +
