@@ -105,6 +105,12 @@ EOS
   end
 
   def test_that_tags_can_have_dashes_and_underscores
+    if RDiscount::VERSION.start_with? "2.0.7"
+      # Skip test for 2.0.7.x series due to upstream behavioral change in
+      # Discount 2.0.7. This test can be fixed in Discount 2.1.5 using the
+      # WITH_GITHUB_TAGS compile-time flag.
+      return
+    end
     rd = RDiscount.new("foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b>")
     assert_equal "<p>foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b></p>\n", rd.to_html
   end
