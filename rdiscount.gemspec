@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
     ext/amalloc.c
     ext/amalloc.h
     ext/basename.c
+    ext/blocktags
     ext/config.h
     ext/css.c
     ext/cstring.h
