@@ -111,12 +111,14 @@ CLEAN.include 'doc'
 
 desc 'Gather required discount sources into extension directory'
 task :gather => 'discount/markdown.h' do |t|
+  # Files unique to /ext that should not be overridden
   rdiscount_ext_files = [
     "config.h",
     "extconf.rb",
     "rdiscount.c",
   ]
   
+  # Files in /discount that have a main function and should not be copied to /ext
   discount_c_files_with_main_function = [
     "main.c",
     "makepage.c",
@@ -152,6 +154,8 @@ task :gather => 'discount/markdown.h' do |t|
       :verbose => true
   end
   
+  # Copy special files from discount -> ext
+  cp 'discount/blocktags', 'ext/'
   cp 'discount/VERSION', 'ext/'
   
   # Copy man page
