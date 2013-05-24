@@ -28,11 +28,15 @@ Gem::Specification.new do |s|
     ext/extconf.rb
     ext/flags.c
     ext/generate.c
+    ext/github_flavoured.c
     ext/html5.c
     ext/markdown.c
     ext/markdown.h
     ext/mkdio.c
     ext/mkdio.h
+    ext/mktags.c
+    ext/pgm_options.c
+    ext/pgm_options.h
     ext/rdiscount.c
     ext/resource.c
     ext/setup.c
