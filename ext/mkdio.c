@@ -18,13 +18,13 @@ typedef ANCHOR(Line) LineAnchor;
 
 /* create a new blank Document
  */
-static Document*
-new_Document()
+Document*
+__mkd_new_Document()
 {
     Document *ret = calloc(sizeof(Document), 1);
 
     if ( ret ) {
-	if (( ret->ctx = calloc(sizeof(MMIOT), 1) )) {
+	if ( ret->ctx = calloc(sizeof(MMIOT), 1) ) {
 	    ret->magic = VALID_DOCUMENT;
 	    return ret;
 	}
@@ -34,10 +34,11 @@ new_Document()
 }
 
 
-/* add a line to the markdown input chain
+/* add a line to the markdown input chain, expanding tabs and
+ * noting the presence of special characters as we go.
  */
-static void
-queue(Document* a, Cstring *line)
+void
+__mkd_enqueue(Document* a, Cstring *line)
 {
     Line *p = calloc(sizeof *p, 1);
     unsigned char c;
@@ -60,6 +61,8 @@ queue(Document* a, Cstring *line)
 	    } while ( ++xp % a->tabstop );
 	}
 	else if ( c >= ' ' ) {
+	    if ( c == '|' )
+		p->flags |= PIPECHAR;
 	    EXPAND(p->text) = c;
 	    ++xp;
 	}
@@ -72,8 +75,8 @@ queue(Document* a, Cstring *line)
 
 /* trim leading blanks from a header line
  */
-static void
-header_dle(Line *p)
+void
+__mkd_header_dle(Line *p)
 {
     CLIP(p->text, 0, 1);
     p->dle = mkd_firstnonblank(p);
@@ -88,7 +91,7 @@ Document *
 populate(getc_func getc, void* ctx, int flags)
 {
     Cstring line;
-    Document *a = new_Document();
+    Document *a = __mkd_new_Document();
     int c;
     int pandoc = 0;
 
@@ -106,7 +109,7 @@ populate(getc_func getc, void* ctx, int flags)
 		else
 		    pandoc = EOF;
 	    }
-	    queue(a, &line);
+	    __mkd_enqueue(a, &line);
 	    S(line) = 0;
 	}
 	else if ( isprint(c) || isspace(c) || (c & 0x80) )
@@ -114,7 +117,7 @@ populate(getc_func getc, void* ctx, int flags)
     }
 
     if ( S(line) )
-	queue(a, &line);
+	__mkd_enqueue(a, &line);
 
     DELETE(line);
 
@@ -125,9 +128,9 @@ populate(getc_func getc, void* ctx, int flags)
 	 */
 	Line *headers = T(a->content);
 
-	a->title = headers;             header_dle(a->title);
-	a->author= headers->next;       header_dle(a->author);
-	a->date  = headers->next->next; header_dle(a->date);
+	a->title = headers;             __mkd_header_dle(a->title);
+	a->author= headers->next;       __mkd_header_dle(a->author);
+	a->date  = headers->next->next; __mkd_header_dle(a->date);
 
 	T(a->content) = headers->next->next->next;
     }
@@ -147,14 +150,8 @@ mkd_in(FILE *f, DWORD flags)
 
 /* return a single character out of a buffer
  */
-struct string_ctx {
-    char *data;		/* the unread data */
-    int   size;		/* and how much is there? */
-} ;
-
-
-static int
-strget(struct string_ctx *in)
+int
+__mkd_io_strget(struct string_stream *in)
 {
     if ( !in->size ) return EOF;
 
@@ -167,14 +164,14 @@ strget(struct string_ctx *in)
 /* convert a block of text into a linked list
  */
 Document *
-mkd_string(char *buf, int len, DWORD flags)
+mkd_string(const char *buf, int len, DWORD flags)
 {
-    struct string_ctx about;
+    struct string_stream about;
 
     about.data = buf;
     about.size = len;
 
-    return populate((getc_func)strget, &about, flags & INPUT_MASK);
+    return populate((getc_func)__mkd_io_strget, &about, flags & INPUT_MASK);
 }
 
 
@@ -225,7 +222,7 @@ mkd_string_to_anchor(char *s, int len, mkd_sta_function_t outchar,
 
     size = mkd_line(s, len, &line, IS_LABEL);
     
-    if ( labelformat && size && !isalpha(line[0]) )
+    if ( labelformat && (size>0) && !isalpha(line[0]) )
 	(*outchar)('L',out);
     for ( i=0; i < size ; i++ ) {
 	c = line[i];
@@ -233,7 +230,7 @@ mkd_string_to_anchor(char *s, int len, mkd_sta_function_t outchar,
 	    if ( isalnum(c) || (c == '_') || (c == ':') || (c == '-') || (c == '.' ) )
 		(*outchar)(c, out);
 	    else
-		(*outchar)('.',out);
+		(*outchar)('.', out);
 	}
 	else
 	    (*outchar)(c,out);
@@ -251,7 +248,7 @@ mkd_parse_line(char *bfr, int size, MMIOT *f, int flags)
 {
     ___mkd_initmmiot(f, 0);
     f->flags = flags & USER_FLAGS;
-    ___mkd_reparse(bfr, size, 0, f);
+    ___mkd_reparse(bfr, size, 0, f, 0);
     ___mkd_emblock(f);
 }
 

@@ -23,10 +23,20 @@ typedef struct footnote {
  * that all tabs will be expanded to spaces!], and a pointer to
  * the next line.
  */
+typedef enum { chk_text, chk_code,
+	       chk_hr, chk_dash,
+	       chk_tilde, chk_backtick,
+	       chk_equal } line_type;
 typedef struct line {
     Cstring text;
     struct line *next;
-    int dle;
+    int dle;			/* leading indent on the line */
+    int flags;			/* special attributes for this line */
+#define PIPECHAR	0x01		/* line contains a | */
+#define CHECKED		0x02
+
+    line_type kind;
+    int count;
 } Line;
 
 
@@ -71,6 +81,12 @@ typedef struct callback_data {
 } Callback_data;
 
 
+struct escaped { 
+    char *text;
+    struct escaped *up;
+} ;
+
+
 /* a magic markdown io thing holds all the data structures needed to
  * do the backend processing of a markdown document
  */
@@ -80,6 +96,7 @@ typedef struct mmiot {
     Qblock Q;
     int isp;
     int reference;
+    struct escaped *esc;
     char *ref_prefix;
     STRING(Footnote) *footnotes;
     DWORD flags;
@@ -105,6 +122,7 @@ typedef struct mmiot {
 #define MKD_NOALPHALIST	0x00080000
 #define MKD_NODLIST	0x00100000
 #define MKD_EXTRA_FOOTNOTE 0x00200000
+#define MKD_NOSTYLE	0x00400000
 #define IS_LABEL	0x08000000
 #define USER_FLAGS	0x0FFFFFFF
 #define INPUT_MASK	(MKD_NOHEADER|MKD_TABSTOP)
@@ -137,6 +155,16 @@ typedef struct document {
 } Document;
 
 
+/*
+ * economy FILE-type structure for pulling characters out of a
+ * fixed-length string.
+ */
+struct string_stream {
+    const char *data;	/* the unread data */
+    int   size;		/* and how much is there? */
+} ;
+
+
 extern int  mkd_firstnonblank(Line *);
 extern int  mkd_compile(Document *, DWORD);
 extern int  mkd_document(Document *, char **);
@@ -156,7 +184,10 @@ typedef int (*mkd_sta_function_t)(const int,const void*);
 extern void mkd_string_to_anchor(char*,int, mkd_sta_function_t, void*, int);
 
 extern Document *mkd_in(FILE *, DWORD);
-extern Document *mkd_string(char*,int, DWORD);
+extern Document *mkd_string(const char*,int, DWORD);
+
+extern Document *gfm_in(FILE *, DWORD);
+extern Document *gfm_string(const char*,int, DWORD);
 
 extern void mkd_initialize();
 extern void mkd_shlib_destructor();
@@ -174,8 +205,14 @@ extern void ___mkd_initmmiot(MMIOT *, void *);
 extern void ___mkd_freemmiot(MMIOT *, void *);
 extern void ___mkd_freeLineRange(Line *, Line *);
 extern void ___mkd_xml(char *, int, FILE *);
-extern void ___mkd_reparse(char *, int, int, MMIOT*);
+extern void ___mkd_reparse(char *, int, int, MMIOT*, char*);
 extern void ___mkd_emblock(MMIOT*);
 extern void ___mkd_tidy(Cstring *);
+
+extern Document *__mkd_new_Document();
+extern void __mkd_enqueue(Document*, Cstring *);
+extern void __mkd_header_dle(Line *);
+
+extern int  __mkd_io_strget(struct string_stream *);
 
 #endif/*_MARKDOWN_D*/

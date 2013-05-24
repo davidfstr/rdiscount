@@ -18,5 +18,13 @@ char markdown_version[] = VERSION
 #else
 		" DL=NONE"
 #endif
-
+#if WITH_ID_ANCHOR
+		" ID-ANCHOR"
+#endif
+#if WITH_GITHUB_TAGS
+		" GITHUB-TAGS"
+#endif
+#if WITH_FENCED_CODE
+		" FENCED-CODE"
+#endif
 		;
