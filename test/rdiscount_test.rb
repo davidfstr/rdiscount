@@ -53,7 +53,7 @@ class RDiscountTest < Test::Unit::TestCase
 
   def test_should_get_the_generated_toc
     rd = RDiscount.new("# Level 1\n\n## Level 2", :generate_toc)
-    exp = %(<ul>\n <li><a href="#Level.1">Level 1</a></li>\n <li><ul>\n  <li><a href="#Level.2">Level 2</a></li>\n </ul></li>\n</ul>)
+    exp = %(<ul>\n <li><a href=\"#Level.1\">Level 1</a>\n <ul>\n  <li><a href=\"#Level.2\">Level 2</a></li>\n </ul>\n </li>\n</ul>)
     assert_equal exp, rd.toc_content.strip
   end
 
