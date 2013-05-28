@@ -111,6 +111,14 @@ EOS
     rd = RDiscount.new("A^B")
     assert_equal "<p>A<sup>B</sup></p>\n", rd.to_html
   end
+  
+  def test_that_no_strikethrough_flag_works
+    rd = RDiscount.new("~~A~~", :no_strikethrough)
+    assert_equal "<p>~~A~~</p>\n", rd.to_html
+    
+    rd = RDiscount.new("~~A~~")
+    assert_equal "<p><del>A</del></p>\n", rd.to_html
+  end
 
   def test_that_tags_can_have_dashes_and_underscores
     if RDiscount::VERSION.start_with? "2.0.7"

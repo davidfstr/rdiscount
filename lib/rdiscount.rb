@@ -71,6 +71,9 @@ class RDiscount
   
   # Disable superscript processing.
   attr_accessor :no_superscript
+  
+  # Disable strikethrough processing.
+  attr_accessor :no_strikethrough
 
   # Create a RDiscount Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
