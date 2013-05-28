@@ -29,6 +29,7 @@ static AccessorFlagPair ACCESSOR_2_FLAG[] = {
     { "autolink", MKD_AUTOLINK },
     { "safelink", MKD_SAFELINK },
     { "no_pseudo_protocols", MKD_NO_EXT },
+    { "no_superscript", MKD_NOSUPERSCRIPT },
     { NULL, 0 }     /* sentinel */
 };
 

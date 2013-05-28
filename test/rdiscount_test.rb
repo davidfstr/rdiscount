@@ -103,6 +103,14 @@ EOS
     rd = RDiscount.new("[foo](id:bar)", :no_pseudo_protocols)
     assert_equal "<p>[foo](id:bar)</p>\n", rd.to_html
   end
+  
+  def test_that_no_superscript_flag_works
+    rd = RDiscount.new("A^B", :no_superscript)
+    assert_equal "<p>A^B</p>\n", rd.to_html
+    
+    rd = RDiscount.new("A^B")
+    assert_equal "<p>A<sup>B</sup></p>\n", rd.to_html
+  end
 
   def test_that_tags_can_have_dashes_and_underscores
     if RDiscount::VERSION.start_with? "2.0.7"

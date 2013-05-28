@@ -68,6 +68,9 @@ class RDiscount
 
   # Do not process pseudo-protocols like <tt>[](id:name)</tt>
   attr_accessor :no_pseudo_protocols
+  
+  # Disable superscript processing.
+  attr_accessor :no_superscript
 
   # Create a RDiscount Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
