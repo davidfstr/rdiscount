@@ -3,6 +3,35 @@
 #include "ruby.h"
 #include "mkdio.h"
 
+typedef struct {
+    char *accessor_name;
+    int flag;
+} AccessorFlagPair;
+
+/* 
+ * Maps accessor names on the RDiscount object to Discount flags.
+ * 
+ * The following flags are handled specially:
+ * - MKD_TABSTOP: Always set.
+ * - MKD_NOHEADER: Always set.
+ * - MKD_NOPANTS: Set unless the "smart" accessor returns true.
+ * 
+ * See rb_rdiscount__get_flags() for the detailed implementation.
+ */
+static AccessorFlagPair ACCESSOR_2_FLAG[] = {
+    { "filter_html", MKD_NOHTML },
+    { "footnotes", MKD_EXTRA_FOOTNOTE },
+    { "generate_toc", MKD_TOC },
+    { "no_image", MKD_NOIMAGE },
+    { "no_links", MKD_NOLINKS },
+    { "no_tables", MKD_NOTABLES },
+    { "strict", MKD_STRICT },
+    { "autolink", MKD_AUTOLINK },
+    { "safelink", MKD_SAFELINK },
+    { "no_pseudo_protocols", MKD_NO_EXT },
+    { NULL, 0 }     /* sentinel */
+};
+
 static VALUE rb_cRDiscount;
 
 static VALUE
@@ -27,7 +56,7 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
      * of at least 21 bits).
      */
     char *old_locale = strdup(setlocale(LC_CTYPE, NULL));
-    setlocale(LC_CTYPE, "C");   // ASCII (and passthru characters > 127)
+    setlocale(LC_CTYPE, "C");   /* ASCII (and passthru characters > 127) */
 
     MMIOT *doc = mkd_string(RSTRING_PTR(text), RSTRING_LEN(text), flags);
 
@@ -46,8 +75,8 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 
     /* force the input encoding */
     if ( rb_respond_to(text, rb_intern("encoding")) ) {
-      encoding = rb_funcall(text, rb_intern("encoding"), 0);
-      rb_funcall(buf, rb_intern("force_encoding"), 1, encoding);
+        encoding = rb_funcall(text, rb_intern("encoding"), 0);
+        rb_funcall(buf, rb_intern("force_encoding"), 1, encoding);
     }
 
     return buf;
@@ -85,55 +114,24 @@ rb_rdiscount_toc_content(int argc, VALUE *argv, VALUE self)
 
 int rb_rdiscount__get_flags(VALUE ruby_obj)
 {
-  /* compile flags */
-  int flags = MKD_TABSTOP | MKD_NOHEADER;
-
-  /* smart */
-  if ( rb_funcall(ruby_obj, rb_intern("smart"), 0) != Qtrue )
-      flags = flags | MKD_NOPANTS;
-
-  /* filter_html */
-  if ( rb_funcall(ruby_obj, rb_intern("filter_html"), 0) == Qtrue )
-      flags = flags | MKD_NOHTML;
-
-  /* footnotes */
-  if ( rb_funcall(ruby_obj, rb_intern("footnotes"), 0) == Qtrue )
-      flags = flags | MKD_EXTRA_FOOTNOTE;
-
-  /* generate_toc */
-  if ( rb_funcall(ruby_obj, rb_intern("generate_toc"), 0) == Qtrue)
-    flags = flags | MKD_TOC;
-
-  /* no_image */
-  if ( rb_funcall(ruby_obj, rb_intern("no_image"), 0) == Qtrue)
-    flags = flags | MKD_NOIMAGE;
-
-  /* no_links */
-  if ( rb_funcall(ruby_obj, rb_intern("no_links"), 0) == Qtrue)
-    flags = flags | MKD_NOLINKS;
-
-  /* no_tables */
-  if ( rb_funcall(ruby_obj, rb_intern("no_tables"), 0) == Qtrue)
-    flags = flags | MKD_NOTABLES;
-
-  /* strict */
-  if ( rb_funcall(ruby_obj, rb_intern("strict"), 0) == Qtrue)
-    flags = flags | MKD_STRICT;
-
-  /* autolink */
-  if ( rb_funcall(ruby_obj, rb_intern("autolink"), 0) == Qtrue)
-    flags = flags | MKD_AUTOLINK;
-
-  /* safelink */
-  if ( rb_funcall(ruby_obj, rb_intern("safelink"), 0) == Qtrue)
-    flags = flags | MKD_SAFELINK;
-
-  /* no_pseudo_protocols */
-  if ( rb_funcall(ruby_obj, rb_intern("no_pseudo_protocols"), 0) == Qtrue)
-    flags = flags | MKD_NO_EXT;
-
-
-  return flags;
+    AccessorFlagPair *entry;
+    
+    /* compile flags */
+    int flags = MKD_TABSTOP | MKD_NOHEADER;
+    
+    /* The "smart" accessor turns OFF the MKD_NOPANTS flag. */
+    if ( rb_funcall(ruby_obj, rb_intern("smart"), 0) != Qtrue ) {
+        flags = flags | MKD_NOPANTS;
+    }
+    
+    /* Handle standard flags declared in ACCESSOR_2_FLAG */
+    for ( entry = ACCESSOR_2_FLAG; entry->accessor_name; entry++ ) {
+        if ( rb_funcall(ruby_obj, rb_intern(entry->accessor_name), 0) == Qtrue ) {
+            flags = flags | entry->flag;
+        }
+    }
+    
+    return flags;
 }
 
 
