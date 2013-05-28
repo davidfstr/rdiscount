@@ -160,5 +160,10 @@ EOS
     rd = RDiscount.new("A^B")
     assert_equal "<p>A<sup>B</sup></p>\n", rd.to_html
   end
+  
+  def test_that_style_tag_is_not_filtered_by_default
+    rd = RDiscount.new("Hello<style>p { margin: 5px; }</style>")
+    assert_equal "<p>Hello<style>p { margin: 5px; }</style></p>\n", rd.to_html
+  end
 
 end
