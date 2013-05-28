@@ -152,5 +152,13 @@ EOS
     rd = RDiscount.new("A---B", :smart)
     assert_equal "<p>A&mdash;B</p>\n", rd.to_html
   end
+  
+  def test_that_superscripts_can_be_escaped
+    rd = RDiscount.new("A\\^B")
+    assert_equal "<p>A^B</p>\n", rd.to_html
+    
+    rd = RDiscount.new("A^B")
+    assert_equal "<p>A<sup>B</sup></p>\n", rd.to_html
+  end
 
 end
