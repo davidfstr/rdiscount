@@ -144,5 +144,13 @@ EOS
     rd = RDiscount.new("[Test](http://example.com/ß)")
     assert_equal "<p><a href=\"http://example.com/%C3%9F\">Test</a></p>\n", rd.to_html
   end
+  
+  def test_that_dashes_encoded_correctly
+    rd = RDiscount.new("A--B", :smart)
+    assert_equal "<p>A&ndash;B</p>\n", rd.to_html
+    
+    rd = RDiscount.new("A---B", :smart)
+    assert_equal "<p>A&mdash;B</p>\n", rd.to_html
+  end
 
 end
