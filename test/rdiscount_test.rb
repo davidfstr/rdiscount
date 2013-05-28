@@ -184,7 +184,7 @@ EOS
 |---|---|
 | C | D |
 EOS
-    assert_equal "<p>| A | B |\n|---|---|\n| C | D |</p>\n", rd.to_html
+    assert_equal "<table>\n<thead>\n<tr>\n<th> A </th>\n<th> B </th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td> C </td>\n<td> D </td>\n</tr>\n</tbody>\n</table>\n\n", rd.to_html
   end
 
 end
