@@ -177,5 +177,14 @@ EOS
     rd = RDiscount.new("Hello<style>p { margin: 5px; }</style>")
     assert_equal "<p>Hello<style>p { margin: 5px; }</style></p>\n", rd.to_html
   end
+  
+  def test_that_tables_can_have_leading_and_trailing_pipes
+    rd = RDiscount.new(<<EOS)
+| A | B |
+|---|---|
+| C | D |
+EOS
+    assert_equal "<p>| A | B |\n|---|---|\n| C | D |</p>\n", rd.to_html
+  end
 
 end
