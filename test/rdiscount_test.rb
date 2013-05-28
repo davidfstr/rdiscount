@@ -56,6 +56,18 @@ class RDiscountTest < Test::Unit::TestCase
     exp = %(<ul>\n <li><a href=\"#Level.1\">Level 1</a>\n <ul>\n  <li><a href=\"#Level.2\">Level 2</a></li>\n </ul>\n </li>\n</ul>)
     assert_equal exp, rd.toc_content.strip
   end
+  
+  def test_toc_should_escape_apostropes
+    rd = RDiscount.new("# A'B\n\n## C", :generate_toc)
+    exp = %(<ul>\n <li><a href=\"#A.B\">A'B</a>\n <ul>\n  <li><a href=\"#C\">C</a></li>\n </ul>\n </li>\n</ul>)
+    assert_equal exp, rd.toc_content.strip
+  end
+  
+  def test_toc_should_escape_question_marks
+    rd = RDiscount.new("# A?B\n\n## C", :generate_toc)
+    exp = %(<ul>\n <li><a href=\"#A.B\">A?B</a>\n <ul>\n  <li><a href=\"#C\">C</a></li>\n </ul>\n </li>\n</ul>)
+    assert_equal exp, rd.toc_content.strip
+  end
 
   if "".respond_to?(:encoding)
     def test_should_return_string_in_same_encoding_as_input
