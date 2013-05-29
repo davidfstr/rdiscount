@@ -186,5 +186,27 @@ EOS
 EOS
     assert_equal "<table>\n<thead>\n<tr>\n<th> A </th>\n<th> B </th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td> C </td>\n<td> D </td>\n</tr>\n</tbody>\n</table>\n\n", rd.to_html
   end
+  
+  def test_that_gfm_code_blocks_work
+    rd = RDiscount.new(<<EOS)
+```
+line 1
+
+line 2
+```
+EOS
+    assert_equal "<pre><code>line 1\n\nline 2\n</code></pre>\n", rd.to_html
+  end
+  
+    def test_that_pandoc_code_blocks_work
+    rd = RDiscount.new(<<EOS)
+~~~
+line 1
+
+line 2
+~~~
+EOS
+    assert_equal "<pre><code>line 1\n\nline 2\n</code></pre>\n", rd.to_html
+  end
 
 end

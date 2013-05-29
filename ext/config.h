@@ -7,6 +7,9 @@
 /* tabs are four spaces */
 #define TABSTOP 4
 
+/* enable fenced code blocks */
+#define WITH_FENCED_CODE 1
+
 /* these are setup by extconf.rb */
 #if HAVE_RANDOM
 #define COINTOSS() (random()&1)
