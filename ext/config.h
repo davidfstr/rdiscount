@@ -10,6 +10,9 @@
 /* enable fenced code blocks */
 #define WITH_FENCED_CODE 1
 
+/* include - and _ as acceptable characters in HTML tag names */
+#define WITH_GITHUB_TAGS 1
+
 /* these are setup by extconf.rb */
 #if HAVE_RANDOM
 #define COINTOSS() (random()&1)
