@@ -1,5 +1,21 @@
 # RDiscount Changelog
 
+## Version 2.1.6 <small>(May 28, 2013)</small>
+
+* Discount upgraded from 2.0.7 -> 2.1.6
+    * Fenced code blocks
+        * backtick-delimited – from GitHub Flavored Markdown
+        * tilde-delimited – from PHP Markdown Extra
+    * New extensions:
+        * `:no_superscript` - Disables superscript processing.
+        * `:no_strikethrough` - Disables strikethrough processing.
+    * License changed from 4-clause BSD to the more-permissive 3-clause BSD.
+    * Fix `--` and `---` to be converted to `&ndash;` and `&mdash;` correctly.
+    * Fix handling of tables that have leading and trailing pipe characters.
+    * Fix generated table of contents to be valid HTML.
+      Handling of special characters in headings is also improved.
+    * Fix recognition of HTML tags that contain - or _.
+
 ## Version 2.0.7.3 <small>(May 7, 2013)</small>
 
 * Fix usage of deallocated memory when manipulating locale information.
