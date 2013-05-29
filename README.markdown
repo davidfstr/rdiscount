@@ -8,7 +8,7 @@ passes the [Markdown 1.0 test suite][2].
 
 CODE: `git clone git://github.com/davidfstr/rdiscount.git`  
 HOME: <http://dafoster.net/projects/rdiscount/>  
-DOCS: <http://rdoc.info/github/davidfstr/rdiscount/RDiscount>  
+DOCS: <http://rdoc.info/github/davidfstr/rdiscount/master/RDiscount>  
 BUGS: <http://github.com/davidfstr/rdiscount/issues>  
 
 Discount was developed by [David Loren Parsons][3]. The Ruby extension
