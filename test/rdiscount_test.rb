@@ -6,6 +6,12 @@ require 'test/unit'
 require 'rdiscount'
 
 class RDiscountTest < Test::Unit::TestCase
+  def test_that_version_looks_valid
+    if not /^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$/ =~ RDiscount::VERSION
+      assert false, 'Expected RDiscount::VERSION to be a 3 or 4 component version string but found ' + RDiscount::VERSION.to_s
+    end
+  end
+  
   def test_that_discount_does_not_blow_up_with_weird_formatting_case
     text = (<<-TEXT).gsub(/^ {4}/, '').rstrip
     1. some text
@@ -208,5 +214,4 @@ line 2
 EOS
     assert_equal "<pre><code>line 1\n\nline 2\n</code></pre>\n", rd.to_html
   end
-
 end
