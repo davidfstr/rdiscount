@@ -93,6 +93,8 @@ class RDiscount
   # * <tt>:autolink</tt> - Greedily urlify links.
   # * <tt>:safelink</tt> - Do not make links for unknown URL types.
   # * <tt>:no_pseudo_protocols</tt> - Do not process pseudo-protocols.
+  # * <tt>:no_superscript</tt> - Disable superscript processing.
+  # * <tt>:no_strikethrough</tt> - Disable strikethrough processing.
   #
   def initialize(text, *extensions)
     @text  = text
