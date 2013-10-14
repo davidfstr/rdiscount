@@ -1,5 +1,13 @@
 # RDiscount Changelog
 
+## Version 2.1.7 <small>(October 13, 2013)</small>
+
+* Discount upgraded from 2.1.6 -> 2.1.7
+    * GFM fenced code blocks support a language identifier.
+* Definition lists:
+    * [Discount-style definition lists](http://www.pell.portland.or.us/~orc/Code/discount/#dl)
+    * [PHP Markdown Extra definition lists](http://michelf.ca/projects/php-markdown/extra/#def-list)
+
 ## Version 2.1.6 <small>(May 28, 2013)</small>
 
 * Discount upgraded from 2.0.7 -> 2.1.6

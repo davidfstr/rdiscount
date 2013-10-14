@@ -13,6 +13,10 @@
 /* include - and _ as acceptable characters in HTML tag names */
 #define WITH_GITHUB_TAGS 1
 
+/* enable discount and PHP Markdown Extra definition lists */
+#define USE_EXTRA_DL 1
+#define USE_DISCOUNT_DL 1
+
 /* these are setup by extconf.rb */
 #if HAVE_RANDOM
 #define COINTOSS() (random()&1)

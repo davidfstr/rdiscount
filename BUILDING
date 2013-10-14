@@ -20,7 +20,8 @@ the rake gather task to copy discount source files into the ext/ directory:
     Submodule 'discount' (git://github.com/davidfstr/discount.git) registered for path 'discount'
     Cloning into discount...
     $ cd discount
-    $ ./configure.sh --with-fenced-code --with-github-tags
+    $ ./configure.sh --with-fenced-code --with-github-tags --with-dl=both
+    $ make  # ensure it compiles
     $ cd ..
     $ rake gather
     $ rake build
@@ -75,10 +76,14 @@ Worked? Swell! The hard part is past.
 
 Check the Discount release notes to determine whether it has gained any new
 features that should be exposed through the RDiscount Ruby interface
-(lib/rdiscount.rb), such as new MKD_* flags. If so, update the
-Ruby interface.
+(lib/rdiscount.rb), such as new MKD_* flags or configure flags.
+If so, update the Ruby interface.
 
-For new Discount extensions, you will need to update:
+If the ./configure.sh line needs to be changed to support new features,
+you will need to port some #defines from discount/config.h to ext/config.h
+manually to get RDiscount's embedded Discount to use the same configure flags.
+
+For new Discount extensions via new MKD_* flags, you will need to update:
 
 * lib/rdiscount.rb with new accessors and
 * the rb_rdiscount__get_flags function in ext/rdiscount.c with new
@@ -87,8 +92,8 @@ For new Discount extensions, you will need to update:
 You should also look for RDiscount-specific bugs & feature requests in the
 GitHub tracker and fix a few.
 
-If any bugs were fixed or features added, be sure to rerun the
-release tests mentioned above.
+If any bugs were fixed or features added be sure to also add new tests!
+And don't forget to rerun the preexisting tests.
 
 Update the CHANGELOG.
 

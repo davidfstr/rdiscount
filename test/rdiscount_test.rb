@@ -204,7 +204,18 @@ EOS
     assert_equal "<pre><code>line 1\n\nline 2\n</code></pre>\n", rd.to_html
   end
   
-    def test_that_pandoc_code_blocks_work
+  def test_that_gfm_code_blocks_work_with_language
+    rd = RDiscount.new(<<EOS)
+```ruby
+line 1
+
+line 2
+```
+EOS
+    assert_equal "<pre><code class=\"ruby\">line 1\n\nline 2\n</code></pre>\n", rd.to_html
+  end
+  
+  def test_that_pandoc_code_blocks_work
     rd = RDiscount.new(<<EOS)
 ~~~
 line 1
@@ -213,5 +224,33 @@ line 2
 ~~~
 EOS
     assert_equal "<pre><code>line 1\n\nline 2\n</code></pre>\n", rd.to_html
+  end
+  
+  def test_that_discount_definition_lists_work
+    rd = RDiscount.new(<<EOS)
+=tag1=
+=tag2=
+    data.
+EOS
+    assert_equal <<EOS, rd.to_html
+<dl>
+<dt>tag1</dt>
+<dt>tag2</dt>
+<dd>data.</dd>
+</dl>
+EOS
+  end
+  
+  def test_that_extra_definition_lists_work
+    rd = RDiscount.new(<<EOS)
+tag1
+: data
+EOS
+    assert_equal <<EOS, rd.to_html
+<dl>
+<dt>tag1</dt>
+<dd>data</dd>
+</dl>
+EOS
   end
 end
