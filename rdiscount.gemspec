@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.email = 'davidfstr@gmail.com'
   s.homepage = 'http://dafoster.net/projects/rdiscount/'
   s.authors = ["Ryan Tomayko", "David Loren Parsons", "Andrew White", "David Foster"]
+  s.license = "BSD"
   # = MANIFEST =
   s.files = %w[
     BUILDING
