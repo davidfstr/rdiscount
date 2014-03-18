@@ -253,4 +253,15 @@ EOS
 </dl>
 EOS
   end
+  
+  def test_that_emphasis_beside_international_characters_detected
+    rd = RDiscount.new(%(*foo ä bar*))
+    assert_equal %(<p><em>foo ä bar</em></p>\n), rd.to_html
+    
+    rd = RDiscount.new(%(*ä foobar*))
+    assert_equal %(<p><em>ä foobar</em></p>\n), rd.to_html
+    
+    rd = RDiscount.new(%(*foobar ä*))
+    assert_equal %(<p><em>foobar ä</em></p>\n), rd.to_html
+  end
 end
