@@ -34,4 +34,12 @@ end
 
 $defs.push("-DVERSION=\\\"#{VERSION}\\\"")
 
+# Post XCode 5.1 the command line tools on OS X treat unrecognised 
+# command line options as errors and it's been seen that
+# -multiply_definedsuppress can trickle from ruby build settings.
+# Issue 115
+if /darwin|mac os/.match RbConfig::CONFIG['host_os']
+  $DLDFLAGS.gsub!("-multiply_definedsuppress", "")
+end
+
 create_makefile('rdiscount')
