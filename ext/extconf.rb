@@ -38,7 +38,7 @@ $defs.push("-DVERSION=\\\"#{VERSION}\\\"")
 # command line options as errors and it's been seen that
 # -multiply_definedsuppress can trickle from ruby build settings.
 # Issue 115
-if  /darwin|mac os/.match RbConfig::CONFIG['host_os']
+if /darwin|mac os/.match RbConfig::CONFIG['host_os']
   $DLDFLAGS.gsub!("-multiply_definedsuppress", "")
 end
 
