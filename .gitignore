@@ -14,3 +14,4 @@
 .yardoc
 doc
 rdiscount-*.gem
+.idea
