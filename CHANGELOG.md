@@ -1,5 +1,9 @@
 # RDiscount Changelog
 
+## Version 2.1.7.1 <small>(April 12, 2014)</small>
+
+* Compatible with Xcode 5.1's clang on OS X.
+
 ## Version 2.1.7 <small>(October 13, 2013)</small>
 
 * Discount upgraded from 2.1.6 -> 2.1.7
