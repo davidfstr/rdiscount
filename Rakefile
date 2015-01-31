@@ -8,7 +8,7 @@ task :default => :test
 # Ruby Extension
 # ==========================================================
 
-DLEXT = Config::MAKEFILE_CONFIG['DLEXT']
+DLEXT = RbConfig::MAKEFILE_CONFIG['DLEXT']
 RUBYDIGEST = Digest::MD5.hexdigest(`ruby --version`)
 
 file "ext/ruby-#{RUBYDIGEST}" do |f|
