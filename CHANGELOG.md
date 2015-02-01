@@ -1,5 +1,14 @@
 # RDiscount Changelog
 
+## Version 2.1.8 <small>(February 1, 2015)</small>
+
+* Compatible with Ruby 1.2.0.
+* Discount upgraded from 2.1.7 -> 2.1.8
+    * GitHub-style language attributes on fenced code blocks.
+    * Long numeric list items.
+    * Fix footnote numbering inside of nested elements.
+    * Fix a bug where autolink + github flavored markdown absorbs the ^C eoln character into a link at the end of a line.
+
 ## Version 2.1.7.1 <small>(April 12, 2014)</small>
 
 * Compatible with Xcode 5.1's clang on OS X.
