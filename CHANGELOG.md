@@ -2,7 +2,7 @@
 
 ## Version 2.1.8 <small>(February 1, 2015)</small>
 
-* Compatible with Ruby 1.2.0.
+* Compatible with Ruby 2.2.
 * Discount upgraded from 2.1.7 -> 2.1.8
     * GitHub-style language attributes on fenced code blocks.
     * Long numeric list items.
