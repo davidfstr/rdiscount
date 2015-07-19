@@ -1,3 +1,5 @@
+# === Test Matrix ===
+
 platform:
   - x86
   # TODO: Support 64-bit builds as well
@@ -5,4 +7,9 @@ platform:
 
 configuration: Release
 
+# === Build Steps ===
+
 build_script: appveyor-build.ps1
+
+artifacts:
+  - path: appveyor-build.log

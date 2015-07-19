@@ -4,6 +4,12 @@
 #       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force -Scope Process
 # 
 
+# Log everything this script does to file
+Start-Transcript -path appveyor-build.log
+echo ""
+
+# Assume that we start in the RDiscount source directory,
+# so save its location for later
 $rdiscountDirpath = pwd
 
 # Create downloads folder
