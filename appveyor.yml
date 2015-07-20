@@ -6,8 +6,7 @@
 
 platform:
   - x86
-  # TODO: Support 64-bit builds as well
-  #- x64
+  - x64
 
 configuration: Release
 
