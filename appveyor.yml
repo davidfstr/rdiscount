@@ -1,0 +1,20 @@
+# 
+# Configuration for the Appveyor continuous integration system.
+# 
+
+# === Test Matrix ===
+
+# Appveyor only has 64-bit Window OS at the time of writing.
+# 
+# NOTE: Adding an x86 line here does NOT actually use 32-bit Windows.
+#       Instead it configures MSBuild to target 32-bit Windows,
+#       which doesn't apply to our build procedure.
+platform:
+  - x64
+
+configuration: Release
+
+# === Build Steps ===
+
+build_script:
+  - ps: .\appveyor-build.ps1
