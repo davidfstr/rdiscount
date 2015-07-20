@@ -37,6 +37,8 @@ echo ""
 # ------------------------------------------------------------------------------
 # Provision, Build, and Test
 
+Throw "This is a test failure!"
+
 # Create downloads folder
 md "C:\Downloads" > $null
 
