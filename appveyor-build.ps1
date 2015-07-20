@@ -16,12 +16,14 @@
 Start-Transcript -path appveyor-build.log
 echo ""
 
+$rdiscountDirpath = pwd
+
+try {
 # ------------------------------------------------------------------------------
 # Configure
 
 # Detect whether running in Appveyor environment
-if (Get-Command "Push-AppveyorArtifact" -errorAction SilentlyContinue)
-{
+if (Get-Command "Push-AppveyorArtifact" -errorAction SilentlyContinue) {
     $appveyor = $true
 } else {
     $appveyor = $false
@@ -29,7 +31,7 @@ if (Get-Command "Push-AppveyorArtifact" -errorAction SilentlyContinue)
 
 $osBitness = (gwmi win32_OperatingSystem).OSArchitecture
 if (($osBitness -ne "32-bit") -and ($osBitness -ne "64-bit")) {
-    Throw "Windows OS has unknown bitness: $osBitness"
+    Throw "Unrecognized OS bitness: $osBitness"
 }
 
 echo "Detected configuration:"
@@ -37,9 +39,6 @@ echo "- Appveyor: $appveyor (supported: True, False)"
 echo "- OS Bitness: $osBitness (supported: 32-bit, 64-bit)"
 echo ""
 
-$rdiscountDirpath = pwd
-
-try {
 # ------------------------------------------------------------------------------
 # Provision, Build, and Test
 
@@ -203,4 +202,4 @@ if ($appveyor) {
 Stop-Transcript
 # This should be the last command. Do not insert new commands below this line.
 
-} /* end finally */
+}
