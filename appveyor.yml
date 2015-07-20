@@ -1,3 +1,7 @@
+# 
+# Configuration for the Appveyor continuous integration system.
+# 
+
 # === Test Matrix ===
 
 platform:

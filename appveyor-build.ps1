@@ -1,4 +1,11 @@
 # 
+# Installs all platform dependencies of RDiscount, builds RDiscount,
+# and tests RDiscount on a Windows-based operating system.
+# 
+# This script can be run manually to check whether RDiscount works on a
+# particular Windows OS, or automatically through the Appveyor continuous
+# integration platform.
+# 
 # NOTE: You might need to run the following command to invoke this script:
 # 
 #       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force -Scope Process
@@ -11,6 +18,14 @@ echo ""
 # Assume that we start in the RDiscount source directory,
 # so save its location for later
 $rdiscountDirpath = pwd
+
+# Detect whether running in Appveyor environment
+if (Get-Command "Push-AppveyorArtifact" -errorAction SilentlyContinue)
+{
+    $appveyor = $true
+} else {
+    $appveyor = $false
+}
 
 # Create downloads folder
 md "C:\Downloads" > $null
@@ -34,6 +49,10 @@ echo "Downloading DevKit..."
 $url = "http://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe"
 $filepath = "C:\Downloads\DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe"
 $downloader.DownloadFile($url, $filepath)
+
+if ($appveyor) {
+    Push-AppveyorArtifact "appveyor-build.log"
+}
 
 $unzipper = new-object -com shell.application
 
@@ -64,6 +83,10 @@ md $destination > $null
 cd $destination
 & $un7z x $zipFilepath > $null
 
+if ($appveyor) {
+    Push-AppveyorArtifact "appveyor-build.log"
+}
+
 $rubyRoot = "C:\Downloads\ruby\ruby-2.2.2-i386-mingw32"
 $rubyBin  = "C:\Downloads\ruby\ruby-2.2.2-i386-mingw32\bin"
 $ruby     = "C:\Downloads\ruby\ruby-2.2.2-i386-mingw32\bin\ruby.exe"
@@ -78,6 +101,10 @@ echo ""
 echo "Installing DevKit..."
 & $ruby "C:\Downloads\devkit\dk.rb" install
 echo ""
+
+if ($appveyor) {
+    Push-AppveyorArtifact "appveyor-build.log"
+}
 
 # Add DevKit to PATH
 # NOTE: Assumes PowerShell execution policy allows other ps1 scripts to be run
@@ -99,6 +126,10 @@ echo "Installing RDiscount gem..."
 gem install rdiscount-*.gem
 echo ""
 
+if ($appveyor) {
+    Push-AppveyorArtifact "appveyor-build.log"
+}
+
 # Check whether RDiscount binary works
 echo "Checking RDiscount binary..."
 $output = echo *hello* | rdiscount
@@ -109,3 +140,11 @@ If (-not ($ok)) {
 echo ""
 
 echo "OK"
+
+if ($appveyor) {
+    Push-AppveyorArtifact "appveyor-build.log"
+}
+
+Stop-Transcript
+# The above command should be the last command.
+# Do not insert new commands below this line.
