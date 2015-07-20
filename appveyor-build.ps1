@@ -11,11 +11,6 @@
 #       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force -Scope Process
 # 
 
-# Log everything this script does to file.
-# This should be the first command. Do not insert new commands above this line.
-Start-Transcript -path appveyor-build.log
-echo ""
-
 $rdiscountDirpath = pwd
 
 try {
@@ -79,10 +74,6 @@ if ($osBitness -eq "32-bit") {
 }
 $downloader.DownloadFile($url, $filepath)
 
-if ($appveyor) {
-    Push-AppveyorArtifact "appveyor-build.log"
-}
-
 $unzipper = new-object -com shell.application
 
 # Unzip 7z app
@@ -124,10 +115,6 @@ md $destination > $null
 cd $destination
 & $un7z x $zipFilepath > $null
 
-if ($appveyor) {
-    Push-AppveyorArtifact "appveyor-build.log"
-}
-
 if ($osBitness -eq "32-bit") {
     $rubyRoot = "C:\Downloads\ruby\ruby-2.2.2-i386-mingw32"
     $rubyBin  = "C:\Downloads\ruby\ruby-2.2.2-i386-mingw32\bin"
@@ -151,10 +138,6 @@ echo "Installing DevKit..."
 & $ruby "C:\Downloads\devkit\dk.rb" install
 echo ""
 
-if ($appveyor) {
-    Push-AppveyorArtifact "appveyor-build.log"
-}
-
 # Add DevKit to PATH
 # NOTE: Assumes PowerShell execution policy allows other ps1 scripts to be run
 & "C:\Downloads\devkit\devkitvars.ps1"
@@ -175,10 +158,6 @@ echo "Installing RDiscount gem..."
 gem install rdiscount-*.gem
 echo ""
 
-if ($appveyor) {
-    Push-AppveyorArtifact "appveyor-build.log"
-}
-
 # Check whether RDiscount binary works
 echo "Checking RDiscount binary..."
 $output = echo *hello* | rdiscount
@@ -194,12 +173,5 @@ echo "OK"
 } finally {
 
 cd $rdiscountDirpath
-
-if ($appveyor) {
-    Push-AppveyorArtifact "appveyor-build.log"
-}
-
-Stop-Transcript
-# This should be the last command. Do not insert new commands below this line.
 
 }
