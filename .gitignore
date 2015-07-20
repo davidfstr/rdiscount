@@ -4,9 +4,6 @@
 # Build outputs
 rdiscount-*.gem
 
-# Continuous integration outputs
-appveyor-build.log
-
 # Other
 /ext/*.o
 /ext/*.bundle
