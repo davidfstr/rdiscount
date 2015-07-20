@@ -13,7 +13,8 @@ configuration: Release
 
 # === Build Steps ===
 
-build_script: appveyor-build.ps1
+build_script:
+  - ps: .\appveyor-build.ps1
 
 artifacts:
   - path: appveyor-build.log
