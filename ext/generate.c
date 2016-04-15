@@ -786,7 +786,7 @@ mangle(char *s, int len, MMIOT *f)
 {
     while ( len-- > 0 ) {
 #if DEBIAN_GLITCH
-	Qprintf(f, "&#02d;", *((unsigned char*)(s++)) );
+	Qprintf(f, "&#%02d;", *((unsigned char*)(s++)) );
 #else
 	Qstring("&#", f);
 	Qprintf(f, COINTOSS() ? "x%02x;" : "%02d;", *((unsigned char*)(s++)) );
@@ -859,7 +859,6 @@ code(MMIOT *f, char *s, int length)
 	else
 	    cputc(c, f);
 } /* code */
-
 
 /*  delspan() -- write out a chunk of text, blocking with <del>...</del>
  */
@@ -1009,11 +1008,9 @@ maybe_tag_or_link(MMIOT *f)
 	}
 	else if ( isspace(c) )
 	    break;
-#if WITH_GITHUB_TAGS
-	else if ( ! (c == '/' || c == '-' || c == '_' || isalnum(c) ) )
-#else
-	else if ( ! (c == '/' || isalnum(c) ) )
-#endif
+	else if ( ! (c == '/'
+		     || (f->flags & MKD_GITHUBTAGS && (c == '-' || c == '_'))
+		     || isalnum(c) ) )
 	    maybetag=0;
     }
 
@@ -1064,6 +1061,8 @@ maybe_autolink(MMIOT *f)
 	     if ( peek(f, size+2) != EOF )
 		++size;
 	}
+	else if ( c & 0x80 )	/* HACK: ignore utf-8 extended characters */
+	    continue;
 	else if ( isspace(c) || strchr("'\"()[]{}<>`", c) || c == MKD_EOLN )
 	    break;
     }
@@ -1208,6 +1207,29 @@ smartypants(int c, int *flags, MMIOT *f)
 } /* smartypants */
 
 
+#if WITH_LATEX
+/* process latex with arbitrary 2-character ( $$ .. $$, \[ .. \], \( .. \)
+ * delimiters
+ */
+static int
+mathhandler(MMIOT *f, int e1, int e2)
+{
+    int i = 0;
+
+    while(peek(f, ++i) != EOF) {
+        if (peek(f, i) == e1 && peek(f, i+1) == e2) {
+	    cputc(peek(f,-1), f);
+	    cputc(peek(f, 0), f);
+	    while ( i-- > -1 )
+		cputc(pull(f), f);
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
+
+
 /* process a body of text encased in some sort of tick marks.   If it
  * works, generate the output and return 1, otherwise just return 0 and
  * let the caller figure it out.
@@ -1283,6 +1305,7 @@ text(MMIOT *f)
 		    else
 			Qchar(c, f);
 		    break;
+
 	case '[':   if ( tag_text(f) || !linkylinky(0, f) )
 			Qchar(c, f);
 		    break;
@@ -1386,7 +1409,14 @@ text(MMIOT *f)
 				
 		    case EOF:	Qchar('\\', f);
 				break;
-				
+
+#if WITH_LATEX
+		    case '[':
+		    case '(':   if ( mathhandler(f, '\\', (c =='(')?')':']') )
+				    break;
+				/* else fall through to default */
+#endif
+			
 		    default:    if ( escaped(f,c) ||
 				     strchr(">#.-+{}]![*_\\()`", c) )
 				    Qchar(c, f);
@@ -1412,6 +1442,16 @@ text(MMIOT *f)
 			Qchar(c, f);
 		    break;
 
+#if WITH_LATEX
+	case '$':   if ( peek(f, 1) == '$' ) {
+			pull(f);
+			if ( mathhandler(f, '$', '$') )
+			    break;
+			Qchar('$', f);
+		    }
+		    /* fall through to default */
+#endif
+	
 	default:    Qchar(c, f);
 		    break;
 	}
@@ -1426,26 +1466,26 @@ text(MMIOT *f)
 static void
 printheader(Paragraph *pp, MMIOT *f)
 {
-#if WITH_ID_ANCHOR
-    Qprintf(f, "<h%d", pp->hnumber);
-    if ( f->flags & MKD_TOC ) {
-	Qstring(" id=\"", f);
-	mkd_string_to_anchor(T(pp->text->text),
-			     S(pp->text->text),
-			     (mkd_sta_function_t)Qchar, f, 1);
-	Qchar('"', f);
+    if ( f->flags & MKD_IDANCHOR ) {
+	Qprintf(f, "<h%d", pp->hnumber);
+	if ( f->flags & MKD_TOC ) {
+	    Qstring(" id=\"", f);
+	    mkd_string_to_anchor(T(pp->text->text),
+				 S(pp->text->text),
+				 (mkd_sta_function_t)Qchar, f, 1, f->flags);
+	    Qchar('"', f);
+	}
+	Qchar('>', f);
+    } else {
+	if ( f->flags & MKD_TOC ) {
+	    Qstring("<a name=\"", f);
+	    mkd_string_to_anchor(T(pp->text->text),
+				 S(pp->text->text),
+				 (mkd_sta_function_t)Qchar, f, 1, f->flags);
+	    Qstring("\"></a>\n", f);
+	}
+	Qprintf(f, "<h%d>", pp->hnumber);
     }
-    Qchar('>', f);
-#else
-    if ( f->flags & MKD_TOC ) {
-	Qstring("<a name=\"", f);
-	mkd_string_to_anchor(T(pp->text->text),
-			     S(pp->text->text),
-			     (mkd_sta_function_t)Qchar, f, 1);
-	Qstring("\"></a>\n", f);
-    }
-    Qprintf(f, "<h%d>", pp->hnumber);
-#endif
     push(T(pp->text->text), S(pp->text->text), f);
     text(f);
     Qprintf(f, "</h%d>", pp->hnumber);
@@ -1812,15 +1852,19 @@ mkd_document(Document *p, char **res)
 	    if ( p->ctx->flags & MKD_EXTRA_FOOTNOTE )
 		mkd_extra_footnotes(p->ctx);
 	    p->html = 1;
-	}
-
-	size = S(p->ctx->out);
+	    size = S(p->ctx->out);
 	
-	if ( (size == 0) || T(p->ctx->out)[size-1] )
-	    EXPAND(p->ctx->out) = 0;
+	    if ( (size == 0) || T(p->ctx->out)[size-1] ) {
+		/* Add a null byte at the end of the generated html,
+		 * but pretend it doesn't exist.
+		 */
+		EXPAND(p->ctx->out) = 0;
+		--S(p->ctx->out);
+	    }
+	}
 	
 	*res = T(p->ctx->out);
-	return size;
+	return S(p->ctx->out);
     }
     return EOF;
 }

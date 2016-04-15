@@ -16,6 +16,7 @@
 
 typedef ANCHOR(Line) LineAnchor;
 
+
 /* create a new blank Document
  */
 Document*
@@ -183,15 +184,13 @@ mkd_generatehtml(Document *p, FILE *output)
     char *doc;
     int szdoc;
 
-    if ( (szdoc = mkd_document(p, &doc)) != EOF ) {
-	if ( p->ctx->flags & MKD_CDATA )
-	    mkd_generatexml(doc, szdoc, output);
-	else
-	    fwrite(doc, szdoc, 1, output);
-	putc('\n', output);
-	return 0;
-    }
-    return -1;
+    DO_OR_DIE( szdoc = mkd_document(p,&doc) );
+    if ( p->ctx->flags & MKD_CDATA )
+	DO_OR_DIE( mkd_generatexml(doc, szdoc, output) );
+    else if ( fwrite(doc, szdoc, 1, output) != 1 )
+	return EOF;
+    DO_OR_DIE( putc('\n', output) );
+    return 0;
 }
 
 
@@ -213,37 +212,33 @@ markdown(Document *document, FILE *out, int flags)
  */
 void
 mkd_string_to_anchor(char *s, int len, mkd_sta_function_t outchar,
-				       void *out, int labelformat)
+				       void *out, int labelformat,
+				       DWORD flags)
 {
-#if WITH_URLENCODED_ANCHOR
     static const unsigned char hexchars[] = "0123456789abcdef";
-#endif
     unsigned char c;
 
     int i, size;
     char *line;
 
     size = mkd_line(s, len, &line, IS_LABEL);
-    
-#if !WITH_URLENCODED_ANCHOR
-    if ( labelformat && (size>0) && !isalpha(line[0]) )
+
+    if ( !(flags & MKD_URLENCODEDANCHOR)
+	 && labelformat
+	 && (size>0) && !isalpha(line[0]) )
 	(*outchar)('L',out);
-#endif
     for ( i=0; i < size ; i++ ) {
 	c = line[i];
 	if ( labelformat ) {
 	    if ( isalnum(c) || (c == '_') || (c == ':') || (c == '-') || (c == '.' ) )
 		(*outchar)(c, out);
-	    else
-#if WITH_URLENCODED_ANCHOR
-	    {
+	    else if ( flags & MKD_URLENCODEDANCHOR ) {
 		(*outchar)('%', out);
 		(*outchar)(hexchars[c >> 4 & 0xf], out);
 		(*outchar)(hexchars[c      & 0xf], out);
 	    }
-#else
+	    else
 		(*outchar)('.', out);
-#endif
 	}
 	else
 	    (*outchar)(c,out);
@@ -302,15 +297,16 @@ int
 mkd_generateline(char *bfr, int size, FILE *output, DWORD flags)
 {
     MMIOT f;
+    int status;
 
     mkd_parse_line(bfr, size, &f, flags);
     if ( flags & MKD_CDATA )
-	mkd_generatexml(T(f.out), S(f.out), output);
+	status = mkd_generatexml(T(f.out), S(f.out), output) != EOF;
     else
-	fwrite(T(f.out), S(f.out), 1, output);
+	status = fwrite(T(f.out), S(f.out), 1, output) == S(f.out);
 
     ___mkd_freemmiot(&f, 0);
-    return 0;
+    return status ? 0 : EOF;
 }
 
 
