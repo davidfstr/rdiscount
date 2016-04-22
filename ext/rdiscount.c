@@ -14,6 +14,9 @@ typedef struct {
  * The following flags are handled specially:
  * - MKD_TABSTOP: Always set.
  * - MKD_NOHEADER: Always set.
+ * - MKD_DLEXTRA: Always set. (For compatibility with RDiscount 2.1.8 and earlier.)
+ * - MKD_FENCEDCODE: Always set. (For compatibility with RDiscount 2.1.8 and earlier.)
+ * - MKD_GITHUBTAGS: Always set. (For compatibility with RDiscount 2.1.8 and earlier.)
  * - MKD_NOPANTS: Set unless the "smart" accessor returns true.
  * 
  * See rb_rdiscount__get_flags() for the detailed implementation.
@@ -119,7 +122,7 @@ int rb_rdiscount__get_flags(VALUE ruby_obj)
     AccessorFlagPair *entry;
     
     /* compile flags */
-    int flags = MKD_TABSTOP | MKD_NOHEADER;
+    int flags = MKD_TABSTOP | MKD_NOHEADER | MKD_DLEXTRA | MKD_FENCEDCODE | MKD_GITHUBTAGS;
     
     /* The "smart" accessor turns OFF the MKD_NOPANTS flag. */
     if ( rb_funcall(ruby_obj, rb_intern("smart"), 0) != Qtrue ) {
