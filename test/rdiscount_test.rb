@@ -273,4 +273,24 @@ EOS
     rd = RDiscount.new(%(*foobar ä*))
     assert_equal %(<p><em>foobar ä</em></p>\n), rd.to_html
   end
+  
+  def test_that_latex_passthrough_works
+    input = '$$
+M = \left\\{ c \in  \mathbb{C} | \lim_{n\to\infty} Z_n \neq \infty \right\\}
+\begin{align}
+& Z_0 = c \\\
+& Z\_{n+1} = Z\_n\^2 + c
+\end{align}
+$$'
+    expected_output = '<p>$$
+M = \left\\{ c \in  \mathbb{C} | \lim_{n\to\infty} Z_n \neq \infty \right\\}
+\begin{align}
+&amp; Z_0 = c \\\
+&amp; Z\_{n+1} = Z\_n\^2 + c
+\end{align}
+$$</p>
+'
+    rd = RDiscount.new(input)
+    assert_equal expected_output, rd.to_html
+  end
 end

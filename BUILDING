@@ -20,7 +20,7 @@ the rake gather task to copy discount source files into the ext/ directory:
     Submodule 'discount' (git://github.com/davidfstr/discount.git) registered for path 'discount'
     Cloning into discount...
     $ cd discount
-    $ ./configure.sh
+    $ ./configure.sh --with-latex
     $ make  # ensure it compiles
     $ cd ..
     $ rake gather
