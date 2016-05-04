@@ -1,5 +1,9 @@
 # RDiscount Changelog
 
+## Version 2.2.0 <small>(May 3, 2016)</small>
+
+* Discount upgraded from 2.1.8 -> 2.2.0
+
 ## Version 2.1.8 <small>(February 1, 2015)</small>
 
 * Compatible with Ruby 2.2.
