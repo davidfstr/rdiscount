@@ -10,6 +10,10 @@
 # 
 #       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force -Scope Process
 # 
+# NOTE: You might need to manually unblock this script to run it:
+#
+#       Right-click this file > Properties > Unblock
+# 
 
 $rdiscountDirpath = pwd
 
