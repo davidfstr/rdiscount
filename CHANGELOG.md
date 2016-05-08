@@ -1,8 +1,10 @@
 # RDiscount Changelog
 
-## Version 2.2.0 <small>(May 3, 2016)</small>
+## Version 2.2.0.1 <small>(May 7, 2016)</small>
 
 * Discount upgraded from 2.1.8 -> 2.2.0
+* Fix compilation error on MSVC (Windows).
+* Enable continuous integration with Ruby 2.3.0.
 
 ## Version 2.1.8 <small>(February 1, 2015)</small>
 
