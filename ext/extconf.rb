@@ -42,4 +42,8 @@ if /darwin|mac os/.match RbConfig::CONFIG['host_os']
   $DLDFLAGS.gsub!("-multiply_definedsuppress", "")
 end
 
+if /mswin/.match RbConfig::CONFIG['host_os']
+  $defs.push("-Dinline=__inline")
+end
+
 create_makefile('rdiscount')
