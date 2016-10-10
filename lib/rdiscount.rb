@@ -105,4 +105,9 @@ end
 
 Markdown = RDiscount unless defined? Markdown
 
-require 'rdiscount.so'
+begin
+  require 'rdiscount.so'
+rescue LoadError
+  # fall back on kramdown
+  require 'rdiscount-kramdown'
+end
