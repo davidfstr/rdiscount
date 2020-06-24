@@ -39,6 +39,28 @@ static AccessorFlagPair ACCESSOR_2_FLAG[] = {
 
 static VALUE rb_cRDiscount;
 
+int rb_rdiscount__get_flags(VALUE ruby_obj)
+{
+    AccessorFlagPair *entry;
+    
+    /* compile flags */
+    int flags = MKD_TABSTOP | MKD_NOHEADER | MKD_DLEXTRA | MKD_FENCEDCODE | MKD_GITHUBTAGS;
+    
+    /* The "smart" accessor turns OFF the MKD_NOPANTS flag. */
+    if ( rb_funcall(ruby_obj, rb_intern("smart"), 0) != Qtrue ) {
+        flags = flags | MKD_NOPANTS;
+    }
+    
+    /* Handle standard flags declared in ACCESSOR_2_FLAG */
+    for ( entry = ACCESSOR_2_FLAG; entry->accessor_name; entry++ ) {
+        if ( rb_funcall(ruby_obj, rb_intern(entry->accessor_name), 0) == Qtrue ) {
+            flags = flags | entry->flag;
+        }
+    }
+    
+    return flags;
+}
+
 static VALUE
 rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
 {
@@ -115,28 +137,6 @@ rb_rdiscount_toc_content(int argc, VALUE *argv, VALUE self)
     mkd_cleanup(doc);
 
     return buf;
-}
-
-int rb_rdiscount__get_flags(VALUE ruby_obj)
-{
-    AccessorFlagPair *entry;
-    
-    /* compile flags */
-    int flags = MKD_TABSTOP | MKD_NOHEADER | MKD_DLEXTRA | MKD_FENCEDCODE | MKD_GITHUBTAGS;
-    
-    /* The "smart" accessor turns OFF the MKD_NOPANTS flag. */
-    if ( rb_funcall(ruby_obj, rb_intern("smart"), 0) != Qtrue ) {
-        flags = flags | MKD_NOPANTS;
-    }
-    
-    /* Handle standard flags declared in ACCESSOR_2_FLAG */
-    for ( entry = ACCESSOR_2_FLAG; entry->accessor_name; entry++ ) {
-        if ( rb_funcall(ruby_obj, rb_intern(entry->accessor_name), 0) == Qtrue ) {
-            flags = flags | entry->flag;
-        }
-    }
-    
-    return flags;
 }
 
 
