@@ -71,3 +71,4 @@ that allows you to do as you wish with it as long as you don't attempt
 to claim it as your own work. RDiscount adopts Discount's license
 verbatim. See the file `COPYING` for more information.
 
+<!-- test -->
