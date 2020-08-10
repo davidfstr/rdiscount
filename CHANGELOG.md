@@ -1,5 +1,11 @@
 # RDiscount Changelog
 
+## Version 2.2.0.2 <small>(August 9, 2020)</small>
+
+* Fix compilation error on macOS Big Sur Preview (11.0).
+* Enable continuous integration with Ruby 2.4-2.6.
+* Builds with Ruby 2.7.0 locally but not on Travis CI.
+
 ## Version 2.2.0.1 <small>(May 7, 2016)</small>
 
 * Discount upgraded from 2.1.8 -> 2.2.0
