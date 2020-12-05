@@ -7,4 +7,5 @@ rvm:
   - "2.4"
   - "2.5"
   - "2.6"
+  - truffleruby-head
   #- "2.7.0"  # builds locally on macOS 10.14 but not on Travis
