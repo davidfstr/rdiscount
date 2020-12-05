@@ -9,3 +9,9 @@ rvm:
   - "2.6"
   - truffleruby-head
   #- "2.7.0"  # builds locally on macOS 10.14 but not on Travis
+  
+  jobs:
+    include:
+      - rvm: truffleruby-head
+        before_script:
+          - gem install rubygems-bundler
