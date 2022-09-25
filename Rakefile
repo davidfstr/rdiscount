@@ -57,7 +57,7 @@ Rake::TestTask.new('test:unit') do |t|
 end
 task 'test:unit' => [:build]
 
-desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0)'
+desc 'Run conformance tests (MARKDOWN_TEST_VER=1.0.3)'
 task 'test:conformance' => [:build] do |t|
   script = "#{pwd}/bin/rdiscount"
   test_version = ENV['MARKDOWN_TEST_VER'] || '1.0.3'
@@ -67,12 +67,6 @@ task 'test:conformance' => [:build] do |t|
     print result
     fail unless result.include? "; 0 failed."
   end
-end
-
-desc 'Run version 1.0 conformance suite'
-task 'test:conformance:1.0' => [:build] do |t|
-  ENV['MARKDOWN_TEST_VER'] = '1.0'
-  Rake::Task['test:conformance'].invoke
 end
 
 desc 'Run 1.0.3 conformance suite'
