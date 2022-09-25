@@ -1,4 +1,3 @@
 [submodule "discount"]
 	path = discount
-	url = git://github.com/davidfstr/discount.git
-	ignore = untracked
+	url = git@github.com:Orc/discount.git
