@@ -5,12 +5,17 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         ruby-version: ['3.1', '3.0', '2.7']
+        # conformance require perl because of that we 
+        # only run unit tests on windows 
+        include:
+          - os: windows-latest
+            args: test:unit
     runs-on: ${{ matrix.os }}
     steps:
         - uses: actions/checkout@v3
         - uses: ruby/setup-ruby@v1
           with:
             ruby-version: ${{ matrix.ruby-version }}
-        - run: rake
+        - run: rake ${{matrix.args}}
