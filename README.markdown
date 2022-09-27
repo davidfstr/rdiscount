@@ -2,21 +2,21 @@ Discount Markdown Processor for Ruby
 ====================================
 [![Build Status](https://github.com/davidfstr/rdiscount/actions/workflows/main.yml/badge.svg)](https://github.com/davidfstr/rdiscount/actions/workflows/main.yml)
 
-Discount is an implementation of John Gruber's Markdown markup language in C. It
-implements all of the language described in [the markdown syntax document][1] and
+Discount is an implementation of John Gruber's Markdown markup language in C.
+It implements all of the language described in [the markdown syntax document][1] and
 passes the [Markdown 1.0 test suite][2].
 
 CODE: `git clone git://github.com/davidfstr/rdiscount.git`  
-HOME: <http://dafoster.net/projects/rdiscount/>  
-DOCS: <http://rdoc.info/github/davidfstr/rdiscount/master/RDiscount>  
-BUGS: <http://github.com/davidfstr/rdiscount/issues>  
+HOME: <https://dafoster.net/projects/rdiscount/>  
+DOCS: <https://rdoc.info/github/davidfstr/rdiscount/master/RDiscount>  
+BUGS: <https://github.com/davidfstr/rdiscount/issues>
 
-Discount was developed by [David Loren Parsons][3]. The Ruby extension
-is maintained by [David Foster][4].
+Discount was developed by [David Loren Parsons][3].
+The Ruby extension is maintained by [David Foster][4].
 
-[1]: http://daringfireball.net/projects/markdown/syntax
-[2]: http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip
-[3]: http://www.pell.portland.or.us/~orc
+[1]: https://daringfireball.net/projects/markdown/syntax
+[2]: https://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip
+[3]: https://www.pell.portland.or.us/~orc
 [4]: https://github.com/davidfstr
 
 INSTALL, HACKING
