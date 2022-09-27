@@ -1,7 +1,6 @@
 Discount Markdown Processor for Ruby
 ====================================
-[![Build Status](https://travis-ci.org/davidfstr/rdiscount.svg?branch=master)](https://travis-ci.org/davidfstr/rdiscount)
-[![Build status](https://ci.appveyor.com/api/projects/status/47i0qxrnvjbg724f/branch/master?svg=true)](https://ci.appveyor.com/project/DavidFoster/rdiscount/branch/master)
+[![Build Status](https://github.com/davidfstr/rdiscount/actions/workflows/main.yml/badge.svg)](https://github.com/davidfstr/rdiscount/actions/workflows/main.yml)
 
 Discount is an implementation of John Gruber's Markdown markup language in C. It
 implements all of the language described in [the markdown syntax document][1] and
