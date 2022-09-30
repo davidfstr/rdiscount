@@ -138,7 +138,6 @@ class MarkdownTest < Test::Unit::TestCase
   Dir["#{MARKDOWN_TEST_DIR}/Tests/*.text"].each do |text_file|
 
     basename = File.basename(text_file).sub(/\.text$/, '')
-    html_file = text_file.sub(/text$/, 'html')
     method_name = basename.gsub(/[-,()]/, '').gsub(/\s+/, '_').downcase
 
     define_method "test_#{method_name}" do

@@ -7,7 +7,7 @@ require 'rdiscount'
 
 class RDiscountTest < Test::Unit::TestCase
   def test_that_version_looks_valid
-    if not /^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$/ =~ RDiscount::VERSION
+    if not (/^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$/) =~ RDiscount::VERSION
       assert false, 'Expected RDiscount::VERSION to be a 3 or 4 component version string but found ' + RDiscount::VERSION.to_s
     end
   end
@@ -139,12 +139,6 @@ EOS
   end
 
   def test_that_tags_can_have_dashes_and_underscores
-    if RDiscount::VERSION.start_with? "2.0.7"
-      # Skip test for 2.0.7.x series due to upstream behavioral change in
-      # Discount 2.0.7. This test can be fixed in Discount 2.1.5 using the
-      # WITH_GITHUB_TAGS compile-time flag.
-      return
-    end
     rd = RDiscount.new("foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b>")
     assert_equal "<p>foo <asdf-qwerty>bar</asdf-qwerty> and <a_b>baz</a_b></p>\n", rd.to_html
   end
@@ -249,7 +243,18 @@ EOS
 </dl>
 EOS
   end
-  
+
+  def test_that_emphasis_beside_international_characters_detected
+    rd = RDiscount.new(%(*foo ä bar*))
+    assert_equal %(<p><em>foo ä bar</em></p>\n), rd.to_html
+
+    rd = RDiscount.new(%(*ä foobar*))
+    assert_equal %(<p><em>ä foobar</em></p>\n), rd.to_html
+
+    rd = RDiscount.new(%(*foobar ä*))
+    assert_equal %(<p><em>foobar ä</em></p>\n), rd.to_html
+  end
+
   def test_that_extra_definition_lists_work
     rd = RDiscount.new(<<EOS)
 tag1
@@ -261,16 +266,5 @@ EOS
 <dd>data</dd>
 </dl>
 EOS
-  end
-  
-  def test_that_emphasis_beside_international_characters_detected
-    rd = RDiscount.new(%(*foo ä bar*))
-    assert_equal %(<p><em>foo ä bar</em></p>\n), rd.to_html
-    
-    rd = RDiscount.new(%(*ä foobar*))
-    assert_equal %(<p><em>ä foobar</em></p>\n), rd.to_html
-    
-    rd = RDiscount.new(%(*foobar ä*))
-    assert_equal %(<p><em>foobar ä</em></p>\n), rd.to_html
   end
 end
