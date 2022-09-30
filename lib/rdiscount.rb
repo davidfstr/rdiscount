@@ -75,6 +75,9 @@ class RDiscount
   # Disable strikethrough processing.
   attr_accessor :no_strikethrough
 
+  # Keep LaTeX inside $$ intact.
+  attr_accessor :latex
+
   # Create a RDiscount Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
   # supplied to set various processing options:
@@ -95,6 +98,7 @@ class RDiscount
   # * <tt>:no_pseudo_protocols</tt> - Do not process pseudo-protocols.
   # * <tt>:no_superscript</tt> - Disable superscript processing.
   # * <tt>:no_strikethrough</tt> - Disable strikethrough processing.
+  # * <tt>:latex</tt> - Keep LaTeX inside $$ intact.
   #
   def initialize(text, *extensions)
     @text  = text

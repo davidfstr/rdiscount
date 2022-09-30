@@ -244,6 +244,11 @@ EOS
 EOS
   end
 
+  def test_latex_passtrough_dont_render_link
+    rd = RDiscount.new("$$[(1+2)*3-4](1-2)$$", :latex)
+    assert_equal "<p>$$[(1+2)*3-4](1-2)$$</p>\n", rd.to_html
+  end
+
   def test_that_emphasis_beside_international_characters_detected
     rd = RDiscount.new(%(*foo ä bar*))
     assert_equal %(<p><em>foo ä bar</em></p>\n), rd.to_html
