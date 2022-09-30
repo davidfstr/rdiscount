@@ -7,6 +7,8 @@
 /* tabs are four spaces */
 #define TABSTOP 4
 
+#define DESTRUCTOR  __attribute__((__destructor__))
+
 /* these are setup by extconf.rb */
 #if HAVE_RANDOM
 #define COINTOSS() (random()&1)

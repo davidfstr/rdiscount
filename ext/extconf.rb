@@ -33,6 +33,7 @@ open(File.join(File.dirname(__FILE__), "ruby-config.h"), "wb") do |f|
 end
 
 $defs.push("-DVERSION=\\\"#{VERSION}\\\"")
+$defs.push("-DBRANCH=\"\"")
 
 # Post XCode 5.1 the command line tools on OS X treat unrecognised 
 # command line options as errors and it's been seen that

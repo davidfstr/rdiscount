@@ -8,9 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
 #include <mkdio.h>
 #include <errno.h>
 #include <string.h>
@@ -34,8 +31,8 @@ static struct _opt {
     { "tabstop",       "default (4-space) tabstops", 0, 0, 1, MKD_TABSTOP  },
     { "image",         "images",                     1, 0, 1, MKD_NOIMAGE  },
     { "links",         "links",                      1, 0, 1, MKD_NOLINKS  },
-    { "relax",         "emphasis inside words",      1, 1, 1, MKD_STRICT   },
-    { "strict",        "emphasis inside words",      0, 0, 1, MKD_STRICT   },
+    { "relax",         "Markdown.pl compatibility",  1, 1, 1, MKD_STRICT   },
+    { "strict",        "Markdown.pl compatibility",  0, 0, 1, MKD_STRICT   },
     { "tables",        "tables",                     1, 0, 1, MKD_NOTABLES },
     { "header",        "pandoc-style headers",       1, 0, 1, MKD_NOHEADER },
     { "html",          "raw html",                   1, 0, 1, MKD_NOHTML   },
@@ -62,7 +59,10 @@ static struct _opt {
     { "fencedcode",    "fenced code blocks",         0, 0, 1, MKD_FENCEDCODE },
     { "idanchor",      "id= anchors in TOC",         0, 0, 1, MKD_IDANCHOR },
     { "githubtags",    "permit - and _ in element names", 0, 0, 0, MKD_GITHUBTAGS },
-    { "urlencodedanchor", "urlencode special chars in TOC links", 0, 0, 0, MKD_URLENCODEDANCHOR },
+    { "urlencodedanchor", "html5-style anchors", 0, 0, 0, MKD_URLENCODEDANCHOR },
+    { "html5anchor",   "html5-style anchors", 0, 1, 0, MKD_URLENCODEDANCHOR },
+    { "latex",         "handle LaTeX escapes",         0, 0, 1, MKD_LATEX },
+    { "explicitlist",  "do not merge adjacent numeric/bullet lists", 0, 0, 1, MKD_EXPLICITLIST },
 } ;
 
 #define NR(x)	(sizeof x / sizeof x[0])
@@ -84,7 +84,7 @@ sort_by_flag(struct _opt *a, struct _opt *b)
 
 
 void
-show_flags(int byname)
+show_flags(int byname, int verbose)
 {
     int i;
 
@@ -92,14 +92,14 @@ show_flags(int byname)
 	qsort(opts, NR(opts), sizeof(opts[0]), (stfu)sort_by_name);
     
 	for (i=0; i < NR(opts); i++)
-	    if ( ! opts[i].skip )
+	    if ( verbose || !opts[i].skip )
 		fprintf(stderr, "%16s : %s\n", opts[i].name, opts[i].desc);
     }
     else {
 	qsort(opts, NR(opts), sizeof(opts[0]), (stfu)sort_by_flag);
 	
 	for (i=0; i < NR(opts); i++)
-	    if ( ! opts[i].skip ) {
+	    if ( !opts[i].skip ) {
 		fprintf(stderr, "%08lx : ", (long)opts[i].flag);
 		if ( opts[i].sayenable )
 		    fprintf(stderr, opts[i].off ? "disable " : "enable ");
@@ -109,7 +109,7 @@ show_flags(int byname)
 }
     
 
-int
+char *
 set_flag(mkd_flag_t *flags, char *optionstring)
 {
     int i;
@@ -140,7 +140,7 @@ set_flag(mkd_flag_t *flags, char *optionstring)
 		*flags &= ~opts[i].flag;
 	}
 	else
-	    return 0;
+	    return arg;
     }
-    return 1;
+    return 0;
 }

@@ -25,12 +25,14 @@ mkd_toc(Document *p, char **doc)
     Cstring res;
     int size;
     int first = 1;
+    extern void Csreparse(Cstring *, char *, int, mkd_flag_t);
+    
     
     if ( !(doc && p && p->ctx) ) return -1;
 
     *doc = 0;
     
-    if ( ! (p->ctx->flags & MKD_TOC) ) return 0;
+    if ( ! is_flag_set(p->ctx->flags, MKD_TOC) ) return 0;
 
     CREATE(res);
     RESERVE(res, 100);
@@ -38,7 +40,7 @@ mkd_toc(Document *p, char **doc)
     for ( tp = p->code; tp ; tp = tp->next ) {
 	if ( tp->typ == SOURCE ) {
 	    for ( srcp = tp->down; srcp; srcp = srcp->next ) {
-		if ( srcp->typ == HDR && srcp->text ) {
+		if ( (srcp->typ == HDR) && srcp->text ) {
 	    
 		    while ( last_hnumber > srcp->hnumber ) {
 			if ( (last_hnumber - srcp->hnumber) > 1 )
@@ -62,11 +64,11 @@ mkd_toc(Document *p, char **doc)
 		    Csprintf(&res, "%*s<li><a href=\"#", srcp->hnumber, "");
 		    mkd_string_to_anchor(T(srcp->text->text),
 					 S(srcp->text->text),
-					 (mkd_sta_function_t)Csputc, &res,1,p->ctx->flags);
+					 (mkd_sta_function_t)Csputc,
+					 &res,1,p->ctx);
 		    Csprintf(&res, "\">");
-		    mkd_string_to_anchor(T(srcp->text->text),
-					 S(srcp->text->text),
-					 (mkd_sta_function_t)Csputc, &res,0,p->ctx->flags);
+		    Csreparse(&res, T(srcp->text->text),
+				    S(srcp->text->text), IS_LABEL);
 		    Csprintf(&res, "</a>");
 
 		    first = 0;
@@ -82,16 +84,12 @@ mkd_toc(Document *p, char **doc)
     }
 
     if ( (size = S(res)) > 0 ) {
+	/* null-terminate & strdup into a free()able memory chunk
+	 */
 	EXPAND(res) = 0;
-			/* HACK ALERT! HACK ALERT! HACK ALERT! */
-	*doc = T(res);  /* we know that a T(Cstring) is a character pointer
-			 * so we can simply pick it up and carry it away,
-			 * leaving the husk of the Ctring on the stack
-			 * END HACK ALERT
-			 */
+	*doc = strdup(T(res));
     }
-    else
-	DELETE(res);
+    DELETE(res);
     return size;
 }
 

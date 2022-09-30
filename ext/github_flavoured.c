@@ -30,7 +30,7 @@ gfm_populate(getc_func getc, void* ctx, int flags)
 
     if ( !a ) return 0;
 
-    a->tabstop = (flags & MKD_TABSTOP) ? 4 : TABSTOP;
+    a->tabstop = is_flag_set(flags, MKD_TABSTOP) ? 4 : TABSTOP;
 
     CREATE(line);
 
@@ -59,16 +59,17 @@ gfm_populate(getc_func getc, void* ctx, int flags)
 
     DELETE(line);
 
-    if ( (pandoc == 3) && !(flags & (MKD_NOHEADER|MKD_STRICT)) ) {
+    if ( (pandoc == 3) && !(is_flag_set(flags, MKD_NOHEADER)
+     || is_flag_set(flags, MKD_STRICT)) ) {
 	/* the first three lines started with %, so we have a header.
 	 * clip the first three lines out of content and hang them
 	 * off header.
 	 */
 	Line *headers = T(a->content);
 
-	a->title = headers;             __mkd_header_dle(a->title);
-	a->author= headers->next;       __mkd_header_dle(a->author);
-	a->date  = headers->next->next; __mkd_header_dle(a->date);
+	a->title = headers;             __mkd_trim_line(a->title, 1);
+	a->author= headers->next;       __mkd_trim_line(a->author, 1);
+	a->date  = headers->next->next; __mkd_trim_line(a->date, 1);
 
 	T(a->content) = headers->next->next->next;
     }
@@ -80,7 +81,7 @@ gfm_populate(getc_func getc, void* ctx, int flags)
 /* convert a block of text into a linked list
  */
 Document *
-gfm_string(const char *buf, int len, DWORD flags)
+gfm_string(const char *buf, int len, mkd_flag_t flags)
 {
     struct string_stream about;
 
@@ -94,7 +95,7 @@ gfm_string(const char *buf, int len, DWORD flags)
 /* convert a file into a linked list
  */
 Document *
-gfm_in(FILE *f, DWORD flags)
+gfm_in(FILE *f, mkd_flag_t flags)
 {
     return gfm_populate((getc_func)fgetc, f, flags & INPUT_MASK);
 }

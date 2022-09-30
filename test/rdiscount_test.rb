@@ -54,24 +54,24 @@ class RDiscountTest < Test::Unit::TestCase
   def test_that_generate_toc_sets_toc_ids
     rd = RDiscount.new("# Level 1\n\n## Level 2", :generate_toc)
     assert rd.generate_toc
-    assert_equal %(<a name="Level.1"></a>\n<h1>Level 1</h1>\n\n<a name="Level.2"></a>\n<h2>Level 2</h2>\n), rd.to_html
+    assert_equal %(<a name="Level-1"></a>\n<h1>Level 1</h1>\n\n<a name="Level-2"></a>\n<h2>Level 2</h2>\n), rd.to_html
   end
 
   def test_should_get_the_generated_toc
     rd = RDiscount.new("# Level 1\n\n## Level 2", :generate_toc)
-    exp = %(<ul>\n <li><a href=\"#Level.1\">Level 1</a>\n <ul>\n  <li><a href=\"#Level.2\">Level 2</a></li>\n </ul>\n </li>\n</ul>)
+    exp = %(<ul>\n <li><a href=\"#Level-1\">Level 1</a>\n <ul>\n  <li><a href=\"#Level-2\">Level 2</a></li>\n </ul>\n </li>\n</ul>)
     assert_equal exp, rd.toc_content.strip
   end
   
   def test_toc_should_escape_apostropes
     rd = RDiscount.new("# A'B\n\n## C", :generate_toc)
-    exp = %(<ul>\n <li><a href=\"#A.B\">A'B</a>\n <ul>\n  <li><a href=\"#C\">C</a></li>\n </ul>\n </li>\n</ul>)
+    exp = %(<ul>\n <li><a href=\"#A-27-B\">A'B</a>\n <ul>\n  <li><a href=\"#C\">C</a></li>\n </ul>\n </li>\n</ul>)
     assert_equal exp, rd.toc_content.strip
   end
   
   def test_toc_should_escape_question_marks
     rd = RDiscount.new("# A?B\n\n## C", :generate_toc)
-    exp = %(<ul>\n <li><a href=\"#A.B\">A?B</a>\n <ul>\n  <li><a href=\"#C\">C</a></li>\n </ul>\n </li>\n</ul>)
+    exp = %(<ul>\n <li><a href=\"#A-3f-B\">A?B</a>\n <ul>\n  <li><a href=\"#C\">C</a></li>\n </ul>\n </li>\n</ul>)
     assert_equal exp, rd.toc_content.strip
   end
 

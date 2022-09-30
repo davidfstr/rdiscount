@@ -15,13 +15,12 @@ Gem::Specification.new do |s|
     Rakefile
     bin/rdiscount
     discount
-    ext/Csio.c
-    ext/VERSION
     ext/amalloc.c
     ext/amalloc.h
     ext/basename.c
     ext/blocktags
     ext/config.h
+    ext/Csio.c
     ext/css.c
     ext/cstring.h
     ext/docheader.c
@@ -30,13 +29,17 @@ Gem::Specification.new do |s|
     ext/extconf.rb
     ext/flags.c
     ext/generate.c
+    ext/gethopt.c
+    ext/gethopt.h
     ext/github_flavoured.c
+    ext/h1title.c
     ext/html5.c
     ext/markdown.c
     ext/markdown.h
     ext/mkdio.c
     ext/mkdio.h
     ext/mktags.c
+    ext/notspecial.c
     ext/pgm_options.c
     ext/pgm_options.h
     ext/rdiscount.c
@@ -45,6 +48,7 @@ Gem::Specification.new do |s|
     ext/tags.c
     ext/tags.h
     ext/toc.c
+    ext/VERSION
     ext/version.c
     ext/xml.c
     ext/xmlpage.c

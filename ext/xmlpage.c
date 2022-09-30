@@ -5,18 +5,13 @@
  * The redistribution terms are provided in the COPYRIGHT file that must
  * be distributed with this source code.
  */
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-
-#include "cstring.h"
-#include "markdown.h"
-#include "amalloc.h"
+#include <markdown.h>
 
 
 int
-mkd_xhtmlpage(Document *p, int flags, FILE *out)
+mkd_xhtmlpage(Document *p, mkd_flag_t flags, FILE *out)
 {
     char *title;
     extern char *mkd_doc_title(Document *);
@@ -29,9 +24,11 @@ mkd_xhtmlpage(Document *p, int flags, FILE *out)
 				"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n") );
 
 	DO_OR_DIE( fprintf(out, "<head>\n") );
+	DO_OR_DIE( fprintf(out, "<title>") );
 	if ( title = mkd_doc_title(p) ) {
-	    DO_OR_DIE( fprintf(out, "<title>%s</title>\n", title) );
+	    DO_OR_DIE( fprintf(out, "%s", title) );
 	}
+	DO_OR_DIE( fprintf(out, "</title>\n") );
 	DO_OR_DIE( mkd_generatecss(p, out) );
 	DO_OR_DIE( fprintf(out, "</head>\n"
 				"<body>\n") );

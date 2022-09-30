@@ -108,9 +108,18 @@ dumptree(Paragraph *pp, Stack *sp, FILE *f)
 	    changepfx(sp, '`');
 	printpfx(sp, f);
 
-	d = fprintf(f, "[%s", Pptype(pp->typ));
+	if ( pp->typ == HDR )
+	    d += fprintf(f, "[h%d", pp->hnumber);
+	else
+	    d = fprintf(f, "[%s", Pptype(pp->typ));
 	if ( pp->ident )
 	    d += fprintf(f, " %s", pp->ident);
+
+#ifdef GITHUB_CHECKBOX
+	if ( pp->flags )
+	    d += fprintf(f, " %x", pp->flags);
+#endif
+	    
 	if ( pp->align > 1 )
 	    d += fprintf(f, ", <%s>", Begin[pp->align]);
 
@@ -134,7 +143,7 @@ dumptree(Paragraph *pp, Stack *sp, FILE *f)
 
 
 int
-mkd_dump(Document *doc, FILE *out, int flags, char *title)
+mkd_dump(Document *doc, FILE *out, mkd_flag_t flags, char *title)
 {
     Stack stack;
 

@@ -74,13 +74,19 @@ __mkd_enqueue(Document* a, Cstring *line)
 }
 
 
-/* trim leading blanks from a header line
+/* trim leading characters from a line, then adjust the dle.
  */
 void
-__mkd_header_dle(Line *p)
+__mkd_trim_line(Line *p, int clip)
 {
-    CLIP(p->text, 0, 1);
-    p->dle = mkd_firstnonblank(p);
+    if ( clip >= S(p->text) ) {
+	S(p->text) = p->dle = 0;
+	T(p->text)[0] = 0;
+    }
+    else if ( clip > 0 ) {
+	CLIP(p->text, 0, clip);
+	p->dle = mkd_firstnonblank(p);
+    }
 }
 
 
@@ -89,7 +95,7 @@ __mkd_header_dle(Line *p)
 typedef int (*getc_func)(void*);
 
 Document *
-populate(getc_func getc, void* ctx, int flags)
+populate(getc_func getc, void* ctx, mkd_flag_t flags)
 {
     Cstring line;
     Document *a = __mkd_new_Document();
@@ -98,7 +104,7 @@ populate(getc_func getc, void* ctx, int flags)
 
     if ( !a ) return 0;
 
-    a->tabstop = (flags & MKD_TABSTOP) ? 4 : TABSTOP;
+    a->tabstop = is_flag_set(flags, MKD_TABSTOP) ? 4 : TABSTOP;
 
     CREATE(line);
 
@@ -122,16 +128,16 @@ populate(getc_func getc, void* ctx, int flags)
 
     DELETE(line);
 
-    if ( (pandoc == 3) && !(flags & (MKD_NOHEADER|MKD_STRICT)) ) {
+    if ( (pandoc == 3) && !(is_flag_set(flags, MKD_NOHEADER) || is_flag_set(flags, MKD_STRICT)) ) {
 	/* the first three lines started with %, so we have a header.
 	 * clip the first three lines out of content and hang them
 	 * off header.
 	 */
 	Line *headers = T(a->content);
 
-	a->title = headers;             __mkd_header_dle(a->title);
-	a->author= headers->next;       __mkd_header_dle(a->author);
-	a->date  = headers->next->next; __mkd_header_dle(a->date);
+	a->title = headers;             __mkd_trim_line(a->title, 1);
+	a->author= headers->next;       __mkd_trim_line(a->author, 1);
+	a->date  = headers->next->next; __mkd_trim_line(a->date, 1);
 
 	T(a->content) = headers->next->next->next;
     }
@@ -143,7 +149,7 @@ populate(getc_func getc, void* ctx, int flags)
 /* convert a file into a linked list
  */
 Document *
-mkd_in(FILE *f, DWORD flags)
+mkd_in(FILE *f, mkd_flag_t flags)
 {
     return populate((getc_func)fgetc, f, flags & INPUT_MASK);
 }
@@ -165,7 +171,7 @@ __mkd_io_strget(struct string_stream *in)
 /* convert a block of text into a linked list
  */
 Document *
-mkd_string(const char *buf, int len, DWORD flags)
+mkd_string(const char *buf, int len, mkd_flag_t flags)
 {
     struct string_stream about;
 
@@ -185,7 +191,7 @@ mkd_generatehtml(Document *p, FILE *output)
     int szdoc;
 
     DO_OR_DIE( szdoc = mkd_document(p,&doc) );
-    if ( p->ctx->flags & MKD_CDATA )
+    if ( is_flag_set(p->ctx->flags, MKD_CDATA) )
 	DO_OR_DIE( mkd_generatexml(doc, szdoc, output) );
     else if ( fwrite(doc, szdoc, 1, output) != 1 )
 	return EOF;
@@ -197,7 +203,7 @@ mkd_generatehtml(Document *p, FILE *output)
 /* convert some markdown text to html
  */
 int
-markdown(Document *document, FILE *out, int flags)
+markdown(Document *document, FILE *out, mkd_flag_t flags)
 {
     if ( mkd_compile(document, flags) ) {
 	mkd_generatehtml(document, out);
@@ -208,51 +214,103 @@ markdown(Document *document, FILE *out, int flags)
 }
 
 
+/* anchor_format a string, returning the formatted string in malloc()ed space
+ * MKD_URLENCODEDANCHOR is now perverted to being a html5 anchor
+ *
+ * !labelformat:  print all characters
+ * labelformat && h4anchor: prefix nonalpha label with L,
+ *                          expand all nonalnum, _, ':', '.' to hex
+ *                          except space which maps to -
+ * labelformat && !h4anchor:expand space to -, other isspace() & '%' to hex
+ */
+static char *
+mkd_anchor_format(char *s, int len, int labelformat, mkd_flag_t flags)
+{
+    char *res;
+    unsigned char c;
+    int i, needed, out = 0;
+    int h4anchor = !is_flag_set(flags, MKD_URLENCODEDANCHOR);
+    static const unsigned char hexchars[] = "0123456789abcdef";
+
+    needed = (labelformat ? (4*len) : len) + 2 /* 'L', trailing null */;
+
+    if ( (res = malloc(needed)) == NULL )
+	return NULL;
+
+    if ( h4anchor && labelformat && !isalpha(s[0]) )
+	res[out++] = 'L';
+	
+    
+    for ( i=0; i < len ; i++ ) {
+	c = s[i];
+	if ( labelformat ) {
+	    if ( h4anchor
+		    ? (isalnum(c) || (c == '_') || (c == ':') || (c == '.' ) )
+		    : !(isspace(c) || c == '%') )
+		res[out++] = c;
+	    else if ( c == ' ' )
+		res[out++] = '-';
+	    else {
+		    res[out++] = h4anchor ? '-' : '%';
+		    res[out++] = hexchars[c >> 4 & 0xf];
+		    res[out++] = hexchars[c      & 0xf];
+		    if ( h4anchor )
+			res[out++] = '-';
+	    }
+	}
+	else
+	    res[out++] = c;
+    }
+    
+    res[out++] = 0;
+    return res;
+} /* mkd_anchor_format */
+
+
 /* write out a Cstring, mangled into a form suitable for `<a href=` or `<a id=`
  */
 void
 mkd_string_to_anchor(char *s, int len, mkd_sta_function_t outchar,
 				       void *out, int labelformat,
-				       DWORD flags)
+				       MMIOT *f)
 {
-    static const unsigned char hexchars[] = "0123456789abcdef";
-    unsigned char c;
-
-    int i, size;
+    char *res;
     char *line;
+    int size;
+
+    int i;
 
     size = mkd_line(s, len, &line, IS_LABEL);
 
-    if ( !(flags & MKD_URLENCODEDANCHOR)
-	 && labelformat
-	 && (size>0) && !isalpha(line[0]) )
-	(*outchar)('L',out);
-    for ( i=0; i < size ; i++ ) {
-	c = line[i];
-	if ( labelformat ) {
-	    if ( isalnum(c) || (c == '_') || (c == ':') || (c == '-') || (c == '.' ) )
-		(*outchar)(c, out);
-	    else if ( flags & MKD_URLENCODEDANCHOR ) {
-		(*outchar)('%', out);
-		(*outchar)(hexchars[c >> 4 & 0xf], out);
-		(*outchar)(hexchars[c      & 0xf], out);
-	    }
-	    else
-		(*outchar)('.', out);
-	}
-	else
-	    (*outchar)(c,out);
+    if ( !line )
+	return;
+
+    if ( f->cb->e_anchor )
+	res = (*(f->cb->e_anchor))(line, size, f->cb->e_data);
+    else
+	res = mkd_anchor_format(line, size, labelformat, f->flags);
+
+    free(line);
+
+    if ( !res )
+	return;
+
+    for ( i=0; res[i]; i++ )
+	(*outchar)(res[i], out);
+
+    if ( f->cb->e_anchor ) {
+	if ( f->cb->e_free )
+	    (*(f->cb->e_free))(res, f->cb->e_data);
     }
-	
-    if (line)
-	free(line);
+    else 
+	free(res);
 }
 
 
 /*  ___mkd_reparse() a line
  */
 static void
-mkd_parse_line(char *bfr, int size, MMIOT *f, int flags)
+mkd_parse_line(char *bfr, int size, MMIOT *f, mkd_flag_t flags)
 {
     ___mkd_initmmiot(f, 0);
     f->flags = flags & USER_FLAGS;
@@ -264,7 +322,7 @@ mkd_parse_line(char *bfr, int size, MMIOT *f, int flags)
 /* ___mkd_reparse() a line, returning it in malloc()ed memory
  */
 int
-mkd_line(char *bfr, int size, char **res, DWORD flags)
+mkd_line(char *bfr, int size, char **res, mkd_flag_t flags)
 {
     MMIOT f;
     int len;
@@ -272,15 +330,14 @@ mkd_line(char *bfr, int size, char **res, DWORD flags)
     mkd_parse_line(bfr, size, &f, flags);
 
     if ( len = S(f.out) ) {
-	/* kludge alert;  we know that T(f.out) is malloced memory,
-	 * so we can just steal it away.   This is awful -- there
-	 * should be an opaque method that transparently moves 
-	 * the pointer out of the embedded Cstring.
-	 */
 	EXPAND(f.out) = 0;
-	*res = T(f.out);
-	T(f.out) = 0;
-	S(f.out) = ALLOCATED(f.out) = 0;
+	/* strdup() doesn't use amalloc(), so in an amalloc()ed
+	 * build this copies the string safely out of our memory
+	 * paranoia arena.  In a non-amalloc world, it's a spurious
+	 * memory allocation, but it avoids unintentional hilarity
+	 * with amalloc()
+	 */
+	*res = strdup(T(f.out));
     }
     else {
 	 *res = 0;
@@ -294,13 +351,13 @@ mkd_line(char *bfr, int size, char **res, DWORD flags)
 /* ___mkd_reparse() a line, writing it to a FILE
  */
 int
-mkd_generateline(char *bfr, int size, FILE *output, DWORD flags)
+mkd_generateline(char *bfr, int size, FILE *output, mkd_flag_t flags)
 {
     MMIOT f;
     int status;
 
     mkd_parse_line(bfr, size, &f, flags);
-    if ( flags & MKD_CDATA )
+    if ( is_flag_set(flags, MKD_CDATA) )
 	status = mkd_generatexml(T(f.out), S(f.out), output) != EOF;
     else
 	status = fwrite(T(f.out), S(f.out), 1, output) == S(f.out);
@@ -315,8 +372,11 @@ mkd_generateline(char *bfr, int size, FILE *output, DWORD flags)
 void
 mkd_e_url(Document *f, mkd_callback_t edit)
 {
-    if ( f )
+    if ( f ) {
+	if ( f->cb.e_url != edit )
+	    f->dirty = 1;
 	f->cb.e_url = edit;
+    }
 }
 
 
@@ -325,8 +385,24 @@ mkd_e_url(Document *f, mkd_callback_t edit)
 void
 mkd_e_flags(Document *f, mkd_callback_t edit)
 {
-    if ( f )
+    if ( f ) {
+	if ( f->cb.e_flags != edit )
+	    f->dirty = 1;
 	f->cb.e_flags = edit;
+    }
+}
+
+
+/* set the anchor formatter
+ */
+void
+mkd_e_anchor(Document *f, mkd_callback_t format)
+{
+    if ( f ) {
+	if ( f->cb.e_anchor != format )
+	    f->dirty = 1;
+	f->cb.e_anchor = format;
+    }
 }
 
 
@@ -335,8 +411,11 @@ mkd_e_flags(Document *f, mkd_callback_t edit)
 void
 mkd_e_free(Document *f, mkd_free_t dealloc)
 {
-    if ( f )
+    if ( f ) {
+	if ( f->cb.e_free != dealloc )
+	    f->dirty = 1;
 	f->cb.e_free = dealloc;
+    }
 }
 
 
@@ -345,8 +424,23 @@ mkd_e_free(Document *f, mkd_free_t dealloc)
 void
 mkd_e_data(Document *f, void *data)
 {
-    if ( f )
+    if ( f ) {
+	if ( f->cb.e_data != data )
+	    f->dirty = 1;
 	f->cb.e_data = data;
+    }
+}
+
+
+/* set the code block display callback
+ */
+void
+mkd_e_code_format(Document *f, mkd_callback_t codefmt)
+{
+    if ( f && (f->cb.e_codefmt != codefmt) ) {
+	f->dirty = 1;
+	f->cb.e_codefmt = codefmt;
+    }
 }
 
 
@@ -355,6 +449,9 @@ mkd_e_data(Document *f, void *data)
 void
 mkd_ref_prefix(Document *f, char *data)
 {
-    if ( f )
+    if ( f ) {
+	if ( f->ref_prefix != data )
+	    f->dirty = 1;
 	f->ref_prefix = data;
+    }
 }

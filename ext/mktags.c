@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #define __WITHOUT_AMALLOC 1
+#include "config.h"
 #include "cstring.h"
 #include "tags.h"
 
@@ -41,6 +42,7 @@ typedef int (*stfu)(const void*,const void*);
 
 /* load in the standard collection of html tags that markdown supports
  */
+int
 main()
 {
     int i;
@@ -65,6 +67,7 @@ main()
     KW("H6");
     KW("LISTING");
     KW("NOBR");
+    KW("FORM");
     KW("UL");
     KW("P");
     KW("OL");

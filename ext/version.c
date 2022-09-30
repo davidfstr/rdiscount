@@ -1,13 +1,13 @@
 #include "config.h"
 
-char markdown_version[] = VERSION
+char markdown_version[] = BRANCH VERSION
 #if 4 != 4
 		" TAB=4"
 #endif
 #if USE_AMALLOC
 		" DEBUG"
 #endif
-#if WITH_LATEX
-		" LATEX"
+#if GITHUB_CHECKBOX
+		" GITHUB_CHECKBOX"
 #endif
 		;
