@@ -50,7 +50,7 @@ by BlueCloth:
 Additional processing options can be turned on when creating the
 RDiscount object:
 
-    markdown = RDiscount.new("Hello World!", :smart, :filter_html)
+    markdown = RDiscount.new("Hello World!", :MKD_NOHTML)
 
 Inject RDiscount into your BlueCloth-using code by replacing your bluecloth
 require statements with the following:
