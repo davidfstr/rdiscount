@@ -35,6 +35,7 @@ static AccessorFlagPair ACCESSOR_2_FLAG[] = {
     { "no_superscript", MKD_NOSUPERSCRIPT },
     { "no_strikethrough", MKD_NOSTRIKETHROUGH },
     { "latex", MKD_LATEX },
+    { "explicitlist", MKD_EXPLICITLIST },
     { NULL, 0 }     /* sentinel */
 };
 

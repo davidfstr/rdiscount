@@ -78,6 +78,9 @@ class RDiscount
   # Keep LaTeX inside $$ intact.
   attr_accessor :latex
 
+  # Don't merge adjacent list into a single list.
+  attr_accessor :explicitlist
+
   # Create a RDiscount Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
   # supplied to set various processing options:
@@ -99,6 +102,7 @@ class RDiscount
   # * <tt>:no_superscript</tt> - Disable superscript processing.
   # * <tt>:no_strikethrough</tt> - Disable strikethrough processing.
   # * <tt>:latex</tt> - Keep LaTeX inside $$ intact.
+  # * <tt>:explicitlist</tt> - Don't merge adjacent list into a single list.
   #
   def initialize(text, *extensions)
     @text  = text

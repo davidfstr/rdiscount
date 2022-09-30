@@ -260,6 +260,30 @@ EOS
     assert_equal %(<p><em>foobar ä</em></p>\n), rd.to_html
   end
 
+  def test_taht
+    rd = RDiscount.new(<<EOS, :explicitlist)
+- Bullet
+- Bullet
+
+1. Numbered
+2. Numbered
+EOS
+
+    assert_equal <<EOS, rd.to_html
+<ul>
+<li>Bullet</li>
+<li>Bullet</li>
+</ul>
+
+
+<ol>
+<li>Numbered</li>
+<li>Numbered</li>
+</ol>
+
+EOS
+  end
+
   def test_that_extra_definition_lists_work
     rd = RDiscount.new(<<EOS)
 tag1
