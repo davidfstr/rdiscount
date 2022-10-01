@@ -81,6 +81,9 @@ class RDiscount
   # Don't merge adjacent list into a single list.
   attr_accessor :explicitlist
 
+  # Not documented: run in markdown 1 compat mode (only used for MarkdownTest1.0)
+  attr_accessor :md1compat
+
   # Create a RDiscount Markdown processor. The +text+ argument
   # should be a string containing Markdown text. Additional arguments may be
   # supplied to set various processing options:

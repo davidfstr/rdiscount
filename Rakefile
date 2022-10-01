@@ -67,11 +67,20 @@ task 'test:conformance' => [:build] do |t|
     print result
     fail unless result.include? "; 0 failed."
   end
+
+  # Allow to run this rake tasks multiple times
+  # https://medium.com/@shaneilske/invoke-a-rake-task-multiple-times-1bcb01dee9d9
+  ENV.delete("MARKDOWN_TEST_VER")
+  ENV.delete("RDISCOUNT_EXTENSIONS")
+  Rake::Task["test:conformance"].reenable
 end
 
 desc 'Run version 1.0 conformance suite'
 task 'test:conformance:1.0' => [:build] do |t|
   ENV['MARKDOWN_TEST_VER'] = '1.0'
+  # see https://github.com/Orc/discount/issues/261
+  # requires flags -f1.0,tabstop,nopants
+  ENV['RDISCOUNT_EXTENSIONS'] = "md1compat"
   Rake::Task['test:conformance'].invoke
 end
 
@@ -82,7 +91,7 @@ task 'test:conformance:1.0.3' => [:build] do |t|
 end
 
 desc 'Run unit and conformance tests'
-task :test => %w[test:unit test:conformance]
+task :test => %w[test:unit test:conformance:1.0 test:conformance:1.0.3]
 
 desc 'Run benchmarks'
 task :benchmark => :build do |t|
