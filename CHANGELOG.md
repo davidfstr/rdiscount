@@ -1,5 +1,14 @@
 # RDiscount Changelog
 
+## Version 2.2.7 <small>(October 23, 2022)</small>
+
+* Discount upgraded from 2.2.0 -> 2.2.7c
+    * Implement support for :latex
+    * Implement support for :explicitlist
+* Move CI to GitHub action and fix CI builds (Ruby 2.7 - 3.1)
+* Drop support for all EOL Ruby versions (eg > 2.7)
+* Fixing conformance tests to run version 1.0 and 1.0.3
+
 ## Version 2.2.0.2 <small>(August 9, 2020)</small>
 
 * Fix compilation error on macOS Big Sur Preview (11.0).
