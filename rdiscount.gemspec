@@ -2,7 +2,6 @@ Gem::Specification.new do |s|
   s.name = 'rdiscount'
   s.version = '2.2.0.2'
   s.summary = "Fast Implementation of Gruber's Markdown in C"
-  s.date = '2020-08-09'
   s.email = 'david@dafoster.net'
   s.homepage = 'http://dafoster.net/projects/rdiscount/'
   s.authors = ["Ryan Tomayko", "David Loren Parsons", "Andrew White", "David Foster"]
@@ -69,7 +68,4 @@ Gem::Specification.new do |s|
   s.extensions = ["ext/extconf.rb"]
   s.executables = ["rdiscount"]
   s.require_paths = ["lib"]
-  s.rubyforge_project = 'wink'
-  # Ruby 1.9.2 has a known bug in mkmf. Ruby 1.9.3 or later is fine.
-  s.required_ruby_version = '!= 1.9.2'
 end
