@@ -183,10 +183,25 @@ EOS
   end
   
   def test_that_style_tag_is_not_filtered_by_default
-    rd = RDiscount.new("Hello<style>p { margin: 5px; }</style>")
-    assert_equal "<p>Hello<style>p { margin: 5px; }</style></p>\n", rd.to_html
+    rd = RDiscount.new(<<EOS)
+Hello
+<style>
+p { margin: 5px; }
+</style>
+EOS
+    assert_equal "<p>Hello</p>\n\n<style>\np { margin: 5px; }\n</style>\n\n", rd.to_html
   end
   
+  def test_that_style_tag_is_filtered_with_flag
+    rd = RDiscount.new(<<EOS, :filter_styles)
+Hello
+<style>
+p { margin: 5px; }
+</style>
+EOS
+    assert_equal "<p>Hello</p>\n\n\n", rd.to_html
+  end
+
   def test_that_tables_can_have_leading_and_trailing_pipes
     rd = RDiscount.new(<<EOS)
 | A | B |
