@@ -17,7 +17,7 @@ grabbing the discount submodule into the root of the project and then running
 the rake gather task to copy discount source files into the ext/ directory:
 
     $ git submodule update --init
-    Submodule 'discount' (git://github.com/davidfstr/discount.git) registered for path 'discount'
+    Submodule 'discount' (git@github.com:Orc/discount.git) registered for path 'discount'
     Cloning into discount...
     $ cd discount
     $ ./configure.sh
