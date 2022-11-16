@@ -18,6 +18,7 @@ typedef struct {
  * - MKD_FENCEDCODE: Always set. (For compatibility with RDiscount 2.1.8 and earlier.)
  * - MKD_GITHUBTAGS: Always set. (For compatibility with RDiscount 2.1.8 and earlier.)
  * - MKD_NOPANTS: Set unless the "smart" accessor returns true.
+ * - MKD_NOSTYLE: Set unless the "filter_styles" accessor returns true.
  * 
  * See rb_rdiscount__get_flags() for the detailed implementation.
  */
@@ -52,6 +53,11 @@ int rb_rdiscount__get_flags(VALUE ruby_obj)
     /* The "smart" accessor turns OFF the MKD_NOPANTS flag. */
     if ( rb_funcall(ruby_obj, rb_intern("smart"), 0) != Qtrue ) {
         flags = flags | MKD_NOPANTS;
+    }
+
+    /* The "filter_styles" accessor turns OFF the MKD_NOSTYLE flag. */
+    if ( rb_funcall(ruby_obj, rb_intern("filter_styles"), 0) != Qtrue ) {
+        flags = flags | MKD_NOSTYLE;
     }
     
     /* Handle standard flags declared in ACCESSOR_2_FLAG */
