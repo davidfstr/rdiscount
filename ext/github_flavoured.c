@@ -21,7 +21,7 @@
 typedef int (*getc_func)(void*);
 
 Document *
-gfm_populate(getc_func getc, void* ctx, int flags)
+gfm_populate(getc_func getc, void* ctx, mkd_flag_t *flags)
 {
     Cstring line;
     Document *a = __mkd_new_Document();
@@ -30,7 +30,10 @@ gfm_populate(getc_func getc, void* ctx, int flags)
 
     if ( !a ) return 0;
 
-    a->tabstop = is_flag_set(flags, MKD_TABSTOP) ? 4 : TABSTOP;
+    if ( is_flag_set(flags, MKD_TABSTOP) || is_flag_set(flags, MKD_STRICT) )
+	a->tabstop = 4;
+    else
+	a->tabstop = TABSTOP;
 
     CREATE(line);
 
@@ -59,8 +62,7 @@ gfm_populate(getc_func getc, void* ctx, int flags)
 
     DELETE(line);
 
-    if ( (pandoc == 3) && !(is_flag_set(flags, MKD_NOHEADER)
-     || is_flag_set(flags, MKD_STRICT)) ) {
+    if ( (pandoc == 3) && !is_flag_set(flags, MKD_NOHEADER) ) {
 	/* the first three lines started with %, so we have a header.
 	 * clip the first three lines out of content and hang them
 	 * off header.
@@ -81,21 +83,21 @@ gfm_populate(getc_func getc, void* ctx, int flags)
 /* convert a block of text into a linked list
  */
 Document *
-gfm_string(const char *buf, int len, mkd_flag_t flags)
+gfm_string(const char *buf, int len, mkd_flag_t* flags)
 {
     struct string_stream about;
 
     about.data = buf;
     about.size = len;
 
-    return gfm_populate((getc_func)__mkd_io_strget, &about, flags & INPUT_MASK);
+    return gfm_populate((getc_func)__mkd_io_strget, &about, flags);
 }
 
 
 /* convert a file into a linked list
  */
 Document *
-gfm_in(FILE *f, mkd_flag_t flags)
+gfm_in(FILE *f, mkd_flag_t* flags)
 {
-    return gfm_populate((getc_func)fgetc, f, flags & INPUT_MASK);
+    return gfm_populate((getc_func)fgetc, f, flags);
 }

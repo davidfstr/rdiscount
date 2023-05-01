@@ -166,7 +166,6 @@ task :gather => 'discount/markdown.h' do |t|
   end
   
   # Copy special files from discount -> ext
-  cp 'discount/blocktags', 'ext/'
   cp 'discount/VERSION', 'ext/'
   
   # Copy man page

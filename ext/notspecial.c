@@ -17,7 +17,7 @@ notspecial(char *file)
     if ( stat(file, &info) != 0 )
 	return 1;
     
-    return !( S_ISCHR(info.st_mode) || S_ISFIFO(info.st_mode) || S_ISSOCK(info.st_mode) );
+    return S_ISREG(info.st_mode);
 }
 #else
 int
@@ -33,8 +33,7 @@ notspecial(char *file)
 #include <stdio.h>
 
 int
-main(argc, argv)
-char **argv;
+main(int argc, char **argv)
 {
     int i;
 

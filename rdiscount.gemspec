@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     ext/dumptree.c
     ext/emmatch.c
     ext/extconf.rb
+    ext/flagprocs.c
     ext/flags.c
     ext/generate.c
     ext/gethopt.c
@@ -43,10 +44,12 @@ Gem::Specification.new do |s|
     ext/pgm_options.h
     ext/rdiscount.c
     ext/resource.c
+    ext/ruby-config.h
     ext/setup.c
     ext/tags.c
     ext/tags.h
     ext/toc.c
+    ext/v2compat.c
     ext/VERSION
     ext/version.c
     ext/xml.c
