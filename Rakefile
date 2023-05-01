@@ -138,7 +138,7 @@ task :gather => 'discount/markdown.h' do |t|
   ]
   
   # Ensure configure.sh was run
-  if not File.exists? 'discount/mkdio.h'
+  if not File.exist? 'discount/mkdio.h'
     abort "discount/mkdio.h not found. Did you run ./configure.sh in the discount directory?"
   end
   
@@ -166,7 +166,6 @@ task :gather => 'discount/markdown.h' do |t|
   end
   
   # Copy special files from discount -> ext
-  cp 'discount/blocktags', 'ext/'
   cp 'discount/VERSION', 'ext/'
   
   # Copy man page

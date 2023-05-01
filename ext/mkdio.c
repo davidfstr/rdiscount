@@ -20,7 +20,7 @@ typedef ANCHOR(Line) LineAnchor;
 /* create a new blank Document
  */
 Document*
-__mkd_new_Document()
+__mkd_new_Document(void)
 {
     Document *ret = calloc(sizeof(Document), 1);
 
@@ -63,7 +63,7 @@ __mkd_enqueue(Document* a, Cstring *line)
 	}
 	else if ( c >= ' ' ) {
 	    if ( c == '|' )
-		p->flags |= PIPECHAR;
+		p->has_pipechar = 1;
 	    EXPAND(p->text) = c;
 	    ++xp;
 	}
@@ -95,16 +95,23 @@ __mkd_trim_line(Line *p, int clip)
 typedef int (*getc_func)(void*);
 
 Document *
-populate(getc_func getc, void* ctx, mkd_flag_t flags)
+populate(getc_func getc, void* ctx, mkd_flag_t *flags)
 {
     Cstring line;
     Document *a = __mkd_new_Document();
     int c;
     int pandoc = 0;
 
+    if ( flags && (is_flag_set(flags, MKD_NOHEADER) || is_flag_set(flags, MKD_STRICT)) )
+	pandoc= EOF;
+
     if ( !a ) return 0;
 
-    a->tabstop = is_flag_set(flags, MKD_TABSTOP) ? 4 : TABSTOP;
+
+    if ( flags && (is_flag_set(flags, MKD_TABSTOP) || is_flag_set(flags, MKD_STRICT)) )
+	a->tabstop = 4;
+    else
+	a->tabstop = TABSTOP;
 
     CREATE(line);
 
@@ -119,7 +126,7 @@ populate(getc_func getc, void* ctx, mkd_flag_t flags)
 	    __mkd_enqueue(a, &line);
 	    S(line) = 0;
 	}
-	else if ( isprint(c) || isspace(c) || (c & 0x80) )
+	else if ( (c & 0x80) || isprint(c) || isspace(c) )
 	    EXPAND(line) = c;
     }
 
@@ -128,7 +135,7 @@ populate(getc_func getc, void* ctx, mkd_flag_t flags)
 
     DELETE(line);
 
-    if ( (pandoc == 3) && !(is_flag_set(flags, MKD_NOHEADER) || is_flag_set(flags, MKD_STRICT)) ) {
+    if ( pandoc == 3 ) {
 	/* the first three lines started with %, so we have a header.
 	 * clip the first three lines out of content and hang them
 	 * off header.
@@ -149,9 +156,9 @@ populate(getc_func getc, void* ctx, mkd_flag_t flags)
 /* convert a file into a linked list
  */
 Document *
-mkd_in(FILE *f, mkd_flag_t flags)
+mkd_in(FILE *f, mkd_flag_t *flags)
 {
-    return populate((getc_func)fgetc, f, flags & INPUT_MASK);
+    return populate((getc_func)fgetc, f, flags);
 }
 
 
@@ -171,14 +178,14 @@ __mkd_io_strget(struct string_stream *in)
 /* convert a block of text into a linked list
  */
 Document *
-mkd_string(const char *buf, int len, mkd_flag_t flags)
+mkd_string(const char *buf, int len, mkd_flag_t* flags)
 {
     struct string_stream about;
 
     about.data = buf;
     about.size = len;
 
-    return populate((getc_func)__mkd_io_strget, &about, flags & INPUT_MASK);
+    return populate((getc_func)__mkd_io_strget, &about, flags);
 }
 
 
@@ -191,7 +198,7 @@ mkd_generatehtml(Document *p, FILE *output)
     int szdoc;
 
     DO_OR_DIE( szdoc = mkd_document(p,&doc) );
-    if ( is_flag_set(p->ctx->flags, MKD_CDATA) )
+    if ( is_flag_set( &(p->ctx->flags), MKD_CDATA ) )
 	DO_OR_DIE( mkd_generatexml(doc, szdoc, output) );
     else if ( fwrite(doc, szdoc, 1, output) != 1 )
 	return EOF;
@@ -203,7 +210,7 @@ mkd_generatehtml(Document *p, FILE *output)
 /* convert some markdown text to html
  */
 int
-markdown(Document *document, FILE *out, mkd_flag_t flags)
+markdown(Document *document, FILE *out, mkd_flag_t* flags)
 {
     if ( mkd_compile(document, flags) ) {
 	mkd_generatehtml(document, out);
@@ -224,7 +231,7 @@ markdown(Document *document, FILE *out, mkd_flag_t flags)
  * labelformat && !h4anchor:expand space to -, other isspace() & '%' to hex
  */
 static char *
-mkd_anchor_format(char *s, int len, int labelformat, mkd_flag_t flags)
+mkd_anchor_format(char *s, int len, int labelformat, mkd_flag_t *flags)
 {
     char *res;
     unsigned char c;
@@ -232,7 +239,7 @@ mkd_anchor_format(char *s, int len, int labelformat, mkd_flag_t flags)
     int h4anchor = !is_flag_set(flags, MKD_URLENCODEDANCHOR);
     static const unsigned char hexchars[] = "0123456789abcdef";
 
-    needed = (labelformat ? (4*len) : len) + 2 /* 'L', trailing null */;
+    needed = (labelformat ? (4*len) : len) + 2;	/* +2 for L & \0 */
 
     if ( (res = malloc(needed)) == NULL )
 	return NULL;
@@ -277,10 +284,13 @@ mkd_string_to_anchor(char *s, int len, mkd_sta_function_t outchar,
     char *res;
     char *line;
     int size;
+    mkd_flag_t flags;
 
     int i;
 
-    size = mkd_line(s, len, &line, IS_LABEL);
+    mkd_init_flags(&flags);
+    set_mkd_flag(&flags,IS_LABEL);
+    size = mkd_line(s, len, &line, &flags);
 
     if ( !line )
 	return;
@@ -288,7 +298,7 @@ mkd_string_to_anchor(char *s, int len, mkd_sta_function_t outchar,
     if ( f->cb->e_anchor )
 	res = (*(f->cb->e_anchor))(line, size, f->cb->e_data);
     else
-	res = mkd_anchor_format(line, size, labelformat, f->flags);
+	res = mkd_anchor_format(line, size, labelformat, &(f->flags));
 
     free(line);
 
@@ -310,11 +320,14 @@ mkd_string_to_anchor(char *s, int len, mkd_sta_function_t outchar,
 /*  ___mkd_reparse() a line
  */
 static void
-mkd_parse_line(char *bfr, int size, MMIOT *f, mkd_flag_t flags)
+mkd_parse_line(char *bfr, int size, MMIOT *f, mkd_flag_t *flags)
 {
     ___mkd_initmmiot(f, 0);
-    f->flags = flags & USER_FLAGS;
-    ___mkd_reparse(bfr, size, 0, f, 0);
+    if ( flags )
+	COPY_FLAGS(f->flags, *flags);
+    else
+	mkd_init_flags(&f->flags);
+    ___mkd_reparse(bfr, size, NULL, f, 0);
     ___mkd_emblock(f);
 }
 
@@ -322,7 +335,7 @@ mkd_parse_line(char *bfr, int size, MMIOT *f, mkd_flag_t flags)
 /* ___mkd_reparse() a line, returning it in malloc()ed memory
  */
 int
-mkd_line(char *bfr, int size, char **res, mkd_flag_t flags)
+mkd_line(char *bfr, int size, char **res, mkd_flag_t* flags)
 {
     MMIOT f;
     int len;
@@ -351,13 +364,13 @@ mkd_line(char *bfr, int size, char **res, mkd_flag_t flags)
 /* ___mkd_reparse() a line, writing it to a FILE
  */
 int
-mkd_generateline(char *bfr, int size, FILE *output, mkd_flag_t flags)
+mkd_generateline(char *bfr, int size, FILE *output, mkd_flag_t* flags)
 {
     MMIOT f;
     int status;
 
     mkd_parse_line(bfr, size, &f, flags);
-    if ( is_flag_set(flags, MKD_CDATA) )
+    if ( flags && is_flag_set(flags, MKD_CDATA) )
 	status = mkd_generatexml(T(f.out), S(f.out), output) != EOF;
     else
 	status = fwrite(T(f.out), S(f.out), 1, output) == S(f.out);
@@ -454,4 +467,86 @@ mkd_ref_prefix(Document *f, char *data)
 	    f->dirty = 1;
 	f->ref_prefix = data;
     }
+}
+
+#if 0
+static void
+sayflags(char *pfx, mkd_flag_t* flags, FILE *output)
+{
+    int i;
+
+    fprintf(output, "%.*s/", (int)strlen(pfx), "            ");
+    for (i=0; i<MKD_NR_FLAGS; i++)
+	fputc( (i==0) || (i % 10) ? ' ' : (i/10)+'0', output);
+    fputc('\\', output);
+    fputc('\n', output);
+    fprintf(output, "%s|", pfx);
+    for (i=0; i<MKD_NR_FLAGS; i++)
+	fputc((i%10)+'0', output);
+    fputc('|', output);
+    fputc('\n', output);
+    fprintf(output, "%.*s\\", (int)strlen(pfx), "            ");
+    for (i=0;i<MKD_NR_FLAGS; i++)
+	fputc(is_flag_set(flags, i)?'X':' ', output);
+    fputc('/', output);
+    fputc('\n', output);
+}
+#else
+#define sayflags(pfx,flags,output) 1
+#endif
+
+
+
+void
+___mkd_or_flags(mkd_flag_t *dst, mkd_flag_t *src)
+{
+    int i;
+
+    for (i=0; i<MKD_NR_FLAGS; i++)
+	if ( is_flag_set(src,i) )
+	    set_mkd_flag(dst, i);
+}
+
+
+int
+___mkd_different(mkd_flag_t *dst, mkd_flag_t *src)
+{
+    int i;
+    mkd_flag_t zeroes;
+
+    if ( dst == 0 || src == 0 ) {
+	mkd_init_flags(&zeroes);
+	if ( !dst )
+	    dst = &zeroes;
+	if ( !src )
+	    src = &zeroes;
+    }
+
+    for (i=0; i < MKD_NR_FLAGS; i++)
+	if ( is_flag_set(src,i) != is_flag_set(dst,i) )
+	    return 1;
+
+    return 0;
+}
+
+int
+___mkd_any_flags(mkd_flag_t *dst, mkd_flag_t *src)
+{
+    int i;
+    int count = 0;
+    mkd_flag_t zeroes;
+
+    if ( dst == 0 || src == 0 ) {
+	mkd_init_flags(&zeroes);
+	if ( !dst )
+	    dst = &zeroes;
+	if ( !src )
+	    src = &zeroes;
+    }
+
+    for (i=0; i < MKD_NR_FLAGS; i++)
+	if ( is_flag_set(src,i) && is_flag_set(dst,i) )
+	    ++count;
+
+    return count;
 }
