@@ -45,8 +45,7 @@ struct h_context *ctx;
 
 
 int
-hopterr(ctx,val)
-struct h_context *ctx;
+hopterr(struct h_context *ctx, int val)
 {
     int old = ctx->opterr;
     
