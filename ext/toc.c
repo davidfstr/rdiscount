@@ -15,6 +15,10 @@
 #include "markdown.h"
 #include "amalloc.h"
 
+static int Csputc_mkd_sta_function_t(const int n, const void* iot) {
+  Csputc(n, iot);
+}
+
 /* write an header index
  */
 int
@@ -64,7 +68,7 @@ mkd_toc(Document *p, char **doc)
 		    Csprintf(&res, "%*s<li><a href=\"#", srcp->hnumber, "");
 		    mkd_string_to_anchor(T(srcp->text->text),
 					 S(srcp->text->text),
-					 (mkd_sta_function_t)Csputc,
+					 Csputc_mkd_sta_function_t,
 					 &res,1,p->ctx);
 		    Csprintf(&res, "\">");
 		    Csreparse(&res, T(srcp->text->text),
