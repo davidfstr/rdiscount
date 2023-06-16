@@ -100,7 +100,7 @@ And don't forget to rerun the preexisting tests.
 
 Update the CHANGELOG.
 
-Update rdiscount.gemspec with the new RDiscount version number and date.
+Update rdiscount.gemspec with the new RDiscount version number.
 Also update the VERSION constant in lib/rdiscount.rb.
 Push that change as the final commit with a message in the format
 "2.0.7 release".

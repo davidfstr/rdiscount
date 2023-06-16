@@ -1,5 +1,12 @@
 # RDiscount Changelog
 
+## Version 2.2.7.1 <small>(June 16, 2023)</small>
+
+* Fix to not filter out `<style>` tags by default in Markdown output,
+  unless `filter_styles` is enabled
+* Fix compilation issue with Clang 16
+* Add TruffleRuby to continuous integration
+
 ## Version 2.2.7 <small>(October 23, 2022)</small>
 
 * Discount upgraded from 2.2.0 -> 2.2.7c
