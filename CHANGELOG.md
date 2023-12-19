@@ -1,5 +1,10 @@
 # RDiscount Changelog
 
+## Version 2.2.7.2 <small>(December 19, 2023)</small>
+
+* Discount upgraded from 2.2.7c -> 2.2.7d
+    * Fix compilation on openSUSE Tumbleweed
+
 ## Version 2.2.7.1 <small>(June 16, 2023)</small>
 
 * Fix to not filter out `<style>` tags by default in Markdown output,
