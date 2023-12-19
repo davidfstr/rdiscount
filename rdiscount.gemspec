@@ -14,12 +14,13 @@ Gem::Specification.new do |s|
     Rakefile
     bin/rdiscount
     discount
+    ext/Csio.c
+    ext/VERSION
     ext/amalloc.c
     ext/amalloc.h
     ext/basename.c
     ext/blocktags
     ext/config.h
-    ext/Csio.c
     ext/css.c
     ext/cstring.h
     ext/docheader.c
@@ -43,11 +44,11 @@ Gem::Specification.new do |s|
     ext/pgm_options.h
     ext/rdiscount.c
     ext/resource.c
+    ext/ruby-config.h
     ext/setup.c
     ext/tags.c
     ext/tags.h
     ext/toc.c
-    ext/VERSION
     ext/version.c
     ext/xml.c
     ext/xmlpage.c
