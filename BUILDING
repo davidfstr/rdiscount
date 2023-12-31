@@ -47,13 +47,9 @@ Copy the new Discount sources to the appropriate directories for RDiscount:
 
     $ rake gather
 
-Update rdiscount.gemspec to include all *.c, *.h, and *.rb files in
-ext. This must be done manually. Here's a quick way to get the full list:
+Update rdiscount.gemspec to include all *.c, *.h, and *.rb files in ext:
 
-    $ echo ext/*.c ext/*.h ext/*.rb ext/blocktags ext/VERSION | tr ' ' "\n" | sort
-
-(There is an old Rakefile target called "rdiscount.gemspec" that looks like it
- is designed to perform an update of these files, however I haven't tested it.)
+    $ rake rdiscount.gemspec
 
 Build the RDiscount gem. If you get errors related to missing files
 in ext, make sure you updated the gemspec correctly in the previous step.

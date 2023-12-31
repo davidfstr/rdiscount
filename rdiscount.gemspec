@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   # = MANIFEST =
   s.files = %w[
     BUILDING
+    CHANGELOG.md
     COPYING
     README.markdown
     Rakefile
@@ -44,7 +45,6 @@ Gem::Specification.new do |s|
     ext/pgm_options.h
     ext/rdiscount.c
     ext/resource.c
-    ext/ruby-config.h
     ext/setup.c
     ext/tags.c
     ext/tags.h
