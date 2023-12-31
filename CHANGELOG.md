@@ -1,5 +1,10 @@
 # RDiscount Changelog
 
+## Version 2.2.7.3 <small>(December 31, 2023)</small>
+
+* Add Ruby 3.2 and 3.3 to continuous integration
+* Reinstate fix for compilation issue with Clang 16
+
 ## Version 2.2.7.2 <small>(December 19, 2023)</small>
 
 * Discount upgraded from 2.2.7c -> 2.2.7d
