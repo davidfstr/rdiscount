@@ -1,0 +1,92 @@
+diff -U7 ext.orig/generate.c ext.new/generate.c
+--- ext.orig/generate.c	2023-12-19 10:02:39.000000000 -0500
++++ ext.new/generate.c	2023-12-31 11:54:37.000000000 -0500
+@@ -176,21 +176,26 @@
+     va_start(ptr,fmt);
+     vsnprintf(bfr, sizeof bfr, fmt, ptr);
+     va_end(ptr);
+     Qstring(bfr, f);
+ }
+ 
+ 
++static int Qchar_mkd_sta_function_t(const int n, const void* iot) {
++  Qchar(n, iot);
++}
++
++
+ /* Qanchor() prints out a suitable-for-id-tag version of a string
+  */
+ static void
+ Qanchor(struct line *p, MMIOT *f)
+ {
+     mkd_string_to_anchor(T(p->text), S(p->text),
+-			 (mkd_sta_function_t)Qchar, f, 1, f);
++			 Qchar_mkd_sta_function_t, f, 1, f);
+ }
+ 
+ 
+ /* Qem()
+  */
+ static void
+ Qem(MMIOT *f, char c, int count)
+diff -U7 ext.orig/gethopt.c ext.new/gethopt.c
+--- ext.orig/gethopt.c	2023-12-19 10:01:53.000000000 -0500
++++ ext.new/gethopt.c	2023-12-31 11:55:06.000000000 -0500
+@@ -41,16 +41,15 @@
+ struct h_context *ctx;
+ {
+     return ctx->optopt;
+ }
+ 
+ 
+ int
+-hopterr(ctx,val)
+-struct h_context *ctx;
++hopterr(struct h_context *ctx, int val)
+ {
+     int old = ctx->opterr;
+     
+     ctx->opterr = !!val;
+     return old;
+ }
+ 
+diff -U7 ext.orig/toc.c ext.new/toc.c
+--- ext.orig/toc.c	2023-12-19 10:01:53.000000000 -0500
++++ ext.new/toc.c	2023-12-31 11:56:16.000000000 -0500
+@@ -11,14 +11,19 @@
+ #include <stdlib.h>
+ #include <ctype.h>
+ 
+ #include "cstring.h"
+ #include "markdown.h"
+ #include "amalloc.h"
+ 
++static int Csputc_mkd_sta_function_t(const int n, const void* iot) {
++  Csputc(n, iot);
++}
++
++
+ /* write an header index
+  */
+ int
+ mkd_toc(Document *p, char **doc)
+ {
+     Paragraph *tp, *srcp;
+     int last_hnumber = 0;
+@@ -60,15 +65,15 @@
+ 			if ( (srcp->hnumber - last_hnumber) > 1 )
+ 			    Csprintf(&res, "%*s<li>\n", last_hnumber+1, "");
+ 			++last_hnumber;
+ 		    }
+ 		    Csprintf(&res, "%*s<li><a href=\"#", srcp->hnumber, "");
+ 		    mkd_string_to_anchor(T(srcp->text->text),
+ 					 S(srcp->text->text),
+-					 (mkd_sta_function_t)Csputc,
++					 Csputc_mkd_sta_function_t,
+ 					 &res,1,p->ctx);
+ 		    Csprintf(&res, "\">");
+ 		    Csreparse(&res, T(srcp->text->text),
+ 				    S(srcp->text->text), IS_LABEL);
+ 		    Csprintf(&res, "</a>");
+ 
+ 		    first = 0;

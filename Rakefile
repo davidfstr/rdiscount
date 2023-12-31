@@ -171,6 +171,9 @@ task :gather => 'discount/markdown.h' do |t|
   
   # Copy man page
   cp 'discount/markdown.7', 'man/'
+  
+  # Apply patches
+  system('cat ext.diff | patch -p1 -d ext')
 end
 
 file 'discount/markdown.h' do |t|

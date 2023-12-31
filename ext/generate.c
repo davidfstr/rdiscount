@@ -180,13 +180,18 @@ Qprintf(MMIOT *f, char *fmt, ...)
 }
 
 
+static int Qchar_mkd_sta_function_t(const int n, const void* iot) {
+  Qchar(n, iot);
+}
+
+
 /* Qanchor() prints out a suitable-for-id-tag version of a string
  */
 static void
 Qanchor(struct line *p, MMIOT *f)
 {
     mkd_string_to_anchor(T(p->text), S(p->text),
-			 (mkd_sta_function_t)Qchar, f, 1, f);
+			 Qchar_mkd_sta_function_t, f, 1, f);
 }
 
 
