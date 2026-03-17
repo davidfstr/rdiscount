@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #include <locale.h>
 #include "ruby.h"
 #include "mkdio.h"
@@ -43,6 +44,18 @@ static AccessorFlagPair ACCESSOR_2_FLAG[] = {
 
 static VALUE rb_cRDiscount;
 
+static int
+rb_rdiscount__text_len(VALUE text)
+{
+    long text_len = RSTRING_LEN(text);
+
+    if (text_len > INT_MAX) {
+        rb_raise(rb_eArgError, "markdown input too large");
+    }
+
+    return (int)text_len;
+}
+
 int rb_rdiscount__get_flags(VALUE ruby_obj)
 {
     AccessorFlagPair *entry;
@@ -78,8 +91,10 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
     int szres;
     VALUE encoding;
     VALUE text = rb_funcall(self, rb_intern("text"), 0);
-    VALUE buf = rb_str_buf_new(1024);
     Check_Type(text, T_STRING);
+    int text_len = rb_rdiscount__text_len(text);  // may rb_raise
+    
+    VALUE buf = rb_str_buf_new(1024);
 
     int flags = rb_rdiscount__get_flags(self);
     
@@ -94,7 +109,7 @@ rb_rdiscount_to_html(int argc, VALUE *argv, VALUE self)
     char *old_locale = strdup(setlocale(LC_CTYPE, NULL));
     setlocale(LC_CTYPE, "C");   /* ASCII (and passthru characters > 127) */
 
-    MMIOT *doc = mkd_string(RSTRING_PTR(text), RSTRING_LEN(text), flags);
+    MMIOT *doc = mkd_string(RSTRING_PTR(text), text_len, flags);
 
     if ( mkd_compile(doc, flags) ) {
         szres = mkd_document(doc, &res);
@@ -129,11 +144,12 @@ rb_rdiscount_toc_content(int argc, VALUE *argv, VALUE self)
     /* grab char pointer to markdown input text */
     VALUE text = rb_funcall(self, rb_intern("text"), 0);
     Check_Type(text, T_STRING);
+    int text_len = rb_rdiscount__text_len(text);  // may rb_raise
 
     /* allocate a ruby string buffer and wrap it in a stream */
     VALUE buf = rb_str_buf_new(4096);
 
-    MMIOT *doc = mkd_string(RSTRING_PTR(text), RSTRING_LEN(text), flags);
+    MMIOT *doc = mkd_string(RSTRING_PTR(text), text_len, flags);
 
     if ( mkd_compile(doc, flags) ) {
         szres = mkd_toc(doc, &res);

@@ -21,6 +21,25 @@ class RDiscountTest < Test::Unit::TestCase
     RDiscount.new(text).to_html
   end
 
+  def test_that_oversized_input_raises_argument_error
+    # mkd_string() takes an int length, so inputs > INT_MAX (2 147 483 647 bytes)
+    # must be rejected before reaching C to avoid integer truncation / overflow.
+    int_max = 2_147_483_647  # INT_MAX in C
+    begin
+      oversized_text = 'a' * (int_max + 1)
+    # ArgumentError on TruffleRuby; RangeError on Windows
+    rescue NoMemoryError, ArgumentError, RangeError
+      # `omit` is Test::Unit's native skip; `skip` is Minitest's. Support both.
+      respond_to?(:omit, true) ?
+        omit("Insufficient memory to create oversized input for this test") :
+        skip("Insufficient memory to create oversized input for this test")
+    end
+
+    assert_raise(ArgumentError) do
+      RDiscount.new(oversized_text).to_html
+    end
+  end
+
   def test_that_smart_converts_double_quotes_to_curly_quotes
     rd = RDiscount.new(%("Quoted text"), :smart)
     assert_equal %(<p>&ldquo;Quoted text&rdquo;</p>\n), rd.to_html
