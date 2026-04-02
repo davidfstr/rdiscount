@@ -225,7 +225,11 @@ file 'rdiscount.gemspec' => FileList['Rakefile','lib/rdiscount.rb'] do |f|
   files = `git ls-files`.
     split("\n").
     sort.
-    reject{ |file| file =~ /^\./ || file =~ /^test\/MarkdownTest/ }.
+    reject{|file| 
+      file =~ /^\./ || 
+      file =~ /^test\/MarkdownTest/ || 
+      file =~ /^CLAUDE\.md|ext\.diff$/
+    }.
     map{ |file| "    #{file}" }.
     join("\n")
   # piece file back together and write...
