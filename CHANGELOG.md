@@ -1,5 +1,9 @@
 # RDiscount Changelog
 
+## Version 2.2.7.4 <small>(April 1, 2026)</small>
+
+* Fix crash if `to_html` called on a string longer than INT_MAX (2 GiB of text).
+
 ## Version 2.2.7.3 <small>(December 31, 2023)</small>
 
 * Add Ruby 3.2 and 3.3 to continuous integration
